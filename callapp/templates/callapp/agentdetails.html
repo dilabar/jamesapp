@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+    {% load static %}
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="description" content="Streamline your business with our advanced CRM template. Easily integrate and customize to manage sales, support, and customer interactions efficiently. Perfect for any business size">
+      <meta name="keywords" content="Advanced CRM template, customer relationship management, business CRM, sales optimization, customer support software, CRM integration, customizable CRM, business tools, enterprise CRM solutions">
+      <meta name="author" content="Dreams Technologies">
+      <meta name="robots" content="index, follow">
+      <title>Leads Dashboard | CRMS - Advanced Bootstrap 5 Admin Template for Customer Management</title>
+      <script src="{% static 'js/theme-script-1.js' %}' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon-1.png' %}">
+      <link rel="icon" href="{% static 'img/favicon-1.png' %}" type="image/x-icon">
+      <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon-1.png' %}">
+      <link rel="stylesheet" href="{% static 'css/bootstrap.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/tabler-icons/tabler-icons-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/fontawesome/css/fontawesome.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/fontawesome/css/all.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'css/dataTables.bootstrap5.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'plugins/bootstrap-tagsinput/bootstrap-tagsinput-1.css' %}">
+      <link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.min-1.css' %}">
+      <link rel="stylesheet" href="{% static 'css/style-1.css' %}">
+   </head>
+   <body>
+      <div class="main-wrapper">
+         <div class="preloader">
+            <span class="loader"></span>
+         </div>
+         <div class="header">
+            <div class="header-left active">
+               <a href="index-1.html" class="logo logo-normal">
+               <img src="#" alt="Logo">
+               <img src="#" class="white-logo" alt="Logo">
+               </a>
+               <a href="index-1.html" class="logo-small">
+               <img src="#" alt="Logo">
+               </a>
+               <a id="toggle_btn" href="javascript:void(0);">
+               <i class="ti ti-arrow-bar-to-left"></i>
+               </a>
+            </div>
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
+            <span class="bar-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+            </span>
+            </a>
+            <div class="header-user">
+               <ul class="nav user-menu">
+                  <li class="nav-item nav-search-inputs me-auto">
+                     <div class="top-nav-search">
+                        <a href="javascript:void(0);" class="responsive-search">
+                        <i class="fa fa-search"></i>
+                        </a>
+                        <form action="#" class="dropdown">
+                           <div class="searchinputs" id="dropdownMenuClickable">
+                              <input type="text" placeholder="Search">
+                              <div class="search-addon">
+                                 <button type="submit"><i class="ti ti-command"></i></button>
+                              </div>
+                           </div>
+                        </form>
+                     </div>
+                  </li>
+                  <li class="nav-item nav-list">
+                     <ul class="nav">
+                        <li class="dark-mode-list">
+                           <a href="javascript:void(0);" id="dark-mode-toggle" class="dark-mode-toggle">
+                           <i class="ti ti-sun light-mode active"></i>
+                           <i class="ti ti-moon dark-mode"></i>
+                           </a>
+                        </li>
+                        
+                        
+                     </ul>
+                  </li>
+                  
+                  <li class="nav-item dropdown has-arrow main-drop">
+                     <a href="javascript:void(0);" class="nav-link userset" data-bs-toggle="dropdown">
+                     <span class="user-info">
+                     <span class="user-letter">
+                     <img src="{% static 'img/profiles/avatar-20-1.jpg' %}" alt="Profile">
+                     </span>
+                     <span class="badge badge-success rounded-pill"></span>
+                     </span>
+                     </a>
+                     <div class="dropdown-menu menu-drop-user">
+                        <div class="profilename">
+                           <a class="dropdown-item" href="index-1.html">
+                           <i class="ti ti-layout-2"></i> All Agents
+                           </a>
+                           
+                        </div>
+                     </div>
+                  </li>
+               </ul>
+            </div>
+            <div class="dropdown mobile-user-menu">
+               <a href="javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+               <div class="dropdown-menu">
+                  <a class="dropdown-item" href="index-1.html">
+                  <i class="ti ti-layout-2"></i> Dashboard
+                  </a>
+                  
+               </div>
+            </div>
+         </div>
+         <div class="sidebar" id="sidebar">
+            <div class="sidebar-inner slimscroll">
+               <div id="sidebar-menu" class="sidebar-menu">
+                  <ul>
+                     <li class="clinicdropdown">
+                        <a href="profile-1.html">
+                           <img src="{% static 'img/profiles/avatar-14-1.jpg' %}" class="img-fluid" alt="Profile">
+                           <div class="user-names">
+                              <h5>Admin</h5>
+                              <h6>Admin</h6>
+                           </div>
+                        </a>
+                     </li>
+                  </ul>
+                  <ul>
+                     <li>
+                        <h6 class="submenu-hdr">Main Menu</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);" class="subdrop active">
+                              <i class="ti ti-layout-2"></i><span>All Agents</span>
+                              </a>
+                              
+                           </li>
+                           
+                        </ul>
+                     </li>
+                     
+                     
+                  </ul>
+               </div>
+            </div>
+         </div>
+         <div class="page-wrapper">
+            <div class="content">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="page-header">
+                        <div class="row align-items-center ">
+                           <div class="col-md-4">
+                              <h3 class="page-title">Agent 1</h3>
+                           </div>
+                           
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-12">
+                    <div class="card">
+                      <div class="card-header border-0 pb-0">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+                          <h4><i class="ti ti-grip-vertical me-1"></i>Agent Details</h4>
+                        </div>
+                      </div>
+                      <div class="row justify-content-center">
+                        <div class="col-md-6">
+                          <div class="card">
+                            <div class="card-body">
+                              <form action="/your-upload-url" method="POST" enctype="multipart/form-data">
+                                <!-- Agent Picture (Static) -->
+                                <div class="mb-3 text-center">
+                                  
+                                 <div class="text-center">
+                                    <img src="{% static 'img/profiles/avatar-14-1.jpg' %}" alt="Agent Picture" class="img-fluid rounded-circle" style="max-width: 150px;">
+                                  </div>
+                                  
+                                </div>
+                      
+                                <!-- Agent Name -->
+                                <div class="mb-3">
+                                  <label for="agentName" class="form-label">Agent Name</label>
+                                  <input type="text" class="form-control" id="agentName" name="agentName" placeholder="Enter Agent Name">
+                                </div>
+                      
+                                <!-- Excel Upload -->
+                                <div class="mb-3">
+                                  <label for="uploadExcel" class="form-label">Upload Excel</label>
+                                  <input type="file" class="form-control" id="uploadExcel" name="uploadExcel" accept=".xlsx, .xls">
+                                </div>
+                      
+                                <!-- Submit Button -->
+                                <div class="text-center">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  </div>
+                </div>
+                
+              
+               
+            </div>
+         </div>
+      </div>
+      <script src="{% static 'js/jquery-3.7.1.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/bootstrap.bundle.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/feather.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/jquery.slimscroll.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/jquery.dataTables.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/dataTables.bootstrap5.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/moment.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'plugins/daterangepicker/daterangepicker-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/bootstrap-datetimepicker.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'plugins/bootstrap-tagsinput/bootstrap-tagsinput-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'plugins/apexchart/apexcharts.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'plugins/apexchart/chart-data-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'plugins/select2/js/select2.min-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/jsonscript-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/script-1.js' %}" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="{% static 'js/rocket-loader.min-1.js' %}" data-cf-settings="86d4fd7e960d5dee6cf483c7-|49" defer=""></script>
+   </body>
+</html> 

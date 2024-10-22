@@ -1,0 +1,921 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="description" content="Streamline your business with our advanced CRM template. Easily integrate and customize to manage sales, support, and customer interactions efficiently. Perfect for any business size">
+      <meta name="keywords" content="Advanced CRM template, customer relationship management, business CRM, sales optimization, customer support software, CRM integration, customizable CRM, business tools, enterprise CRM solutions">
+      <meta name="author" content="Dreams Technologies">
+      <meta name="robots" content="index, follow">
+      <title>Leads Dashboard | CRMS - Advanced Bootstrap 5 Admin Template for Customer Management</title>
+      <script src="assets/js/theme-script-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon-1.png">
+      <link rel="icon" href="assets/img/favicon-1.png" type="image/x-icon">
+      <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon-1.png">
+      <link rel="stylesheet" href="assets/css/bootstrap.min-1.css">
+      <link rel="stylesheet" href="assets/plugins/tabler-icons/tabler-icons-1.css">
+      <link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min-1.css">
+      <link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min-1.css">
+      <link rel="stylesheet" href="assets/css/dataTables.bootstrap5.min-1.css">
+      <link rel="stylesheet" href="assets/plugins/daterangepicker/daterangepicker-1.css">
+      <link rel="stylesheet" href="assets/plugins/select2/css/select2.min-1.css">
+      <link rel="stylesheet" href="assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput-1.css">
+      <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min-1.css">
+      <link rel="stylesheet" href="assets/css/style-1.css">
+   </head>
+   <body>
+      <div class="main-wrapper">
+         <div class="preloader">
+            <span class="loader"></span>
+         </div>
+         <div class="header">
+            <div class="header-left active">
+               <a href="index-1.html" class="logo logo-normal">
+               <img src="assets/img/logo-1.svg" alt="Logo">
+               <img src="assets/img/white-logo-1.svg" class="white-logo" alt="Logo">
+               </a>
+               <a href="index-1.html" class="logo-small">
+               <img src="assets/img/logo-small-1.svg" alt="Logo">
+               </a>
+               <a id="toggle_btn" href="javascript:void(0);">
+               <i class="ti ti-arrow-bar-to-left"></i>
+               </a>
+            </div>
+            <a id="mobile_btn" class="mobile_btn" href="#sidebar">
+            <span class="bar-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+            </span>
+            </a>
+            <div class="header-user">
+               <ul class="nav user-menu">
+                  <li class="nav-item nav-search-inputs me-auto">
+                     <div class="top-nav-search">
+                        <a href="javascript:void(0);" class="responsive-search">
+                        <i class="fa fa-search"></i>
+                        </a>
+                        <form action="#" class="dropdown">
+                           <div class="searchinputs" id="dropdownMenuClickable">
+                              <input type="text" placeholder="Search">
+                              <div class="search-addon">
+                                 <button type="submit"><i class="ti ti-command"></i></button>
+                              </div>
+                           </div>
+                        </form>
+                     </div>
+                  </li>
+                  <li class="nav-item nav-list">
+                     <ul class="nav">
+                        <li class="dark-mode-list">
+                           <a href="javascript:void(0);" id="dark-mode-toggle" class="dark-mode-toggle">
+                           <i class="ti ti-sun light-mode active"></i>
+                           <i class="ti ti-moon dark-mode"></i>
+                           </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                           <a href="javascript:void(0);" class="btn btn-header-list" data-bs-toggle="dropdown">
+                           <i class="ti ti-layout-grid-add"></i>
+                           </a>
+                           <div class="dropdown-menu dropdown-menu-end menus-info">
+                              <div class="row">
+                                 <div class="col-md-6">
+                                    <ul class="menu-list">
+                                       <li>
+                                          <a href="contacts-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-violet">
+                                                <i class="ti ti-user-up"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Contacts</p>
+                                                   <span>Add New Contact</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="pipeline-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-green">
+                                                <i class="ti ti-timeline-event-exclamation"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Pipline</p>
+                                                   <span>Add New Pipline</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="activities-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-pink">
+                                                <i class="ti ti-bounce-right"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Activities</p>
+                                                   <span>Add New Activity</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="analytics-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-info">
+                                                <i class="ti ti-analyze"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Analytics</p>
+                                                   <span>Shows All Information</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="projects-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-danger">
+                                                <i class="ti ti-atom-2"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Projects</p>
+                                                   <span>Add New Project</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                    </ul>
+                                 </div>
+                                 <div class="col-md-6">
+                                    <ul class="menu-list">
+                                       <li>
+                                          <a href="deals-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-info">
+                                                <i class="ti ti-medal"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Deals</p>
+                                                   <span>Add New Deals</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="leads-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-secondary">
+                                                <i class="ti ti-chart-arcs"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Leads</p>
+                                                   <span>Add New Leads</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="companies-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-tertiary">
+                                                <i class="ti ti-building-community"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Company</p>
+                                                   <span>Add New Company</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="tasks-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-success">
+                                                <i class="ti ti-list-check"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Tasks</p>
+                                                   <span>Add New Task</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                       <li>
+                                          <a href="campaign-1.html">
+                                             <div class="menu-details">
+                                                <span class="menu-list-icon bg-purple">
+                                                <i class="ti ti-brand-campaignmonitor"></i>
+                                                </span>
+                                                <div class="menu-details-content">
+                                                   <p>Campaign</p>
+                                                   <span>Add New Campaign</span>
+                                                </div>
+                                             </div>
+                                          </a>
+                                       </li>
+                                    </ul>
+                                 </div>
+                              </div>
+                           </div>
+                        </li>
+                        <li class="nav-item">
+                           <a href="faq-1.html" class="btn btn-help">
+                           <i class="ti ti-help-hexagon"></i>
+                           </a>
+                        </li>
+                        <li class="nav-item">
+                           <a href="lead-reports-1.html" class="btn btn-chart-pie">
+                           <i class="ti ti-chart-pie"></i>
+                           </a>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="nav-item nav-item-email nav-item-box">
+                     <a href="email-1.html">
+                     <i class="ti ti-message-circle-exclamation"></i>
+                     <span class="badge rounded-pill">14</span>
+                     </a>
+                  </li>
+                  <li class="nav-item dropdown nav-item-box">
+                     <a href="javascript:void(0);" class="nav-link" data-bs-toggle="dropdown">
+                     <i class="ti ti-bell"></i>
+                     <span class="badge rounded-pill">13</span>
+                     </a>
+                     <div class="dropdown-menu dropdown-menu-end notification-dropdown">
+                        <div class="topnav-dropdown-header">
+                           <h4 class="notification-title">Notifications</h4>
+                        </div>
+                        <div class="noti-content">
+                           <ul class="notification-list">
+                              <li class="notification-message">
+                                 <a href="activities-1.html">
+                                    <div class="media d-flex">
+                                       <span class="avatar flex-shrink-0">
+                                       <img src="assets/img/profiles/avatar-02-1.jpg" alt="Profile">
+                                       <span class="badge badge-info rounded-pill"></span>
+                                       </span>
+                                       <div class="media-body flex-grow-1">
+                                          <p class="noti-details">Ray Arnold left 6 comments on Isla Nublar
+                                             SOC2 compliance report
+                                          </p>
+                                          <p class="noti-time">Last Wednesday at 9:42 am</p>
+                                       </div>
+                                    </div>
+                                 </a>
+                              </li>
+                              <li class="notification-message">
+                                 <a href="activities-1.html">
+                                    <div class="media d-flex">
+                                       <span class="avatar flex-shrink-0">
+                                       <img src="assets/img/profiles/avatar-03-1.jpg" alt="Profile">
+                                       </span>
+                                       <div class="media-body flex-grow-1">
+                                          <p class="noti-details">Denise Nedry replied to Anna Srzand</p>
+                                          <p class="noti-sub-details">“Oh, I finished de-bugging the phones,
+                                             but the system's compiling for eighteen minutes, or twenty. So,
+                                             some minor systems may go on and off for a while.”
+                                          </p>
+                                          <p class="noti-time">Last Wednesday at 9:42 am</p>
+                                       </div>
+                                    </div>
+                                 </a>
+                              </li>
+                              <li class="notification-message">
+                                 <a href="activities-1.html">
+                                    <div class="media d-flex">
+                                       <span class="avatar flex-shrink-0">
+                                       <img alt="" src="assets/img/profiles/avatar-06-1.jpg">
+                                       </span>
+                                       <div class="media-body flex-grow-1">
+                                          <p class="noti-details">John Hammond attached a file to Isla Nublar
+                                             SOC2 compliance report
+                                          </p>
+                                          <div class="noti-pdf">
+                                             <div class="noti-pdf-icon">
+                                                <span><i class="ti ti-chart-pie"></i></span>
+                                             </div>
+                                             <div class="noti-pdf-text">
+                                                <p>EY_review.pdf</p>
+                                                <span>2mb</span>
+                                             </div>
+                                          </div>
+                                          <p class="noti-time">Last Wednesday at 9:42 am</p>
+                                       </div>
+                                    </div>
+                                 </a>
+                              </li>
+                           </ul>
+                        </div>
+                        <div class="topnav-dropdown-footer">
+                           <a href="activities-1.html" class="view-link">View all</a>
+                           <a href="javascript:void(0);" class="clear-link">Clear all</a>
+                        </div>
+                     </div>
+                  </li>
+                  <li class="nav-item dropdown has-arrow main-drop">
+                     <a href="javascript:void(0);" class="nav-link userset" data-bs-toggle="dropdown">
+                     <span class="user-info">
+                     <span class="user-letter">
+                     <img src="assets/img/profiles/avatar-20-1.jpg" alt="Profile">
+                     </span>
+                     <span class="badge badge-success rounded-pill"></span>
+                     </span>
+                     </a>
+                     <div class="dropdown-menu menu-drop-user">
+                        <div class="profilename">
+                           <a class="dropdown-item" href="index-1.html">
+                           <i class="ti ti-layout-2"></i> Dashboard
+                           </a>
+                           <a class="dropdown-item" href="profile-1.html">
+                           <i class="ti ti-user-pin"></i> My Profile
+                           </a>
+                           <a class="dropdown-item" href="login-1.html">
+                           <i class="ti ti-lock"></i> Logout
+                           </a>
+                        </div>
+                     </div>
+                  </li>
+               </ul>
+            </div>
+            <div class="dropdown mobile-user-menu">
+               <a href="javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+               <div class="dropdown-menu">
+                  <a class="dropdown-item" href="index-1.html">
+                  <i class="ti ti-layout-2"></i> Dashboard
+                  </a>
+                  <a class="dropdown-item" href="profile-1.html">
+                  <i class="ti ti-user-pin"></i> My Profile
+                  </a>
+                  <a class="dropdown-item" href="login-1.html">
+                  <i class="ti ti-lock"></i> Logout
+                  </a>
+               </div>
+            </div>
+         </div>
+         <div class="sidebar" id="sidebar">
+            <div class="sidebar-inner slimscroll">
+               <div id="sidebar-menu" class="sidebar-menu">
+                  <ul>
+                     <li class="clinicdropdown">
+                        <a href="profile-1.html">
+                           <img src="assets/img/profiles/avatar-14-1.jpg" class="img-fluid" alt="Profile">
+                           <div class="user-names">
+                              <h5>Adrian Davies</h5>
+                              <h6>Tech Lead</h6>
+                           </div>
+                        </a>
+                     </li>
+                  </ul>
+                  <ul>
+                     <li>
+                        <h6 class="submenu-hdr">Main Menu</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);" class="subdrop active">
+                              <i class="ti ti-layout-2"></i><span>Dashboard</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="index-1.html">Deals Dashboard</a></li>
+                                 <li><a href="leads-dashboard-1.html" class="active">Leads Dashboard</a></li>
+                                 <li><a href="project-dashboard-1.html">Project Dashboard</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);"><i class="ti ti-brand-airtable"></i><span>Application</span><span class="menu-arrow"></span></a>
+                              <ul>
+                                 <li><a href="chat-1.html">Chat</a></li>
+                                 <li class="submenu submenu-two">
+                                    <a href="javascript:void(0);">Call<span class="menu-arrow inside-submenu"></span></a>
+                                    <ul>
+                                       <li><a href="video-call-1.html">Video Call</a></li>
+                                       <li><a href="audio-call-1.html">Audio Call</a></li>
+                                       <li><a href="call-history-1.html">Call History</a></li>
+                                    </ul>
+                                 </li>
+                                 <li><a href="calendar-1.html">Calendar</a></li>
+                                 <li><a href="email-1.html">Email</a></li>
+                                 <li><a href="todo-1.html">To Do</a></li>
+                                 <li><a href="notes-1.html">Notes</a></li>
+                                 <li><a href="file-manager-1.html">File Manager</a></li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">CRM</h6>
+                        <ul>
+                           <li>
+                              <a href="contacts-1.html"><i class="ti ti-user-up"></i><span>Contacts</span></a>
+                           </li>
+                           <li>
+                              <a href="companies-1.html"><i class="ti ti-building-community"></i><span>Companies</span></a>
+                           </li>
+                           <li>
+                              <a href="deals-1.html"><i class="ti ti-medal"></i><span>Deals</span></a>
+                           </li>
+                           <li>
+                              <a href="leads-1.html"><i class="ti ti-chart-arcs"></i><span>Leads</span></a>
+                           </li>
+                           <li>
+                              <a href="pipeline-1.html"><i class="ti ti-timeline-event-exclamation"></i><span>Pipeline</span></a>
+                           </li>
+                           <li>
+                              <a href="campaign-1.html"><i class="ti ti-brand-campaignmonitor"></i><span>Campaign</span></a>
+                           </li>
+                           <li>
+                              <a href="projects-1.html"><i class="ti ti-atom-2"></i><span>Projects</span></a>
+                           </li>
+                           <li>
+                              <a href="tasks-1.html"><i class="ti ti-list-check"></i><span>Tasks</span></a>
+                           </li>
+                           <li>
+                              <a href="proposals-1.html"><i class="ti ti-file-star"></i><span>Proposals</span></a>
+                           </li>
+                           <li>
+                              <a href="contracts-1.html"><i class="ti ti-file-check"></i><span>Contracts</span></a>
+                           </li>
+                           <li>
+                              <a href="estimations-1.html"><i class="ti ti-file-report"></i><span>Estimations</span></a>
+                           </li>
+                           <li>
+                              <a href="invoices-1.html"><i class="ti ti-file-invoice"></i><span>Invoices</span></a>
+                           </li>
+                           <li>
+                              <a href="payments-1.html"><i class="ti ti-report-money"></i><span>Payments</span></a>
+                           </li>
+                           <li>
+                              <a href="analytics-1.html"><i class="ti ti-chart-bar"></i><span>Analytics</span></a>
+                           </li>
+                           <li>
+                              <a href="activities-1.html"><i class="ti ti-bounce-right"></i><span>Activities</span></a>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Reports</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-file-invoice"></i><span>Reports</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="lead-reports-1.html">Lead Reports</a></li>
+                                 <li><a href="deal-reports-1.html">Deal Reports</a></li>
+                                 <li><a href="contact-reports-1.html">Contact Reports</a></li>
+                                 <li><a href="company-reports-1.html">Company Reports</a></li>
+                                 <li><a href="project-reports-1.html">Project Reports</a></li>
+                                 <li><a href="task-reports-1.html">Task Reports</a></li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">CRM Settings</h6>
+                        <ul>
+                           <li><a href="sources-1.html"><i class="ti ti-artboard"></i><span>Sources</span></a></li>
+                           <li><a href="lost-reason-1.html"><i class="ti ti-message-exclamation"></i><span>Lost
+                              Reason</span></a>
+                           </li>
+                           <li><a href="contact-stage-1.html"><i class="ti ti-steam"></i><span>Contact
+                              Stage</span></a>
+                           </li>
+                           <li><a href="industry-1.html"><i class="ti ti-building-factory"></i><span>Industry</span></a></li>
+                           <li><a href="calls-1.html"><i class="ti ti-phone-check"></i><span>Calls</span></a></li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">User Management</h6>
+                        <ul>
+                           <li><a href="manage-users-1.html"><i class="ti ti-users"></i><span>Manage Users</span></a></li>
+                           <li><a href="roles-permissions-1.html"><i class="ti ti-navigation-cog"></i><span>Roles &
+                              Permissions</span></a>
+                           </li>
+                           <li><a href="delete-request-1.html"><i class="ti ti-flag-question"></i><span>Delete
+                              Request</span></a>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Membership</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-file-invoice"></i><span>Membership</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="membership-plans-1.html">Membership Plans</a></li>
+                                 <li><a href="membership-addons-1.html">Membership Addons</a></li>
+                                 <li><a href="membership-transactions-1.html">Transactions</a></li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Content</h6>
+                        <ul>
+                           <li><a href="pages-1.html"><i class="ti ti-page-break"></i><span>Pages</span></a></li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-map-pin-pin"></i><span>Location</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="countries-1.html">Countries</a></li>
+                                 <li><a href="states-1.html">States</a></li>
+                                 <li><a href="cities-1.html">Cities</a></li>
+                              </ul>
+                           </li>
+                           <li><a href="testimonials-1.html"><i class="ti ti-quote"></i><span>Testimonials</span></a></li>
+                           <li><a href="faq-1.html"><i class="ti ti-question-mark"></i><span>FAQ</span></a></li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Support</h6>
+                        <ul>
+                           <li><a href="contact-messages-1.html"><i class="ti ti-page-break"></i><span>Contact
+                              Messages</span></a>
+                           </li>
+                           <li><a href="tickets-1.html"><i class="ti ti-ticket"></i><span>Tickets</span></a></li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Settings</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-settings-cog"></i><span>General Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="profile-1.html">Profile</a></li>
+                                 <li><a href="security-1.html">Security</a></li>
+                                 <li><a href="notifications-1.html">Notifications</a></li>
+                                 <li><a href="connected-apps-1.html">Connected Apps</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-world-cog"></i><span>Website Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="company-settings-1.html">Company Settings</a></li>
+                                 <li><a href="localization-1.html">Localization</a></li>
+                                 <li><a href="prefixes-1.html">Prefixes</a></li>
+                                 <li><a href="preference-1.html">Preference</a></li>
+                                 <li><a href="appearance-1.html">Appearance</a></li>
+                                 <li><a href="language-1.html">Language</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-apps"></i><span>App Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="invoice-settings-1.html">Invoice Settings</a></li>
+                                 <li><a href="printers-1.html">Printers</a></li>
+                                 <li><a href="custom-fields-1.html">Custom Fields</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-device-laptop"></i><span>System Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="email-settings-1.html">Email Settings</a></li>
+                                 <li><a href="sms-gateways-1.html">SMS Gateways</a></li>
+                                 <li><a href="gdpr-cookies-1.html">GDPR Cookies</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-moneybag"></i><span>Financial Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="payment-gateways-1.html">Payment Gateways</a></li>
+                                 <li><a href="bank-accounts-1.html">Bank Accounts</a></li>
+                                 <li><a href="tax-rates-1.html">Tax Rates</a></li>
+                                 <li><a href="currencies-1.html">Currencies</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-flag-cog"></i><span>Other Settings</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="storage-1.html">Storage</a></li>
+                                 <li><a href="ban-ip-address-1.html">Ban IP Address</a></li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Pages</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-lock-square-rounded"></i><span>Authentication</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="login-1.html">Login</a></li>
+                                 <li><a href="register-1.html">Register</a></li>
+                                 <li><a href="forgot-password-1.html">Forgot Password</a></li>
+                                 <li><a href="reset-password-1.html">Reset Password</a></li>
+                                 <li><a href="email-verification-1.html">Email Verification</a></li>
+                                 <li><a href="two-step-verification-1.html">2 Step Verification</a></li>
+                                 <li><a href="lock-screen-1.html">Lock Screen</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-error-404"></i><span>Error Pages</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="error-404-1.html">404 Error</a></li>
+                                 <li><a href="error-500-1.html">500 Error</a></li>
+                              </ul>
+                           </li>
+                           <li><a href="blank-page-1.html"><i class="ti ti-apps"></i><span>Blank Page</span></a></li>
+                           <li><a href="coming-soon-1.html"><i class="ti ti-device-laptop"></i><span>Coming
+                              Soon</span></a>
+                           </li>
+                           <li><a href="under-maintenance-1.html"><i class="ti ti-moneybag"></i><span>Under
+                              Maintenance</span></a>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">UI Interface</h6>
+                        <ul>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-adjustments-check"></i><span>Base UI</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="ui-alerts-1.html">Alerts</a></li>
+                                 <li><a href="ui-accordion-1.html">Accordion</a></li>
+                                 <li><a href="ui-avatar-1.html">Avatar</a></li>
+                                 <li><a href="ui-badges-1.html">Badges</a></li>
+                                 <li><a href="ui-borders-1.html">Border</a></li>
+                                 <li><a href="ui-buttons-1.html">Buttons</a></li>
+                                 <li><a href="ui-buttons-group-1.html">Button Group</a></li>
+                                 <li><a href="ui-breadcrumb-1.html">Breadcrumb</a></li>
+                                 <li><a href="ui-cards-1.html">Card</a></li>
+                                 <li><a href="ui-carousel-1.html">Carousel</a></li>
+                                 <li><a href="ui-colors-1.html">Colors</a></li>
+                                 <li><a href="ui-dropdowns-1.html">Dropdowns</a></li>
+                                 <li><a href="ui-grid-1.html">Grid</a></li>
+                                 <li><a href="ui-images-1.html">Images</a></li>
+                                 <li><a href="ui-lightbox-1.html">Lightbox</a></li>
+                                 <li><a href="ui-media-1.html">Media</a></li>
+                                 <li><a href="ui-modals-1.html">Modals</a></li>
+                                 <li><a href="ui-offcanvas-1.html">Offcanvas</a></li>
+                                 <li><a href="ui-pagination-1.html">Pagination</a></li>
+                                 <li><a href="ui-popovers-1.html">Popovers</a></li>
+                                 <li><a href="ui-progress-1.html">Progress</a></li>
+                                 <li><a href="ui-placeholders-1.html">Placeholders</a></li>
+                                 <li><a href="ui-rangeslider-1.html">Range Slider</a></li>
+                                 <li><a href="ui-spinner-1.html">Spinner</a></li>
+                                 <li><a href="ui-sweetalerts-1.html">Sweet Alerts</a></li>
+                                 <li><a href="ui-nav-tabs-1.html">Tabs</a></li>
+                                 <li><a href="ui-toasts-1.html">Toasts</a></li>
+                                 <li><a href="ui-tooltips-1.html">Tooltips</a></li>
+                                 <li><a href="ui-typography-1.html">Typography</a></li>
+                                 <li><a href="ui-video-1.html">Video</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-box-align-bottom"></i><span>Advanced UI</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="ui-ribbon-1.html">Ribbon</a></li>
+                                 <li><a href="ui-clipboard-1.html">Clipboard</a></li>
+                                 <li><a href="ui-drag-drop-1.html">Drag & Drop</a></li>
+                                 <li><a href="ui-rangeslider-1.html">Range Slider</a></li>
+                                 <li><a href="ui-rating-1.html">Rating</a></li>
+                                 <li><a href="ui-text-editor-1.html">Text Editor</a></li>
+                                 <li><a href="ui-counter-1.html">Counter</a></li>
+                                 <li><a href="ui-scrollbar-1.html">Scrollbar</a></li>
+                                 <li><a href="ui-stickynote-1.html">Sticky Note</a></li>
+                                 <li><a href="ui-timeline-1.html">Timeline</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);"><i class="ti ti-chart-donut-2"></i>
+                              <span>Charts</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="chart-apex-1.html">Apex Charts</a></li>
+                                 <li><a href="chart-c3-1.html">Chart C3</a></li>
+                                 <li><a href="chart-js-1.html">Chart Js</a></li>
+                                 <li><a href="chart-morris-1.html">Morris Charts</a></li>
+                                 <li><a href="chart-flot-1.html">Flot Charts</a></li>
+                                 <li><a href="chart-peity-1.html">Peity Charts</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);"><i class="ti ti-icons"></i>
+                              <span>Icons</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li><a href="icon-fontawesome-1.html">Fontawesome Icons</a></li>
+                                 <li><a href="icon-feather-1.html">Feather Icons</a></li>
+                                 <li><a href="icon-ionic-1.html">Ionic Icons</a></li>
+                                 <li><a href="icon-material-1.html">Material Icons</a></li>
+                                 <li><a href="icon-pe7-1.html">Pe7 Icons</a></li>
+                                 <li><a href="icon-simpleline-1.html">Simpleline Icons</a></li>
+                                 <li><a href="icon-themify-1.html">Themify Icons</a></li>
+                                 <li><a href="icon-weather-1.html">Weather Icons</a></li>
+                                 <li><a href="icon-typicon-1.html">Typicon Icons</a></li>
+                                 <li><a href="icon-flag-1.html">Flag Icons</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);">
+                              <i class="ti ti-forms"></i><span>Forms</span><span class="menu-arrow"></span>
+                              </a>
+                              <ul>
+                                 <li class="submenu submenu-two">
+                                    <a href="javascript:void(0);">Form Elements<span class="menu-arrow inside-submenu"></span></a>
+                                    <ul>
+                                       <li><a href="form-basic-inputs-1.html">Basic Inputs</a></li>
+                                       <li><a href="form-checkbox-radios-1.html">Checkbox & Radios</a></li>
+                                       <li><a href="form-input-groups-1.html">Input Groups</a></li>
+                                       <li><a href="form-grid-gutters-1.html">Grid & Gutters</a></li>
+                                       <li><a href="form-select-1.html">Form Select</a></li>
+                                       <li><a href="form-mask-1.html">Input Masks</a></li>
+                                       <li><a href="form-fileupload-1.html">File Uploads</a></li>
+                                    </ul>
+                                 </li>
+                                 <li class="submenu submenu-two">
+                                    <a href="javascript:void(0);">Layouts<span class="menu-arrow inside-submenu"></span></a>
+                                    <ul>
+                                       <li><a href="form-horizontal-1.html">Horizontal Form</a></li>
+                                       <li><a href="form-vertical-1.html">Vertical Form</a></li>
+                                       <li><a href="form-floating-labels-1.html">Floating Labels</a></li>
+                                    </ul>
+                                 </li>
+                                 <li><a href="form-validation-1.html">Form Validation</a></li>
+                                 <li><a href="form-select2-1.html">Select2</a></li>
+                                 <li><a href="form-wizard-1.html">Form Wizard</a></li>
+                              </ul>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);"><i class="ti ti-table"></i><span>Tables</span><span class="menu-arrow"></span></a>
+                              <ul>
+                                 <li><a href="tables-basic-1.html">Basic Tables </a></li>
+                                 <li><a href="data-tables-1.html">Data Table </a></li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                     <li>
+                        <h6 class="submenu-hdr">Help</h6>
+                        <ul>
+                           <li><a href="javascript:void(0);"><i class="ti ti-file-type-doc"></i><span>Documentation</span></a></li>
+                           <li><a href="javascript:void(0);"><i class="ti ti-arrow-capsule"></i><span>Changelog
+                              v2.2</span></a>
+                           </li>
+                           <li class="submenu">
+                              <a href="javascript:void(0);"><i class="ti ti-brand-databricks"></i><span>Multi
+                              Level</span><span class="menu-arrow"></span></a>
+                              <ul>
+                                 <li><a href="javascript:void(0);">Level 1.1</a></li>
+                                 <li class="submenu submenu-two">
+                                    <a href="javascript:void(0);">Level 1.2<span class="menu-arrow inside-submenu"></span></a>
+                                    <ul>
+                                       <li><a href="javascript:void(0);">Level 2.1</a></li>
+                                       <li class="submenu submenu-two submenu-three">
+                                          <a href="javascript:void(0);">Level 2.2<span class="menu-arrow inside-submenu inside-submenu-two"></span></a>
+                                          <ul>
+                                             <li><a href="javascript:void(0);">Level 3.1</a></li>
+                                             <li><a href="javascript:void(0);">Level 3.2</a></li>
+                                          </ul>
+                                       </li>
+                                    </ul>
+                                 </li>
+                              </ul>
+                           </li>
+                        </ul>
+                     </li>
+                  </ul>
+               </div>
+            </div>
+         </div>
+         <div class="page-wrapper">
+            <div class="content">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="page-header">
+                        <div class="row align-items-center ">
+                           <div class="col-md-4">
+                              <h3 class="page-title">Leads Dashboard</h3>
+                           </div>
+                           <div class="col-md-8 float-end ms-auto">
+                              <div class="d-flex title-head">
+                                 <div class="daterange-picker d-flex align-items-center justify-content-center">
+                                    <div class="form-sort me-2">
+                                       <i class="ti ti-calendar"></i>
+                                       <input type="text" class="form-control  date-range bookingrange">
+                                    </div>
+                                    <div class="head-icons mb-0">
+                                       <a href="leads-dashboard-1.html" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Refresh"><i class="ti ti-refresh-dot"></i></a>
+                                       <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Collapse" id="collapse-header"><i class="ti ti-chevrons-up"></i></a>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row">
+                  <div class="col-md-7">
+                     <div class="card">
+                        <div class="card-header border-0 pb-0">
+                           <div class="d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+                              <h4><i class="ti ti-grip-vertical me-1"></i>Recently Created Leads</h4>
+                              <div class="dropdown">
+                                 <a class="dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);">
+                                 <i class="ti ti-calendar-check me-2"></i>Last 30 days
+                                 </a>
+                                 <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:void(0);" class="dropdown-item">
+                                    Last 15 days
+                                    </a>
+                                    <a href="javascript:void(0);" class="dropdown-item">
+                                    Last 30 days
+                                    </a>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="card-body">
+                           <div class="table-responsive custom-table">
+                              <table class="table dataTable" id="lead-project">
+                                 <thead class="thead-light">
+                                    <tr>
+                                       <th>Lead Name</th>
+                                       <th>Company Name</th>
+                                       <th>Phone</th>
+                                       <th>Lead Status</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody></tbody>
+                              </table>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-md-5 d-flex">
+                     <div class="card w-100">
+                        <div class="card-header border-0 pb-0">
+                           <div class="d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+                              <h4><i class="ti ti-grip-vertical me-1"></i>Projects By Stage</h4>
+                              <div class="dropdown">
+                                 <a class="dropdown-toggle" data-bs-toggle="dropdown" href="javascript:void(0);">
+                                 Last 30 Days
+                                 </a>
+                                 <div class="dropdown-menu dropdown-menu-end">
+                                    <a href="javascript:void(0);" class="dropdown-item">
+                                    Last 30 Days
+                                    </a>
+                                    <a href="javascript:void(0);" class="dropdown-item">
+                                    Last 15 Days
+                                    </a>
+                                    <a href="javascript:void(0);" class="dropdown-item">
+                                    Last 7 Days
+                                    </a>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="card-body">
+                           <div id="leadpiechart"></div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               
+            </div>
+         </div>
+      </div>
+      <script src="assets/js/jquery-3.7.1.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/bootstrap.bundle.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/feather.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/jquery.slimscroll.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/jquery.dataTables.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/dataTables.bootstrap5.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/moment.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/plugins/daterangepicker/daterangepicker-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/bootstrap-datetimepicker.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/plugins/bootstrap-tagsinput/bootstrap-tagsinput-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/plugins/apexchart/apexcharts.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/plugins/apexchart/chart-data-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/plugins/select2/js/select2.min-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/jsonscript-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="assets/js/script-1.js" type="86d4fd7e960d5dee6cf483c7-text/javascript"></script>
+      <script src="../../cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min-1.js" data-cf-settings="86d4fd7e960d5dee6cf483c7-|49" defer=""></script>
+   </body>
+</html>

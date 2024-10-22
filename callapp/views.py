@@ -32,3 +32,15 @@ def upload_file(request):
     else:
         form = UploadFileForm()
     return render(request, 'callapp/upload.html', {'form': form})
+
+
+
+
+def agents(request):
+    
+    return render(request, 'callapp/agent.html')
+
+
+def agentsdetails(request):
+    
+    return render(request, 'callapp/agentdetails.html')
