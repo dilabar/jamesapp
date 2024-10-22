@@ -5,8 +5,8 @@ from .forms import UploadFileForm
 from twilio.rest import Client
 
 # Twilio API credentials
-account_sid = 'ACe5a76e5dab8cbce42e79798dcade9e3c'
-auth_token = 'b188751b8610401f5ff26148d2ddda2c'
+account_sid = 'AC69dfc1ab681f0938ddfc48f393598fcb'
+auth_token = 'e348d1151d42ab1c33a72687344230f3'
 twilio_phone_number = '+12515174099'
 client = Client(account_sid, auth_token)
 
