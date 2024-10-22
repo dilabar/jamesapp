@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-td5f6%4ra^l9ht*zu^#2-biy56x!+l!9jhzpls^f&tbp6d&_t4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 
 # Application definition
@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'callapp'
+    'callapp',
+    'agent'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+PLAY_AI_API_KEY = 'ak-524c684b1aa44488b66087078dd9efc0'
+PLAY_AI_USER_ID = 'kXeov3rz8WZD6FEAKs2i2UrUbtb2'

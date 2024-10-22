@@ -1,0 +1,130 @@
+<!-- templates/agent_detail.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Details</title>
+    <style>
+  
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        .card h1 {
+            margin-top: 0;
+            color: #343a40; /* Darker color for title */
+            font-size: 1.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            border: 3px solid #3498db; /* Border around image */
+            margin-bottom: 15px;
+        }
+        .card p {
+            margin: 10px 0;
+            color: #495057; /* Lighter color for text */
+            line-height: 1.6;
+        }
+        .card strong {
+            color: #3498db; /* Color for strong text */
+        }
+        .expandable {
+            cursor: pointer;
+            color: #3498db; /* Change color for expandable text */
+            text-decoration: underline;
+        }
+        .expandable-content {
+            display: none;
+            margin-top: 10px;
+            background: #f8f9fa; /* Light background for expandable content */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .phone-list {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0;
+            margin: 0;
+        }
+        .phone-list li {
+            background: #f8f9fa; /* Light background for phone numbers */
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+        .phone-list li:hover {
+            background: #dee2e6; /* Darker background on hover */
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db; /* Blue background for button */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s; /* Smooth transition for button */
+            font-weight: bold;
+        }
+        .back-link:hover {
+            background-color: #2980b9; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1> {{ agent.displayName }}</h1>   <a href="{% url 'callapp:call' agent.id %}">call</a> 
+        <img src="{{ agent.avatarPhotoUrl }}" alt="Avatar of {{ agent.displayName }}">
+        <p><strong>Agent ID:</strong> {{ agent.id }}</p>
+        <p><strong>Voice:</strong> {{ agent.voice }}</p>
+        <p><strong>Voice Speed:</strong> {{ agent.voiceSpeed }}</p>
+        <p><strong>Greeting:</strong> {{ agent.greeting }}</p>
+        <p class="expandable" onclick="toggleExpandable('descriptionContent')">Description (click to expand)</p>
+        <div id="descriptionContent" class="expandable-content">
+            {{ agent.description|default:"N/A" }}
+        </div>
+        <p class="expandable" onclick="toggleExpandable('promptContent')">Prompt (click to expand)</p>
+        <div id="promptContent" class="expandable-content">
+            {{ agent.prompt }}
+        </div>
+        <p><strong>Visibility:</strong> {{ agent.visibility }}</p>
+        <p><strong>Critical Knowledge:</strong> {{ agent.criticalKnowledge }}</p>
+        <p><strong>Answer Only From Critical Knowledge:</strong> {{ agent.answerOnlyFromCriticalKnowledge }}</p>
+        <h3>Phone Numbers:</h3>
+        <ul class="phone-list">
+            {% for phone in agent.phoneNumbers %}
+                <li>{{ phone.phoneNumber }} ({{ phone.country }}, {{ phone.locality }})</li>
+            {% empty %}
+                <li>No phone numbers available.</li>
+            {% endfor %}
+        </ul>
+        <a class="back-link" href="{% url 'agent_list' %}">Back to Agent List</a>
+    </div>
+
+    <script>
+        function toggleExpandable(contentId) {
+            const content = document.getElementById(contentId);
+            if (content.style.display === "none" || content.style.display === "") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
