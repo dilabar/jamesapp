@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Intellicon - Machine Learnig HTML Template</title>
+   <!--Favicon img-->
+   <link rel="shortcut icon" href="{% static 'jam.png' %}">
+   <!--main css-->
+   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% block css %}
+    
+{% endblock css %}
+
+{% block header %}
+
+{% endblock header %}
+</head>
+
+<body>
+
+<!-- Preloader Start Here -->
+<div class="preloader__wrap">
+   <div class="preloader__box">
+      <div class="robot">
+         <img src="{% static 'img/elements/ponkhi.png' %}" alt="img">
+      </div>
+   </div>
+</div>
+<!-- Preloader End Here -->
+
+
+
+<!-- Header top Here -->
+<section class="header-section">
+   <div class="header-testting-wrap">
+      <header class="header" style="background: black;">
+         <div class="container">
+            <div class="header-testting-inner d-flex align-items-center justify-content-between">
+               <!-- Logo -->
+               <div class="header-item item-left">
+                  <div class="logo-menu">
+                     <a href="index.html" class="logo d-xl-block d-none">
+                        <img src="{% static 'jam.png' %}" alt="logo">
+                     </a>
+                     <a href="index.html" class="logo logo-small d-xl-none">
+                        <img src="{% static 'jam.png' %}" alt="logo">
+                     </a>
+                  </div>
+               </div>
+               <!-- Menu Start -->
+               <div class="header-item">
+                  <div class="menu-overlay"></div>
+                  <nav class="menu">
+                     <!-- Mobile Menu Head -->
+                     <div class="mobile-menu-head">
+                        <div class="go-back">
+                           <i class="material-symbols-outlined">
+                           arrow_back_ios
+                           </i>
+                        </div>
+                        <div class="current-menu-title"></div>
+                        <div class="mobile-menu-close">&times;</div>
+                     </div>
+                     <!-- Mian Menu -->
+                     <ul class="menu-main">
+                        <li class="menu-item-has-children">
+                           <a href="#" class="menu-mitem d-flex align-items-center">
+                              Home 
+                              
+                           </a>
+                           
+                        </li>
+                        <li class="menu-item-has-children">
+                           <a href="{% url 'agent_list' %}" class="menu-mitem d-flex align-items-center">
+                              Agents
+                              
+                           </a>
+                           
+                        </li>
+                        
+                        
+                     </ul>
+                  </nav>
+               </div>
+               <!-- Menu End -->
+               <div class="header-item item-righ d-flex align-items-center justify-content-center">
+                  <div class="menu__components">
+                     <a href="javascript:void(0)" class="mode--toggle d-center">
+                        
+                    </a>
+                    <div class="search-button" role="tablist">
+                     <button class="nav-link" id="search2" aria-selected="false" tabindex="-1" role="tab">
+                         <span class="icons"><i class="material-symbols-outlined">
+                           search
+                           </i>
+                        </span>
+                     </button>
+                     <div class="search-popup2" style="display: none;">
+                       <div class="search-bg2"></div>
+                       <div class="search-form2" style="right: -100%;">
+                         <form action="javascript:void(0)">
+                           <div class="form">
+                             <input type="text" id="searchs" placeholder="Search">
+                           </div>
+                         </form>
+                       </div>
+                     </div>
+                  </div>
+                    
+                 </div>
+                  <!-- Mobile Menu Tigger -->
+                  <div class="mobile-menu-trigger">
+                     <span></span>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </header>
+   </div>
+</section>
+{% block body %}
+    
+{% endblock body %}
+    
+
+
+<!-- Footer Here -->
+<footer class="footer__section footer__section__four">
+    <!--container-->
+    <div class="container">
+       <div class="footer__wrapper">
+          <div class="footer__top">
+             <div class="row g-5">
+                <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                   <div class="footer__widget">
+                      <div class="widget__head">
+                         <a href="index.html" class="footer__logo">
+                            <img src="{% static 'jam.png' %}" alt="logo">
+                         </a>
+                      </div>
+                      <p class="pb__20">
+                         Artificial Intelligence (AI) and Machine Learning (ML) are closely related technologies that enable computers to learn from data and make predictions
+                      </p>
+                      <ul class="social">
+                         <li>
+                            <a href="javascript:void(0)" class="social__item">
+                               <span class="icon">
+                                  <img src="{% static 'img/svg-icon/facebook.svg' %}" alt="svg">
+                               </span>
+                            </a>
+                         </li>
+                         <li>
+                            <a href="javascript:void(0)" class="social__item social__itemtwo">
+                               <span class="icon">
+                                  <img src="{% static 'img/svg-icon/instagram.svg' %}" alt="svg">
+                               </span>
+                            </a>
+                         </li>
+                         <li>
+                            <a href="javascript:void(0)" class="social__item social__itemthree">
+                               <span class="icon">
+                                  <img src="{% static 'img/svg-icon/twitter.svg' %}" alt="svg">
+                               </span>
+                            </a>
+                         </li>
+                         <li>
+                            <a href="javascript:void(0)" class="social__item social__itemfour">
+                               <span class="icon">
+                                  <img src="{% static 'img/svg-icon/linkedin.svg' %}" alt="svg">
+                               </span>
+                            </a>
+                         </li>
+                      </ul>
+                   </div>
+                </div>
+                <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                   <div class="footer__widget">
+                      <div class="widget__head">
+                         <h4>
+                            Contact
+                         </h4>
+                      </div>
+                       <div class="widget__link">
+                         <a href="javascript:void(0)" class="footer__contact__items">
+                            
+                               
+                                  add_call
+                               
+                            
+                           <span class="fcontact__content">
+                               (406) 555-0120
+                           </span>
+                         </a>
+                         <a href="javascript:void(0)" class="footer__contact__items">
+                            
+                               <i class="material-symbols-outlined">
+                                  mark_as_unread
+                               </i>
+                            
+                            <span class="fcontact__content">
+                              <span class="__cf_email__" data-cfemail="36534e575b465a5376534e575b465a531855595b">[email&#160;protected]</span>
+                            </span>
+                         </a>
+                         <a href="javascript:void(0)" class="footer__contact__items">
+                            <span class="icon iconthree">
+                               <span class="material-symbols-outlined">
+                                  pin_drop
+                               </span>
+                            </span>
+                            <span class="fcontact__content">
+                               Westheimer Rd. Santa Ana, Illinois
+                            </span>
+                         </a>
+                      </div>
+                   </div>
+                </div>
+                <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                   <div class="footer__widget">
+                      <div class="widget__head">
+                         <h4>
+                            Newsletter
+                         </h4>
+                      </div>
+                      <p class="pb__20">
+                         Subscribe our newsletter to get our latest update & news
+                      </p>
+                      <form action="#">
+                         <input type="email" placeholder="Your email address">
+                         <button type="submit" class="cmn--btn">
+                            
+                         </button>
+                      </form>
+                   </div>
+                </div>
+                <div class="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                   <div class="footer__widget">
+                      <div class="widget__head">
+                         <h4>
+                            Quick Links
+                         </h4>
+                      </div>
+                      <div class="widget__link">
+                         <a href="about.html" class="link">
+                            Home
+                         </a>
+                         <a href="studies-1.html" class="link">
+                            Agents
+                         </a>
+                         
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+          <div class="footer__bottom footer__bottom__two">
+             
+             <ul class="footer__bottom__link">
+                <li>
+                   <a href="support.html">
+                      Support
+                   </a>
+                </li>
+                <li>
+                   <a href="support.html">
+                      Privacy policy
+                   </a>
+                </li>
+                <li>
+                   <a href="support.html">
+                      Terms of condition
+                   </a>
+                </li>
+             </ul>
+          </div>
+       </div>
+    </div>
+    <!--container-->
+    <!--footer mask-->
+    <div class="footer__mask">
+       <img src="{% static 'img/elements/box-element.png' %}" alt="mask">
+    </div>
+    <!--footer mask-->
+ </footer>
+ <!-- Footer End -->
+ 
+ 
+ 
+ 
+ 
+    <!--Jquery 3 6 0 Min Js-->
+    <script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <!--Bootstrap bundle Js-->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <!--Viewport Jquery Js-->
+    <script src="{% static 'js/viewport.jquery.js' %}"></script>
+    <!--Odometer min Js-->
+    <script src="{% static 'js/odometer.min.js' %}"></script>
+    <!--Magnifiw Popup Js-->
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <!--Wow min Js-->
+    <script src="{% static 'js/wow.min.js' %}"></script>
+    <!--Owl carousel min Js-->
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <!--Prijm Js-->
+    <script src="{% static 'js/prism.js' %}"></script>
+    <!--main Js-->
+    <script src="{% static 'js/main.js' %}"></script>
+
+{% block js %}
+    
+{% endblock js %}
+    
+ </body>
+ 
+ </html>
+
+    
