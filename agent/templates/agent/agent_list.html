@@ -1,73 +1,22 @@
 <!-- templates/agent_list.html -->
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* Center cards in the container */
-            gap: 20px;  /* Space between cards */
-        }
-        .card {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            width: calc(33% - 20px); /* Adjust card width */
-            min-width: 300px; /* Minimum width for responsiveness */
-            transition: transform 0.2s; /* Animation for hover effect */
-        }
-        .card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
-        }
-        .card h3 {
-            margin: 0 0 10px;
-            color: #2c3e50; /* Darker color for the title */
-        }
-        .card p {
-            margin: 5px 0;
-            color: #555; /* Lighter color for text */
-        }
-        .no-agents {
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            color: #e74c3c; /* Red color for the message */
-        }
-        a {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #3498db; /* Blue background for the button */
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s; /* Smooth transition for background color */
-        }
-        a:hover {
-            background-color: #2980b9; /* Darker blue on hover */
-        }
-    </style>
-</head>
-<body>
-    <h1>Agent List</h1>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+
+
+{% comment %} <h1>Agent List</h1>
 
     <div class="container">
         {% for agent in agents %}
@@ -82,6 +31,104 @@
         {% empty %}
         <div class="no-agents">No agents found.</div>
         {% endfor %}
+    </div> {% endcomment %}
+
+<!-- Banner Here -->
+<section class="banner__section banner__section__four  bannerbg">
+    <!--Mask-->
+    <div class="banner__bgmask">
+       <img src="{% static 'img/elements/box-element.png' %}' %}" alt="mask">
     </div>
-</body>
-</html>
+    <!--Mask-->
+    <!--Container-->
+    
+    <!--elements--></section>
+ <!-- Banner End -->
+ <section class="include__benefits bgsection pt-120 pb-120">
+<div class="container" style="
+    margin-top: 150px;
+    /* margin: 150px; */
+    margin-bottom: 150px;">
+        <!--Header section-->
+        <div class="section__header section__center pb__60 wow fadeInUp" data-wow-duration="2s">
+            <h2>
+                {{ agents|length }} Agents Available
+            </h2>
+            <p>
+                Play.ai connects you with a wide range of agents, offering expert services in various fields. Below you can find the details for all agents currently available.
+            </p>
+        </div>
+        
+        <!--Header section-->
+        <!--include benefits-->
+
+        <div class="container">
+            <div class="row justify-content-center align-items-center">
+                <div class="include__boxes include__grid__boxes">
+                    <div class="row g-4">
+                        {% for agent in agents %}
+                        <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="inclue__box">
+                                <div class="icnos">
+                                    <img src="{% static 'img/feature/robotic.svg' %}" alt="icon"> <!-- Adjust based on your dynamic content -->
+                                </div>
+                                <div class="content">
+                                    <h4>
+                                        <a href="{% url 'get_agent' agent.agent_id %}">{{ agent.name }}</a>
+                                    </h4>
+                                    <p>{{ agent.description }}</p>
+                                    <a href="{% url 'get_agent' agent.agent_id %}" class="benefits__btn" style="margin-top: 30px; border-radius: 30px; background-color: black; color: white; padding: 10px 20px; text-align: center; display: inline-block; text-decoration: none;">
+                                        <span>Discover More</span>
+                                        <span class="icon">
+                                            <i class="material-symbols-outlined"></i>
+                                        </span>
+                                    </a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                            <div class="inclue__box">
+                                <p>No agents found.</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!--include benefits-->
+</div>
+<div class="bene__element1">
+    <img src="{% static 'img/banner/devided-element2.png' %}" alt="img">
+ </div>
+ <div class="bene__lockyello">
+    <img src="{% static 'img/banner/devided-lockyello.png' %}" alt="img">
+ </div>
+ <div class="bene__blump">
+    <img src="{% static 'img/banner/round-devided.png' %}" alt="img">
+ </div>
+ <div class="bene__blump2">
+    <img src="{% static 'img/banner/round-devided.png' %}" alt="img">
+ </div>
+<!--element-->
+</section>   
+    
+
+    {% endblock body %}
+    
+
+
+    
+
+    
+
+
+
+    
+{% block js %}
+    
+{% endblock js %}
