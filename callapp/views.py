@@ -14,13 +14,11 @@ from websocket import create_connection
 
 
 # Twilio API credentials
-account_sid = 'AC4fd638d826f7df2e6b19d7c0cd8be96f'
-auth_token = 'e0d55fbb3bcc6b2c62b21e81e69d999c'
-twilio_phone_number = '+19706333596'
-client = Client(account_sid, auth_token)
+
+client = Client(settings.ACOUNT_SID, settings.AUTH_TOKEN)
 
 def call_initate(request,agent_id):
-    client = Client(account_sid, auth_token)
+    client = Client(settings.ACOUNT_SID, settings.AUTH_TOKEN)
     numbers_to_call = PhoneCall.objects.filter(call_status='pending')[:100]
 
     if not numbers_to_call:
@@ -31,7 +29,7 @@ def call_initate(request,agent_id):
             call = client.calls.create(
                 url=f'http://{settings.ALLOWED_HOSTS[1]}/voice/{agent_id}/',
                 to=phone_call.phone_number,
-                from_=twilio_phone_number
+                from_=settings.TWILIO_PHONE_NUMBER
             )
             phone_call.call_status = 'pending'
             phone_call.save()
