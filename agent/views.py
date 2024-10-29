@@ -1,6 +1,11 @@
 import requests
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
+from django.contrib.auth.models import User
+
+from django.contrib.auth import login as auth_login, authenticate, logout
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 
 from agent.models import Agent
 
@@ -34,3 +39,68 @@ def agent_list(request):
         'agents': agents
     }
     return render(request, 'agent/agent_list.html', context)
+
+
+def dashboards(request):
+    
+    return render(request, 'crm/dash.html')
+
+
+
+
+
+
+# Signup View
+def signup(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        # Check if the username or email is already taken
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username is already taken.")
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "Email is already registered.")
+        elif password1 != password2:
+            messages.error(request, "Passwords do not match.")
+        else:
+            try:
+                user = User.objects.create_user(username=username, email=email, password=password1)
+                user.save()
+                auth_login(request, user)  # Automatically log in the user after signup
+                messages.success(request, "Registration successful! Welcome!")
+                return redirect('login')  # Redirect to a home or success page after signup
+            except Exception as e:
+                messages.error(request, f"Error occurred: {e}")
+
+    return render(request, 'crm/signup.html')
+
+
+# Login View
+def login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('dashboards')  # Redirect to the home page or dashboard after login
+        else:
+            messages.error(request, "Invalid username or password.")
+    
+    return render(request, 'crm/login.html')
+
+
+
+def logout(request):
+    logout(request)  
+    return redirect('login') 
+
+
+
+
+def reset(request):
+    
+    return render(request, 'crm/resetpassword.html')

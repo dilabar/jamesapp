@@ -1,0 +1,489 @@
+
+    
+
+<!doctype html>
+<html lang="en" dir="">
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <title>Insta Dash | Responsive Bootstrap 4 Admin Dashboard Template</title>
+      
+      
+
+
+      <!-- Favicon -->
+      <link rel="shortcut icon" href="{% static 'crm/images/favicon.ico' %}">
+      <link rel="stylesheet" href="{% static 'crm/css/backend-plugin.min.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/css/backend.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/vendor/%40fortawesome/fontawesome-free/css/all.min.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/vendor/remixicon/fonts/remixicon.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/vendor/%40icon/dripicons/dripicons.css' %}">
+      
+      <link rel='stylesheet' href="{% static 'crm/vendor/fullcalendar/core/main.css' %}">
+      <link rel='stylesheet' href="{% static 'crm/vendor/fullcalendar/daygrid/main.css' %}">
+      <link rel='stylesheet' href="{% static 'crm/vendor/fullcalendar/timegrid/main.css' %}">
+      <link rel='stylesheet' href="{% static 'crm/vendor/fullcalendar/list/main.css' %}">
+      <link rel="stylesheet" href="{% static 'crm/vendor/mapbox/mapbox-gl.css' %}">  
+
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+    
+    
+      {% block css %}
+    
+      {% endblock css %}
+
+
+      {% block header %}
+
+      {% endblock header %}
+    
+    </head>
+
+
+
+  <body class="  ">
+    <!-- loader Start -->
+    <div id="loading">
+          <div id="loading-center">
+          </div>
+    </div>
+    <!-- loader END -->
+    <!-- Wrapper Start -->
+    <div class="wrapper">
+      
+      <div class="iq-sidebar  rtl-iq-sidebar sidebar-default ">
+          <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
+              <a href="index.html" class="header-logo">
+                  <img src="{% static 'voiceagent.png' %}" class="img-fluid rounded-normal light-logo" alt="logo">
+                  <img src="{% static 'jam.png' %}" class="img-fluid rounded-normal darkmode-logo" alt="logo">
+              </a>
+              <div class="iq-menu-bt-sidebar">
+                  <i class="las la-bars wrapper-menu"></i>
+              </div>
+          </div>
+          <div class="data-scrollbar" data-scroll="1">
+              <nav class="iq-sidebar-menu">
+                  <ul id="iq-sidebar-toggle" class="iq-menu">
+                       <li class=" ">
+                          <a href="#Dashboards" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                              <i class="las la-home"></i><span>Dashboards</span>
+                              <i class="las la-angle-right iq-arrow-right arrow-active"></i>
+                              <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
+                          </a>
+                          <ul id="Dashboards" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                  <li class="active">
+                                          <a href="index.html">
+                                              <i class="lab la-blogger-b"></i><span>Dashboard 1</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="dashboard-2.html">
+                                              <i class="las la-share-alt"></i><span>Dashboard 2</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="dashboard-3.html">
+                                              <i class="las la-icons"></i><span>Dashboard 3</span>
+                                          </a>
+                                  </li>
+                          </ul>
+                       </li>
+                      
+                       
+                       
+                       
+                       
+                     
+                       
+                       <li class=" ">
+                          <a href="#auth" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                              <i class="las la-torah iq-arrow-left"></i><span>Authentication</span>
+                              <i class="las la-angle-right iq-arrow-right arrow-active"></i>
+                              <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
+                          </a>
+                          <ul id="auth" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                  <li class=" ">
+                                          <a href="auth-sign-in.html">
+                                              <i class="las la-sign-in-alt"></i><span>Login</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="auth-sign-up.html">
+                                              <i class="las la-registered"></i><span>Register</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="auth-recoverpw.html">
+                                              <i class="las la-unlock-alt"></i><span>Recover Password</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="auth-confirm-mail.html">
+                                              <i class="las la-envelope-square"></i><span>Confirm Mail</span>
+                                          </a>
+                                  </li>
+                                  <li class=" ">
+                                          <a href="auth-lock-screen.html">
+                                              <i class="las la-lock"></i><span>Lock Screen</span>
+                                          </a>
+                                  </li>
+                          </ul>
+                       </li>
+                       
+                  </ul>
+              </nav>
+              
+          </div>
+          </div>       <div class="iq-top-navbar rtl-iq-top-navbar ">
+          <div class="iq-navbar-custom">
+              <nav class="navbar navbar-expand-lg navbar-light p-0">
+              <div class="iq-navbar-logo d-flex align-items-center justify-content-between">
+                  <i class="ri-menu-line wrapper-menu"></i>
+                  <a href="index.html" class="header-logo">
+                      <img src="{% static 'crm/images/logo.png' %}" class="img-fluid rounded-normal light-logo" alt="logo">
+                      <img src="{% static 'crm/images/logo-white.png' %}" class="img-fluid rounded-normal darkmode-logo" alt="logo">
+                      
+                  </a>
+              </div>
+                  <div class="iq-search-bar device-search">
+                      <form action="#" class="searchbox">
+                      <a class="search-link" href="#"><i class="ri-search-line"></i></a>
+                      <input type="text" class="text search-input" placeholder="Search here...">
+                      </form>
+                  </div>
+                  <div class="d-flex align-items-center">
+                      <div class="change-mode">
+                          <div class="custom-control custom-switch custom-switch-icon custom-control-inline">
+                              <div class="custom-switch-inner">
+                                  <p class="mb-0"> </p>
+                                  <input type="checkbox" class="custom-control-input" id="dark-mode" data-active="true">
+                                  <label class="custom-control-label" for="dark-mode" data-mode="toggle">
+                                      <span class="switch-icon-left"><i class="a-left ri-moon-clear-line"></i></span>
+                                      <span class="switch-icon-right"><i class="a-right ri-sun-line"></i></span>
+                                  </label>
+                              </div>
+                          </div>
+                      </div>
+                      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-label="Toggle navigation">
+                      <i class="ri-menu-3-line"></i>
+                      </button>
+                      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                          <ul class="navbar-nav ml-auto navbar-list align-items-center">
+                          <li class="nav-item nav-icon search-content">
+                              <a href="#" class="search-toggle rounded" id="dropdownSearch" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <i class="ri-search-line"></i>
+                              </a>
+                              <div class="iq-search-bar iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownSearch">
+                                  <form action="#" class="searchbox p-2">
+                                      <div class="form-group mb-0 position-relative">
+                                      <input type="text" class="text search-input font-size-12" placeholder="type here to search...">
+                                      <a href="#" class="search-link"><i class="las la-search"></i></a> 
+                                      </div>
+                                  </form>
+                              </div>
+                          </li>                
+                          <li class="nav-item nav-icon dropdown">
+                              <a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="ri-mail-line  bg-orange p-2 rounded-small"></i>
+                              <span class="bg-primary"></span>
+                              </a>
+                              <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton2">
+                                  <div class="card shadow-none m-0">
+                                      <div class="card-body p-0 ">
+                                      <div class="cust-title p-3">
+                                          <h5 class="mb-0">All Messages</h5>
+                                      </div>
+                                      <div class="p-3">
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/01.jpg' %}" alt="01">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-mr-3 rtl-ml-0">
+                                                  <h6 class="mb-0">Barry Emma Watson <small class="badge badge-success float-right rtl-mr-1">New</small></h6>
+                                                  <small class="float-left font-size-12">12:00 PM</small>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/02.jpg' %}" alt="02">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-ml-0 rtl-mr-3">
+                                                  <h6 class="mb-0 ">Lorem Ipsum Watson</h6>
+                                                  <small class="float-left font-size-12">20 Apr</small>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/03.jpg' %}" alt="03">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-mr-3 rtl-ml-0">
+                                                  <h6 class="mb-0 ">Why do we use it? <small class="badge badge-success float-right rtl-mr-1">New</small></h6>
+                                                  <small class="float-left font-size-12">1:24 PM</small>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/04.jpg' %}" alt="04">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-ml-0 rtl-mr-3">
+                                                  <h6 class="mb-0">Variations Passages <small class="badge badge-success float-right rtl-mr-1">New</small></h6>
+                                                  <small class="float-left font-size-12">5:45 PM</small>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/05.jpg' %}" alt="05">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-mr-3 rtl-ml-0">
+                                                  <h6 class="mb-0 ">Lorem Ipsum generators</h6>
+                                                  <small class="float-left font-size-12">1 day ago</small>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                      </div>
+                                      <a class="right-ic btn btn-primary btn-block position-relative p-2" href="#" role="button">
+                                          <div class="dd-icon"><i class="las la-arrow-right mr-0"></i></div>
+                                          View All
+                                      </a>
+                                      </div>
+                                  </div>
+                              </div>
+                          </li>
+                          <li class="nav-item nav-icon dropdown"> 
+                              <a href="#" class="search-toggle dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                              <i class="ri-notification-line bg-info p-2 rounded-small"></i>
+                              <span class="bg-primary "></span>
+                              </a>
+                              <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                  <div class="card shadow-none m-0">
+                                      <div class="card-body p-0 ">
+                                      <div class="cust-title p-3">
+                                          <h5 class="mb-0">All Notifications</h5>
+                                      </div>
+                                      <div class="p-3">
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/01.jpg' %}" alt="01">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-ml-0 rtl-mr-3">
+                                                  <h6 class="mb-0">Emma Watson Barry <small class="badge badge-success float-right rtl-mr-1">New</small></h6>                                             
+                                                  <p class="mb-0">95 MB</p>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/02.jpg' %}" alt="02">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-mr-3 rtl-ml-0">
+                                                  <h6 class="mb-0 ">New customer is join</h6>
+                                                  <p class="mb-0 ">Cyst Barry</p>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/03.jpg' %}" alt="03">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-ml-0 rtl-mr-3">
+                                                  <h6 class="mb-0 ">Two customer is left</h6>                                             
+                                                  <p class="mb-0">Cyst Barry</p>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                          <a href="#" class="iq-sub-card">
+                                              <div class="media align-items-center">
+                                                  <div class="">
+                                                  <img class="avatar-40 rounded-small" src="{% static 'crm/images/user/04.jpg' %}" alt="04">
+                                                  </div>
+                                                  <div class="media-body ml-3 rtl-mr-3 rtl-ml-0">
+                                                  <h6 class="mb-0 ">New Mail from Fenny <small class="badge badge-success float-right">New</small></h6>                                             
+                                                  <p class="mb-0">Cyst Barry</p>
+                                                  </div>
+                                              </div>
+                                          </a>
+                                      </div>
+                                      <a class="right-ic btn btn-primary btn-block position-relative p-2" href="#" role="button">
+                                          <div class="dd-icon"><i class="las la-arrow-right mr-0"></i></div>
+                                          View All
+                                      </a>                                   
+                                      </div>
+                                  </div>
+                              </div>
+                          </li>                  
+                          <li class="nav-item iq-full-screen"><a href="#" class="" id="btnFullscreen"><i class="ri-fullscreen-line"></i></a></li>
+                          <li class="caption-content">
+                              <a href="#" class="iq-user-toggle">
+                                  <img src="{% static 'crm/images/user/1.jpg' %}" class="img-fluid rounded" alt="user">
+                              </a>
+                              <div class="iq-user-dropdown">
+                                  <div class="card">
+                                      <div class="card-header d-flex justify-content-between align-items-center mb-0">
+                                      <div class="header-title">
+                                          <h4 class="card-title mb-0">Profile</h4>
+                                      </div>
+                                      <div class="close-data text-right badge badge-primary cursor-pointer"><i class="ri-close-fill"></i></div>
+                                      </div>
+                                      <div class="data-scrollbar" data-scroll="2">
+                                      <div class="card-body">
+                                          <div class="profile-header">
+                                              <div class="cover-container ">
+                                                  <div class="media align-items-center mb-4">
+                                                      <img src="{% static 'crm/images/user/1.jpg' %}" alt="profile-bg" class="rounded img-fluid avatar-80">
+                                                      <div class="media-body profile-detail ml-3 rtl-mr-3 rtl-ml-0">
+                                                        <h3>{{ user.username }}</h3>  <!-- Display the logged-in user's username -->
+                                                        <div class="d-flex flex-wrap">
+                                                            <p class="mb-1">{{ user.email }}</p> <!-- Optional: Show full name if set -->
+                                                            <a href="{% url 'logout' %}" class="ml-3 rtl-mr-3 rtl-ml-0">Sign Out</a>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                  </div>
+                                                  
+                                              </div>
+                                              <div class="row">
+                                                  <div class="col-lg-6 col-md-6  col-6 pr-0">
+                                                      <div class="profile-details text-center">
+                                                          <a href="../app/user-profile.html" class="iq-sub-card bg-primary-light rounded-small p-2"> 
+                                                              <div class="rounded iq-card-icon-small">
+                                                                  <i class="ri-file-user-line"></i>
+                                                              </div>
+                                                              <h6 class="mb-0 ">My Profile</h6>
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                                  <div class="col-lg-6  col-md-6 col-6">
+                                                      <div class="profile-details text-center">
+                                                          <a href="../app/user-profile-edit.html" class="iq-sub-card bg-danger-light rounded-small p-2">
+                                                              <div class="rounded iq-card-icon-small">
+                                                                  <i class="ri-profile-line"></i>
+                                                              </div>
+                                                              <h6 class="mb-0 ">Edit Profile</h6>
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                                  <div class="col-lg-6 col-md-6  col-6 pr-0">
+                                                      <div class="profile-details text-center">
+                                                      <a href="../app/user-account-setting.html" class="iq-sub-card bg-success-light rounded-small p-2">
+                                                              <div class="rounded iq-card-icon-small">
+                                                                  <i class="ri-account-box-line"></i>
+                                                              </div>
+                                                              <h6 class="mb-0 ">Account</h6>
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                                  <div class="col-lg-6 col-md-6  col-6">
+                                                      <div class="profile-details text-center">
+                                                          <a href="../app/user-privacy-setting.html" class="iq-sub-card bg-info-light rounded-small p-2">
+                                                              <div class="rounded iq-card-icon-small">
+                                                              <i class="ri-lock-line"></i>
+                                                              </div>
+                                                              <h6 class="mb-0 ">Settings</h6>
+                                                          </a>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              
+                                          </div>
+                                          <div class="p-3"></div>
+                                      </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </li>
+                          </ul>                     
+                      </div> 
+                  </div>
+              </nav>
+          </div>
+      </div>
+
+{% block body %}
+    
+{% endblock body %}
+    
+
+   
+    
+    
+<footer class="iq-footer rtl-footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6 ">
+                <ul class="list-inline mb-0  rtl-pr-0 rtl-right">
+                    <li class="list-inline-item "><a href="privacy-policy.html">Privacy Policy</a></li>
+                    <li class="list-inline-item"><a href="terms-of-service.html">Terms of Use</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-6 text-right ">
+                Copyright  <span id="copyright"> 
+<script>document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))</script>
+</span> <a href="#">Insta Dash</a> All Rights Reserved.
+            </div>
+        </div>
+    </div>
+</footer>
+<!-- Backend Bundle JavaScript -->
+<script src="{% static 'crm/js/backend-bundle.min.js' %}"></script>
+
+<!-- Flextree Javascript-->
+<script src="{% static 'crm/js/flex-tree.min.js' %}"></script>
+<script src="{% static 'crm/js/tree.js' %}"></script>
+
+<!-- Table Treeview JavaScript -->
+<script src="{% static 'crm/js/table-treeview.js' %}"></script>
+
+<!-- Masonary Gallery Javascript -->
+<script src="{% static 'crm/js/masonry.pkgd.min.js' %}"></script>
+<script src="{% static 'crm/js/imagesloaded.pkgd.min.js' %}"></script>
+
+<!-- Mapbox Javascript -->
+<script src="{% static 'crm/js/mapbox-gl.js' %}"></script>
+<script src="{% static 'crm/js/mapbox.js' %}"></script>
+
+<!-- Fullcalender Javascript -->
+<script src="{% static 'crm/vendor/fullcalendar/core/main.js' %}"></script>
+<script src="{% static 'crm/vendor/fullcalendar/daygrid/main.js' %}"></script>
+<script src="{% static 'crm/vendor/fullcalendar/timegrid/main.js' %}"></script>
+<script src="{% static 'crm/vendor/fullcalendar/list/main.js' %}"></script>
+
+<!-- SweetAlert JavaScript -->
+<script src="{% static 'crm/js/sweetalert.js' %}"></script>
+
+<!-- Vectoe Map JavaScript -->
+<script src="{% static 'crm/js/vector-map-custom.js' %}"></script>
+
+<!-- Chart Custom JavaScript -->
+<script src="{% static 'crm/js/customizer.js' %}"></script>
+<script src="{% static 'crm/js/rtl.js' %}"></script>
+
+<!-- Chart Custom JavaScript -->
+<script src="{% static 'crm/js/chart-custom.js' %}"></script>
+
+<!-- slider JavaScript -->
+<script src="{% static 'crm/js/slider.js' %}"></script>
+
+<!-- app JavaScript -->
+<script src="{% static 'crm/js/app.js' %}"></script>
+
+{% block js %}
+    
+{% endblock js %}
+</body>
+</html>
+
+    
