@@ -1,0 +1,47 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
+{% endblock header %}
+
+{% block css %}
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .no-agents {
+        font-style: italic;
+        color: #6c757d;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-10 mx-auto">
+                <div class="info-section">
+                    <h4>Chat Data</h4>
+                    {% if data_list %}
+                        <ul class="list-group">
+                            {% for data in data_list %}
+                                <li class="list-group-item">
+                                    <strong>Content:</strong> {{ data.content }}<br>
+                                    <strong>Created At:</strong> {{ data.created_at|date:"F j, Y, g:i a" }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-agents">No conversations found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

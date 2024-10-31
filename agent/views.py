@@ -10,7 +10,7 @@ from django.contrib import messages
 
 from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
-from jamesapp.utils import decrypt
+from jamesapp.utils import decrypt, get_conversation_data, get_transcript_data
 
 
 def call_play_ai_api(request, agent_id):
@@ -190,3 +190,28 @@ def delete_agent(request, agent_id):
         agent.delete()
         messages.success(request, "Agent deleted successfully.")
     return redirect('agent:agent_list')
+@login_required
+def get_conversation(request, agent_id):
+    play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
+    ag=decrypt(agent_id)
+    data = get_conversation_data(ag,play_ai.decrypted_api_key,play_ai.decrypted_account_sid)
+    if isinstance(data, dict) and "error" in data:
+        # Handle error scenario
+        context = {"error": data["error"]}
+    else:
+        # Assume data is a list of results
+        context = {"data_list": data,"agent_id":agent_id}
+    return render(request, 'agent/conversation.html', context)
+
+@login_required
+def get_transcript(request, agent_id,cid):
+    play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
+    ag=decrypt(agent_id)
+    data = get_transcript_data(ag,cid,play_ai.decrypted_api_key,play_ai.decrypted_account_sid)
+    if isinstance(data, dict) and "error" in data:
+        # Handle error scenario
+        context = {"error": data["error"]}
+    else:
+        # Assume data is a list of results
+        context = {"data_list": data}
+    return render(request, 'agent/transcript.html', context)

@@ -27,7 +27,7 @@
             <div class="col-sm-12 col-lg-10 mx-auto">
                 <div class="card">
                     <div class="card-header">
-                    <h2 class="mt-4 mb-3">Agent List</h2>
+                    <h2 class="mt-4 mb-3">Agent Conversation List</h2>
                         
                     </div>
               <div class="card-body">
@@ -36,30 +36,26 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Agent ID</th>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
+                                <th>Source</th>
+                                <th>Caller Email</th>
+                                <th>Started At</th>
+                                <th>Ended At</th>
+                                <th>DurationInSeconds</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for agent in agents %}
+                            {% for cv in data_list %}
                                 <tr>
-                                    <td>{{ agent.id }}</td>
-                                    <td>{{ agent.decrypted_agent_id }}</td>
-                                    <td>{{ agent.name }}</td>
-                                    <td>{{ agent.description|default:"No description" }}</td>
-                                    <td>{{ agent.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ cv.id }}</td>
+                                    <td>{{ cv.source }}</td>
+                                    <td>{{ cv.callerEmail }}</td>
+                                    <td>{{ cv.startedAt }}</td>
+                                    <td>{{ cv.endedAt }}</td>
+                                    <td>{{ cv.durationInSeconds }}</td>
                                     <td>
-                                        <a href="{% url 'agent:update_agent' agent.agent_id %}" class="btn btn-primary btn-sm">Edit</a>
-                                        <!-- Add other actions as needed -->
-                                        <form action="{% url 'agent:delete_agent' agent.agent_id %}" method="post" style="display:inline;">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this agent?');">Delete</button>
-                                        </form>
-                                        <a href="{% url 'callapp:call' agent.agent_id %}" class="btn btn-primary btn-sm">Call</a>
-                                        <a href="{% url 'agent:get_conversation' agent.agent_id %}" class="btn btn-primary btn-sm">Conversation</a>
+                                     
+                                        <a href="{% url 'agent:get_transcript' agent_id=agent_id cid=cv.id %}" class="btn btn-primary btn-sm">Conversation</a>
                                         
                                     </td>
                                 </tr>
