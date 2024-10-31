@@ -1,75 +1,116 @@
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
-
-from agent.models import PhoneCall
+from django.contrib.auth.decorators import login_required
+from agent.models import PhoneCall, ServiceDetail
 from twilio.rest import Client
 import json
+from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
-from twilio.twiml.voice_response import VoiceResponse
+from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect
 from django.conf import settings
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from websocket import create_connection
+from websocket import create_connection,WebSocketConnectionClosedException
+from django.contrib import messages
+import logging
+logger = logging.getLogger(__name__)
 
 
 # Twilio API credentials
 
-client = Client(settings.ACOUNT_SID, settings.AUTH_TOKEN)
-
-def call_initate(request,agent_id):
-    client = Client(settings.ACOUNT_SID, settings.AUTH_TOKEN)
-    numbers_to_call = PhoneCall.objects.filter(call_status='pending')[:100]
-
-    if not numbers_to_call:
-        return HttpResponse("No pending calls found.")
-
-    for phone_call in numbers_to_call:
-        try:
-            call = client.calls.create(
-                url=f'http://{settings.ALLOWED_HOSTS[1]}/voice/{agent_id}/',
-                to=phone_call.phone_number,
-                from_=settings.TWILIO_PHONE_NUMBER
+@login_required
+def call_initiate(request, agent_id):
+    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+    
+    # Handle form submission
+    if request.method == "POST":
+        phone_number = request.POST.get('phone_number')
+        file_upload = request.FILES.get('file_upload')
+        
+        # Manual entry handling
+        if phone_number:
+            # Save phone call log for manual entry
+            phone_call = PhoneCall.objects.create(
+                phone_number=phone_number,
+                call_status='pending'
             )
-            phone_call.call_status = 'pending'
-            phone_call.save()
-        except Exception as e:
-            return HttpResponse(f"Error initiating call to {phone_call.phone_number}: {str(e)}")
+            # Place the call
+            try:
+                call = client.calls.create(
+                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{agent_id}/',
+                    to=phone_call.phone_number,
+                    from_=twilio.decrypted_twilio_phone
+                )
+                phone_call.call_status = 'initiated'
+                phone_call.twilio_call_id = call.sid
+                phone_call.save()
+            except Exception as e:
+                return HttpResponse(f"Error initiating call to {phone_call.phone_number}: {str(e)}")
 
-    return HttpResponse("Calls initiated successfully!")
+        # CSV/Excel upload handling
+        elif file_upload:
+            # Save file temporarily
+            file_path = default_storage.save(file_upload.name, file_upload)
+            ext = file_upload.name.split('.')[-1].lower()
+            try:
+                # Read file based on extension
+                if ext == 'csv':
+                    data = pd.read_csv(default_storage.open(file_path))
+                elif ext in ['xls', 'xlsx']:
+                    data = pd.read_excel(default_storage.open(file_path))
+                else:
+                    return HttpResponse("Unsupported file format. Please upload a CSV or Excel file.")
+
+                # Extract phone numbers and initiate calls
+                for _, row in data.iterrows():
+                    phone = row.get('phone_number')
+                    if phone:
+                        phone_call = PhoneCall.objects.create(
+                            phone_number=phone,
+                            call_status='pending'
+                        )
+                        try:
+                            call = client.calls.create(
+                                url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{agent_id}/',
+                                to=phone_call.phone_number,
+                                from_=twilio.twilio_phone
+                            )
+                            print("h")
+                            phone_call.call_status = 'initiated'
+                            phone_call.twilio_call_id = call.sid
+                            phone_call.save()
+                        except Exception as e:
+                            return messages.success(f"Error initiating call to {phone_call.phone_number}: {str(e)}")
+
+            finally:
+                default_storage.delete(file_path)  # Clean up the temporary file
+        messages.success(request, 'Call Initiated successfully!')
+
+        # return redirect('agent:agent_list')
+        
+    return render(request, 'callapp/initiate_call.html')
+
+
+   
 @csrf_exempt
-def voice(request, agent_id):
-    """
-    Handles incoming voice requests from Twilio, and forwards the audio stream to Play.ai via WebSocket.
-    """
+def start_twilio_stream(request, agent_id):
     response = VoiceResponse()
-    response.say("Hello, you are connected to your AI assistant.")
+    
+    # Define your WebSocket URL to receive the Twilio stream data
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{agent_id}/"
 
-    # Prepare to send the audio to the WebSocket consumer
-    audio_stream = request.POST.get('RecordingUrl', None)
-    if audio_stream:
-        audio_response = request.get(audio_stream)
-        audio_bytes = audio_response.content
-
-        # Forward the audio to the WebSocket
-        ws_url = f"ws://{settings.ALLOWED_HOSTS[1]}/ws/play_ai/{agent_id}/"
-        ws = create_connection(ws_url)
-        ws.send(json.dumps({'audio_data': audio_bytes}))
+    try:
+        connect = Connect()
+        connect.stream(name='Twilio Stream', url=stream_url)
+        response.append(connect)
+     
+        # # Optional: Play an initial message or beep
+        # response.say('The stream has started. You may now begin speaking.')
         
-        # Receive and play the AI response
-        while True:
-            play_response = ws.recv()
-            response_json = json.loads(play_response)
-            
-            if 'play_audio_url' in response_json:
-                play_audio_url = response_json['play_audio_url']
-                response.play(play_audio_url)
-            elif 'end' in response_json:
-                break
-            elif 'error' in response_json:
-                return HttpResponse(f"Error during AI communication: {response_json['error']}")
-        
-        ws.close()
-
-    response.say("Thank you for using our service.")
-    return HttpResponse(str(response), content_type='text/xml')
+    except Exception as e:
+        logger.error(f"Error starting Twilio stream: {str(e)}")
+        response.say("Error starting the audio stream. Please try again later.")
+    
+    return HttpResponse(str(response), content_type="text/xml")

@@ -35,7 +35,7 @@ def call_play_ai_api(request, agent_id):
 
     except requests.exceptions.RequestException as e:
         return render(request, 'error.html', {'error': str(e)})
-    
+@login_required   
 def agent_list(request):
     agents = Agent.objects.all()  # Fetch all agents from the database
     context={
@@ -43,7 +43,7 @@ def agent_list(request):
     }
     return render(request, 'agent/agent_list.html', context)
 
-
+@login_required
 def dashboards(request):
     
     return render(request, 'crm/dash.html')
@@ -107,7 +107,7 @@ def logout(request):
 def reset(request):
     
     return render(request, 'crm/resetpassword.html')
-
+@login_required
 def service_detail_view(request):
     # Get the user's existing service details for Twilio and Play.ai
     if not request.user.is_authenticated:
@@ -133,7 +133,7 @@ def service_detail_view(request):
     return render(request, 'service/play-ai-create-form.html', {
         'play_ai_form': play_ai_form,
     })
-
+@login_required
 def twilio_service_detail_view(request):
     # Get the user's existing service details for Twilio and Play.ai
     if not request.user.is_authenticated:
@@ -182,6 +182,7 @@ def create_or_update_agent(request, agent_id=None):
         form = AgentForm(instance=agent)
     
     return render(request, 'agent/create_or_update_agent.html', {'form': form, 'agent': agent})
+@login_required
 def delete_agent(request, agent_id):
     dec_agent_id=decrypt(agent_id)
     agent = get_object_or_404(Agent, agent_id=dec_agent_id)

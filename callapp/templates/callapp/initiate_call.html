@@ -1,0 +1,93 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
+{% endblock header %}
+
+{% block css %}
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .input-group {
+        display: none;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-6">
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">Initiate Phone Call</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Radio buttons for selection -->
+                            <div class="form-group">
+                                <label>Choose input method:</label><br>
+                                <input type="radio" id="manual" name="input_method" value="manual" 
+                                       onclick="toggleInput('manual')" checked>
+                                <label for="manual">Manual Entry</label><br>
+                                <input type="radio" id="file" name="input_method" value="file" 
+                                       onclick="toggleInput('file')">
+                                <label for="file">File Upload</label>
+                            </div>
+
+                            <!-- Manual phone number input -->
+                            <div id="manual-input" class="form-group">
+                                <label for="phone_number">Phone number:</label>
+                                <input type="text" class="form-control" id="phone_number" name="phone_number" value="">
+                            </div>
+
+                            <!-- File upload input -->
+                            <div id="file-input" class="form-group" style="display: none;">
+                                <label for="file_upload">File upload:</label>
+                                <input type="file" class="form-control" id="file_upload" name="file_upload" value="">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+    // Function to toggle input visibility
+    function toggleInput(method) {
+        const manualInput = document.getElementById('manual-input');
+        const fileInput = document.getElementById('file-input');
+
+        if (method === 'manual') {
+            manualInput.style.display = 'block';
+            fileInput.style.display = 'none';
+        } else {
+            manualInput.style.display = 'none';
+            fileInput.style.display = 'block';
+        }
+    }
+</script>
+{% endblock js %}

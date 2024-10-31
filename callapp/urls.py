@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import call_initate,voice
+from .views import call_initiate,start_twilio_stream
 app_name = 'callapp'
 urlpatterns = [
-    path('call/<str:agent_id>/', call_initate, name='call'),
-    path('voice/<str:agent_id>/', voice, name='voice')
+    path('<str:agent_id>/', call_initiate, name='call'),
+    path('start_twilio_stream/<str:agent_id>/', start_twilio_stream, name='start_twilio_stream')
 ]

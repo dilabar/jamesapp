@@ -29,6 +29,7 @@ class Agent(models.Model):
 class PhoneCall(models.Model):
     phone_number = models.CharField(max_length=20)
     call_status = models.CharField(max_length=20)
+    twilio_call_id = models.CharField(max_length=100,null=True)
     feedback = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
