@@ -77,7 +77,6 @@ def call_initiate(request, agent_id):
                                 to=phone_call.phone_number,
                                 from_=twilio.twilio_phone
                             )
-                            print("h")
                             phone_call.call_status = 'initiated'
                             phone_call.twilio_call_id = call.sid
                             phone_call.save()
