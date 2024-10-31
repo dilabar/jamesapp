@@ -1,0 +1,76 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">  <!-- Ensure you include Bootstrap CSS -->
+{% endblock header %}
+
+{% block css %}
+<style>
+   
+    .info-section {
+        background-color: #f8f9fa; /* Light background for better visibility */
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+       <div class="row">
+            <!-- Form Column -->
+            <div class="col-sm-12 col-lg-6">
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">{{ agent.name|default:"Onboarding Existing Agent" }}</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="{% url 'agent:create_agent' %}" method='POST'>
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="account_sid">Agent ID:</label>
+                                <input type="text" class="form-control" id="agent_id" name="agent_id" 
+                                       value="{{ form.instance.decrypted_agent_id|default:'' }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="api_key">Name:</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ form.instance.name|default:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="api_key">Descriptions:</label>
+                                <input type="text" class="form-control" id="description" name="description" 
+                                       value="{{ form.instance.description|default:'' }}">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                {% if agent %}Update Agent{% else %}Add Agent{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+         
+       </div>
+    </div>
+</div>
+
+{% endblock body %}
+{% block js %}
+
+{% endblock js %}

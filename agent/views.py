@@ -1,13 +1,16 @@
 import requests
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from django.contrib.auth.models import User
 
 from django.contrib.auth import login as auth_login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 
-from agent.models import Agent
+from agent.forms import ServiceDetailForm,AgentForm
+from agent.models import Agent, ServiceDetail
+from jamesapp.utils import decrypt
 
 
 def call_play_ai_api(request, agent_id):
@@ -71,7 +74,7 @@ def signup(request):
                 user.save()
                 auth_login(request, user)  # Automatically log in the user after signup
                 messages.success(request, "Registration successful! Welcome!")
-                return redirect('login')  # Redirect to a home or success page after signup
+                return redirect('agent:login')  # Redirect to a home or success page after signup
             except Exception as e:
                 messages.error(request, f"Error occurred: {e}")
 
@@ -86,7 +89,7 @@ def login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             auth_login(request, user)
-            return redirect('dashboards')  # Redirect to the home page or dashboard after login
+            return redirect('agent:dashboards')  # Redirect to the home page or dashboard after login
         else:
             messages.error(request, "Invalid username or password.")
     
@@ -96,7 +99,7 @@ def login(request):
 
 def logout(request):
     logout(request)  
-    return redirect('login') 
+    return redirect('agent:login') 
 
 
 
@@ -104,3 +107,85 @@ def logout(request):
 def reset(request):
     
     return render(request, 'crm/resetpassword.html')
+
+def service_detail_view(request):
+    # Get the user's existing service details for Twilio and Play.ai
+    if not request.user.is_authenticated:
+        return redirect('agent:login') 
+    user = request.user
+    play_ai_service = ServiceDetail.objects.filter(user=user, service_name='play_ai').first()
+    if request.method == 'POST':
+        # Create separate forms for each service
+        play_ai_form = ServiceDetailForm(request.POST, instance=play_ai_service)
+
+        if play_ai_form.is_valid():
+            play_ai_form.save(user=user)
+            play_ai_form.save()
+            messages.success(request, 'Service details saved successfully!')
+            return redirect('agent:play_ai_service')  # Redirect to a success page or dashboard
+        else:
+            messages.error(request, 'There were errors in the form. Please correct them.')
+
+    else:
+        # Initialize forms for existing services
+        play_ai_form = ServiceDetailForm(instance=play_ai_service)
+
+    return render(request, 'service/play-ai-create-form.html', {
+        'play_ai_form': play_ai_form,
+    })
+
+def twilio_service_detail_view(request):
+    # Get the user's existing service details for Twilio and Play.ai
+    if not request.user.is_authenticated:
+        return redirect('agent:login') 
+    user = request.user
+    twilio = ServiceDetail.objects.filter(user=user, service_name='twilio').first()
+    if request.method == 'POST':
+        # Create separate forms for each service
+        twilio_form = ServiceDetailForm(request.POST, instance=twilio)
+
+        if twilio_form.is_valid():
+            twilio_form.save(user=user)
+            twilio_form.save()
+            messages.success(request, 'Service details saved successfully!')
+            return redirect('agent:twilio_service')  # Redirect to a success page or dashboard
+        else:
+            messages.error(request, 'There were errors in the form. Please correct them.')
+
+    else:
+        # Initialize forms for existing services
+        twilio_form = ServiceDetailForm(instance=twilio)
+
+    return render(request, 'service/twilio-create-form.html', {
+        'twilio_form': twilio_form,
+    })
+
+@login_required
+def create_or_update_agent(request, agent_id=None):
+    # If agent_id is provided, try to fetch the agent for editing
+    if agent_id:
+        agent = get_object_or_404(Agent, agent_id=agent_id, user=request.user)
+    else:
+        agent = None  # No existing agent, creating a new one
+
+    if request.method == 'POST':
+        form = AgentForm(request.POST, instance=agent)
+        if form.is_valid():
+            # Save the agent, associating it with the current user
+            new_agent = form.save(commit=False)
+            new_agent.user = request.user
+            new_agent.save()
+            
+            messages.success(request, f"Agent {'updated' if agent else 'created'} successfully!")
+            return redirect('agent:agent_list')  # Redirect to a list view or detail page as needed
+    else:
+        form = AgentForm(instance=agent)
+    
+    return render(request, 'agent/create_or_update_agent.html', {'form': form, 'agent': agent})
+def delete_agent(request, agent_id):
+    dec_agent_id=decrypt(agent_id)
+    agent = get_object_or_404(Agent, agent_id=dec_agent_id)
+    if request.method == "POST":
+        agent.delete()
+        messages.success(request, "Agent deleted successfully.")
+    return redirect('agent:agent_list')

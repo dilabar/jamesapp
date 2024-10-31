@@ -1,134 +1,78 @@
-<!-- templates/agent_list.html -->
-
-{% extends 'base.html' %}
+{% extends 'cbase.html' %}
 {% load static %}
 
 {% block header %}
-
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
 {% endblock header %}
 
 {% block css %}
-    
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .no-agents {
+        font-style: italic;
+        color: #6c757d;
+    }
+</style>
 {% endblock css %}
-    
-
 
 {% block body %}
-
-
-{% comment %} <h1>Agent List</h1>
-
+<div class="content-page rtl-page">
     <div class="container">
-        {% for agent in agents %}
-        <div class="card">
-            <h3>{{ agent.name }}</h3>
-            <p><strong>Agent ID:</strong> {{ agent.agent_id }}</p>
-            <p><strong>Description:</strong> {{ agent.description }}</p>
-            <p><strong>Created At:</strong> {{ agent.created_at }}</p>
-            <p><strong>Updated At:</strong> {{ agent.updated_at }}</p>
-            <a href="{% url 'get_agent' agent.agent_id %}">View Details</a>  <!-- Link to agent details -->
-        </div>
-        {% empty %}
-        <div class="no-agents">No agents found.</div>
-        {% endfor %}
-    </div> {% endcomment %}
-
-<!-- Banner Here -->
-<section class="banner__section banner__section__four  bannerbg">
-    <!--Mask-->
-    <div class="banner__bgmask">
-       <img src="{% static 'img/elements/box-element.png' %}' %}" alt="mask">
-    </div>
-    <!--Mask-->
-    <!--Container-->
-    
-    <!--elements--></section>
- <!-- Banner End -->
- <section class="include__benefits bgsection pt-120 pb-120">
-<div class="container" style="
-    margin-top: 150px;
-    /* margin: 150px; */
-    margin-bottom: 150px;">
-        <!--Header section-->
-        <div class="section__header section__center pb__60 wow fadeInUp" data-wow-duration="2s">
-            <h2>
-                {{ agents|length }} Agents Available
-            </h2>
-            <p>
-                Play.ai connects you with a wide range of agents, offering expert services in various fields. Below you can find the details for all agents currently available.
-            </p>
-        </div>
-        
-        <!--Header section-->
-        <!--include benefits-->
-
-        <div class="container">
-            <div class="row justify-content-center align-items-center">
-                <div class="include__boxes include__grid__boxes">
-                    <div class="row g-4">
-                        {% for agent in agents %}
-                        <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                            <div class="inclue__box">
-                                <div class="icnos">
-                                    <img src="{% static 'img/feature/robotic.svg' %}" alt="icon"> <!-- Adjust based on your dynamic content -->
-                                </div>
-                                <div class="content">
-                                    <h4>
-                                        <a href="{% url 'get_agent' agent.agent_id %}">{{ agent.name }}</a>
-                                    </h4>
-                                    <p>{{ agent.description }}</p>
-                                    <a href="{% url 'get_agent' agent.agent_id %}" class="benefits__btn" style="margin-top: 30px; border-radius: 30px; background-color: black; color: white; padding: 10px 20px; text-align: center; display: inline-block; text-decoration: none;">
-                                        <span>Discover More</span>
-                                        <span class="icon">
-                                            <i class="material-symbols-outlined"></i>
-                                        </span>
-                                    </a>
-                                    
-                                </div>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6">
-                            <div class="inclue__box">
-                                <p>No agents found.</p>
-                            </div>
-                        </div>
-                        {% endfor %}
+        <div class="row">
+            <div class="col-sm-12 col-lg-10 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                    <h2 class="mt-4 mb-3">Agent List</h2>
+                        
                     </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Agent ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agents %}
+                                <tr>
+                                    <td>{{ agent.id }}</td>
+                                    <td>{{ agent.decrypted_agent_id }}</td>
+                                    <td>{{ agent.name }}</td>
+                                    <td>{{ agent.description|default:"No description" }}</td>
+                                    <td>{{ agent.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'agent:update_agent' agent.agent_id %}" class="btn btn-primary btn-sm">Edit</a>
+                                        <!-- Add other actions as needed -->
+                                        <form action="{% url 'agent:delete_agent' agent.agent_id %}" method="post" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this agent?');">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center no-agents">No agents found.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+              </div>
+               
+            </div>
             </div>
         </div>
-        
-        
-        <!--include benefits-->
+    </div>
 </div>
-<div class="bene__element1">
-    <img src="{% static 'img/banner/devided-element2.png' %}" alt="img">
- </div>
- <div class="bene__lockyello">
-    <img src="{% static 'img/banner/devided-lockyello.png' %}" alt="img">
- </div>
- <div class="bene__blump">
-    <img src="{% static 'img/banner/round-devided.png' %}" alt="img">
- </div>
- <div class="bene__blump2">
-    <img src="{% static 'img/banner/round-devided.png' %}" alt="img">
- </div>
-<!--element-->
-</section>   
-    
-
-    {% endblock body %}
-    
-
-
-    
-
-    
-
-
-
-    
-{% block js %}
-    
-{% endblock js %}
+{% endblock body %}

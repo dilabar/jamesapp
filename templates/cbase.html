@@ -67,36 +67,83 @@
               <nav class="iq-sidebar-menu">
                   <ul id="iq-sidebar-toggle" class="iq-menu">
                        <li class=" ">
-                          <a href="#Dashboards" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                          <a href="#dashboards" class="collapsed" data-toggle="collapse" aria-expanded="false">
                               <i class="las la-home"></i><span>Dashboards</span>
                               <i class="las la-angle-right iq-arrow-right arrow-active"></i>
                               <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
                           </a>
-                          <ul id="Dashboards" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                          <ul id="dashboards" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                                   <li class="active">
-                                          <a href="index.html">
-                                              <i class="lab la-blogger-b"></i><span>Dashboard 1</span>
+                                          <a href="#">
+                                              <i class="lab la-blogger-b"></i><span>Dashboard</span>
                                           </a>
                                   </li>
-                                  <li class=" ">
-                                          <a href="dashboard-2.html">
-                                              <i class="las la-share-alt"></i><span>Dashboard 2</span>
-                                          </a>
-                                  </li>
-                                  <li class=" ">
-                                          <a href="dashboard-3.html">
-                                              <i class="las la-icons"></i><span>Dashboard 3</span>
-                                          </a>
-                                  </li>
+                              
                           </ul>
                        </li>
-                      
+                       <li class=" ">
+                        <a href="#agent" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <i class="las la-cog"></i><span>Agent</span>
+                            <i class="las la-angle-right iq-arrow-right arrow-active"></i>
+                            <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
+                        </a>
+                        <ul id="agent" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                <li class="">
+                                        <a href="{% url 'agent:create_agent' %}">
+                                            <i class="las la-tools"></i><span>Agent onboarding</span>
+                                        </a>
+                                </li>
+                                <li class="">
+                                    <a href="{% url 'agent:agent_list' %}">
+                                        <i class="las la-tools"></i><span>List of agent</span>
+                                    </a>
+                            </li>
+                            
+                        </ul>
+                       </li>
+                       <li class=" ">
+                        <a href="#conversation" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <i class="las la-cog"></i><span>Conversation</span>
+                            <i class="las la-angle-right iq-arrow-right arrow-active"></i>
+                            <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
+                        </a>
+                        <ul id="conversation" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                              
+                                <li class="">
+                                    <a href="{% url 'agent:agent_list' %}">
+                                        <i class="las la-tools"></i><span>Log</span>
+                                    </a>
+                            </li>
+                            
+                        </ul>
+                       </li>
+                       <li class=" ">
+                        <a href="#settings" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <i class="las la-cog"></i><span>Settings</span>
+                            <i class="las la-angle-right iq-arrow-right arrow-active"></i>
+                            <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
+                        </a>
+                        <ul id="settings" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                                <li class="">
+                                        <a href="{% url 'agent:play_ai_service' %}">
+                                            <i class="las la-tools"></i><span>Play.AI</span>
+                                        </a>
+                                </li>
+                                <li class="">
+                                    <a href="{% url 'agent:twilio_service' %}">
+                                        <i class="las la-tools"></i><span>Twilio</span>
+                                    </a>
+                            </li>
+                            
+                        </ul>
+                     </li>
+                    
                        
                        
                        
                        
                      
-                       
+<!--                        
                        <li class=" ">
                           <a href="#auth" class="collapsed" data-toggle="collapse" aria-expanded="false">
                               <i class="las la-torah iq-arrow-left"></i><span>Authentication</span>
@@ -130,7 +177,7 @@
                                           </a>
                                   </li>
                           </ul>
-                       </li>
+                       </li> -->
                        
                   </ul>
               </nav>
@@ -348,7 +395,7 @@
                                                         <h3>{{ user.username }}</h3>  <!-- Display the logged-in user's username -->
                                                         <div class="d-flex flex-wrap">
                                                             <p class="mb-1">{{ user.email }}</p> <!-- Optional: Show full name if set -->
-                                                            <a href="{% url 'logout' %}" class="ml-3 rtl-mr-3 rtl-ml-0">Sign Out</a>
+                                                            <a href="{% url 'agent:logout' %}" class="ml-3 rtl-mr-3 rtl-ml-0">Sign Out</a>
                                                         </div>
                                                     </div>
                                                     

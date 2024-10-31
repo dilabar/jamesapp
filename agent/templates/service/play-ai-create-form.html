@@ -1,0 +1,98 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">  <!-- Ensure you include Bootstrap CSS -->
+{% endblock header %}
+
+{% block css %}
+<style>
+    .step {
+        display: none;
+    }
+    .step.active {
+        display: block;
+    }
+    .info-section {
+        background-color: #f8f9fa; /* Light background for better visibility */
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+       <div class="row">
+            <!-- Form Column -->
+            <div class="col-sm-12 col-lg-6">
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">Play.AI Api Details</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="" method='POST'>
+                            {% csrf_token %}
+                            <input type="hidden" name="service_name" value="play_ai">
+
+                            <div class="form-group">
+                                <label for="account_sid">User ID:</label>
+                                <input type="text" class="form-control" id="account_sid" name="account_sid" 
+                                       value="{{ play_ai_form.instance.decrypted_account_sid|default:'' }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="api_key">Secret Key:</label>
+                                <input type="password" class="form-control" id="api_key" name="api_key" 
+                                       value="{{ play_ai_form.instance.decrypted_api_key|default:'' }}">
+                                <input type="checkbox" id="show_key" onclick="togglePassword()"> Show Secret Key
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Column -->
+            <div class="col-sm-12 col-lg-6">
+                <div class="info-section">
+                    <h4>How to Collect API Details</h4>
+                    <p>Follow the steps below to obtain your API credentials:</p>
+                    <ol>
+                        <li><strong>Log in</strong> to your Play.AI account.</li>
+                        <li>Navigate to the <strong>Developers</strong> page in your dashboard.</li>
+                        <li>Locate the <strong>API Access</strong> sections.</li>
+                        <li>Copy the <strong>User ID</strong> and <strong>Secret Key</strong> to the input fields.</li>
+                        <li>If required, generate a new <strong>Secret Key</strong> and keep it secure.</li>
+                        <li>Use these credentials to authenticate your requests.</li>
+                    </ol>
+                    <p>If you have any issues, please refer to the <a href="https://support.play.ai" target="_blank">Play.AI support</a> for assistance.</p>
+                </div>
+            </div>
+       </div>
+    </div>
+</div>
+
+{% endblock body %}
+{% block js %}
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('api_key');
+        const showKeyCheckbox = document.getElementById('show_key');
+        // Toggle the input type between "password" and "text"
+        passwordField.type = showKeyCheckbox.checked ? 'text' : 'password';
+    }
+</script>
+{% endblock js %}
