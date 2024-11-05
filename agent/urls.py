@@ -8,5 +8,7 @@ urlpatterns = [
     path('login/', login, name='login'),
     path('signup/', signup, name='signup'),
     path('reset-password/', reset, name='reset'),
-    path('logout/', logout, name='logout'), 
+    path('logout/', byby, name='logout'), 
+    path('conversation-list/', conversation, name='conversation'), 
+    path('chat-data/', chatdata, name='chatdata'), 
 ]

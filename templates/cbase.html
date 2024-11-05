@@ -7,7 +7,7 @@
     {% load static %}
     <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <title>Insta Dash | Responsive Bootstrap 4 Admin Dashboard Template</title>
+      <title>Secrct Voice Agent</title>
       
       
 
@@ -28,6 +28,8 @@
       <link rel="stylesheet" href="{% static 'crm/vendor/mapbox/mapbox-gl.css' %}">  
 
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+      <link rel="stylesheet" href="https://unpkg.com/remixicon@2.5.0/fonts/remixicon.css">
+
     
     
       {% block css %}
@@ -74,22 +76,16 @@
                           </a>
                           <ul id="Dashboards" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                                   <li class="active">
-                                          <a href="index.html">
-                                              <i class="lab la-blogger-b"></i><span>Dashboard 1</span>
+                                          <a href="{% url 'conversation' %}">
+                                              <i class="lab la-blogger-b"></i><span>Conversation List</span>
                                           </a>
                                   </li>
-                                  <li class=" ">
-                                          <a href="dashboard-2.html">
-                                              <i class="las la-share-alt"></i><span>Dashboard 2</span>
-                                          </a>
-                                  </li>
-                                  <li class=" ">
-                                          <a href="dashboard-3.html">
-                                              <i class="las la-icons"></i><span>Dashboard 3</span>
-                                          </a>
-                                  </li>
+                                  
                           </ul>
                        </li>
+
+
+                       
                       
                        
                        
@@ -105,17 +101,17 @@
                           </a>
                           <ul id="auth" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                                   <li class=" ">
-                                          <a href="auth-sign-in.html">
+                                          <a href="{% url 'login' %}">
                                               <i class="las la-sign-in-alt"></i><span>Login</span>
                                           </a>
                                   </li>
                                   <li class=" ">
-                                          <a href="auth-sign-up.html">
+                                          <a href="{% url 'signup' %}">
                                               <i class="las la-registered"></i><span>Register</span>
                                           </a>
                                   </li>
                                   <li class=" ">
-                                          <a href="auth-recoverpw.html">
+                                          <a href="{% url 'reset' %}">
                                               <i class="las la-unlock-alt"></i><span>Recover Password</span>
                                           </a>
                                   </li>
@@ -432,7 +428,7 @@
             <div class="col-lg-6 text-right ">
                 Copyright  <span id="copyright"> 
 <script>document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))</script>
-</span> <a href="#">Insta Dash</a> All Rights Reserved.
+</span> <a href="#">Secrct Voice Agent</a> All Rights Reserved.
             </div>
         </div>
     </div>

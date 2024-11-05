@@ -1,0 +1,74 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="content-page rtl-page">
+<div class="container-fluid">
+    <div class="row">
+       <div class="col-sm-12">
+          <div class="card">
+             <div class="card-header d-flex justify-content-between">
+                <div class="header-title">
+                   <h4 class="card-title">Conversation List</h4>
+                </div>
+             </div>
+             <div class="card-body">
+                
+                <div class="table-responsive">
+                   <table id="datatable" class="table data-table table-striped table-bordered">
+                       <thead>
+                           <tr>
+                               <th>ID</th>
+                               <th>Source</th>
+                               <th>Caller Email</th>
+                               <th>Start Time</th>
+                               <th>End Time</th>
+                               <th>Duration (seconds)</th>
+                               <th>Transcript Link</th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           <tr>
+                               <td>ucflmJ2s5X3xB7ukqyHR</td>
+                               <td>web</td>
+                               <td>james@ifscapital.com</td>
+                               <td>2024-10-20T20:24:01.545Z</td>
+                               <td>2024-10-20T20:25:33.545Z</td>
+                               <td>92</td>
+                               <td>
+                                   <a href="https://api.play.ai/api/v1/agents/YOUR-AI-CLONE-0k26dDh7LesuHadHoV8YH/conversations/ucflmJ2s5X3xB7ukqyHR/transcript" target="_blank">
+                                       View Transcript
+                                   </a>
+                               </td>
+                           </tr>
+                       </tbody>
+                   </table>
+                   
+                </div>
+             </div>
+          </div>
+       </div>
+    </div>
+</div>
+
+</div>
+    
+{% endblock body %}
+    
+
+
+{% block js %}
+    
+{% endblock js %}
+    

@@ -94,7 +94,7 @@ def login(request):
 
 
 
-def logout(request):
+def byby(request):
     logout(request)  
     return redirect('login') 
 
@@ -104,3 +104,15 @@ def logout(request):
 def reset(request):
     
     return render(request, 'crm/resetpassword.html')
+
+
+
+def conversation(request):
+    
+    return render(request, 'crm/conversationlist.html')
+
+
+
+def chatdata(request):
+    
+    return render(request, 'crm/chatdata.html')
