@@ -29,7 +29,9 @@ SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1","51b4-2401-4900-314e-59c8-9f6-18a-d323-85c5.ngrok-free.app"]
+CSRF_TRUSTED_ORIGINS=['https://*.ngrok-free.app','https://secretvoiceagent.net','http://secretvoiceagent.net']
+# Application definition
 
 
 # Application definition
@@ -121,11 +123,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_ROOT = BASE_DIR / "assets"
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR , "static",
+    BASE_DIR / "static",  # Only points to actual static assets
 ]
+STATIC_ROOT = BASE_DIR / "staticfiles"  # Destination for collected static files
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -134,3 +136,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'auth.User'
 ACOUNT_SID=os.getenv('ACOUNT_SID')
 AUTH_TOKEN=os.getenv('AUTH_TOKEN')
+LOGIN_URL = '/login/'

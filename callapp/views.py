@@ -9,9 +9,7 @@ from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
 from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect
 from django.conf import settings
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from websocket import create_connection,WebSocketConnectionClosedException
+
 from django.contrib import messages
 import logging
 logger = logging.getLogger(__name__)
@@ -23,7 +21,6 @@ logger = logging.getLogger(__name__)
 def call_initiate(request, agent_id):
     twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
     client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
-    
     # Handle form submission
     if request.method == "POST":
         phone_number = request.POST.get('phone_number')
@@ -39,7 +36,7 @@ def call_initiate(request, agent_id):
             # Place the call
             try:
                 call = client.calls.create(
-                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{agent_id}/',
+                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone
                 )
@@ -73,7 +70,7 @@ def call_initiate(request, agent_id):
                         )
                         try:
                             call = client.calls.create(
-                                url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{agent_id}/',
+                                url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
                                 to=phone_call.phone_number,
                                 from_=twilio.twilio_phone
                             )
@@ -94,11 +91,11 @@ def call_initiate(request, agent_id):
 
    
 @csrf_exempt
-def start_twilio_stream(request, agent_id):
+def start_twilio_stream(request, user_id,agent_id):
     response = VoiceResponse()
     
     # Define your WebSocket URL to receive the Twilio stream data
-    stream_url = f"wss://{request.get_host()}/ws/play_ai/{agent_id}/"
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/"
 
     try:
         connect = Connect()

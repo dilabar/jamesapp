@@ -8,8 +8,9 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 # key = Fernet.generate_key()
 
 # Retrieve the key from an environment variable or settings
-ENCRYPTION_KEY = settings.SECRET_KEY[:32]  # For example, using the first 32 bytes of Django's SECRET_KEY
-cipher = Fernet(urlsafe_b64encode(ENCRYPTION_KEY.encode()))
+ENCRYPTION_KEY = "2R2b2TIyweYG3T9KG7K2sXlgcNXCAEUsU0m0-Zp8a50="  # For example, using the first 32 bytes of Django's SECRET_KEY
+# cipher = Fernet(urlsafe_b64encode(ENCRYPTION_KEY.encode()))
+cipher = Fernet(ENCRYPTION_KEY)
 
 def encrypt(value):
     if value:

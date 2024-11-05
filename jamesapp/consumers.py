@@ -18,11 +18,13 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         self.play_ai_ws = None  # Initialize Play.ai WebSocket connection
         self.play_ai_connected = False  # Flag to track Play.ai connection status
         self.twilio_connected = False  # Flag to track twilio connection status
-    @login_required
     def connect(self):
+        logger.info("Connecting.....")
+
         self.accept()
-        user = self.scope["user"]  # Retrieve the logged-in user
-        play_ai_service = ServiceDetail.objects.filter(user=user, service_name='play_ai').first()
+        user_id = self.scope["url_route"]["kwargs"]["user_id"]
+        # user = self.scope["user"]  # Retrieve the logged-in user
+        play_ai_service = ServiceDetail.objects.filter(user_id=user_id,service_name='play_ai').first()
         if play_ai_service:
         # Decrypt the credentials
 
