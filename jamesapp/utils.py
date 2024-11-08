@@ -82,3 +82,27 @@ def get_transcript_data(agent_id,cid,PLAY_AI_API_KEY,PLAY_AI_USER_ID):
         return {"error": f"Request error occurred: {req_err}"}
     except Exception as e:
         return {"error": f"An error occurred: {e}"}
+    
+def fetch_data_from_api(url, headers, params=None):
+    """
+    Helper function to make GET requests to an API endpoint.
+
+    Parameters:
+    - url (str): The API URL endpoint.
+    - headers (dict): Headers to include in the request.
+    - params (dict, optional): URL parameters for the request.
+
+    Returns:
+    - dict: The JSON response from the API or an error message.
+    """
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+
+    except requests.exceptions.HTTPError as http_err:
+        return {"error": f"HTTP error occurred: {http_err}"}
+    except requests.exceptions.RequestException as req_err:
+        return {"error": f"Request error occurred: {req_err}"}
+    except Exception as e:
+        return {"error": f"An error occurred: {e}"}

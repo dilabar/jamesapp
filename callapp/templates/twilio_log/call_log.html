@@ -1,0 +1,77 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
+{% endblock header %}
+
+{% block css %}
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .no-agents {
+        font-style: italic;
+        color: #6c757d;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-10 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mt-4 mb-3">Call Log List</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Caller Name</th>
+                                        <th>Direction</th>
+                                        <th>Duration</th>
+                                        <th>Start At</th>
+                                        <th>End At</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for call in calls_list %}
+                                        <tr>
+                                            <td>{{ call.account_sid }}</td>
+                                            <td>{{ call.caller_name }}</td>
+                                            <td>{{ call.direction }}</td>
+                                            <td>{{ call.duration|default:"No duration" }}</td>
+                                            <td>{{ call.start_time|date:"Y-m-d H:i" }}</td>
+                                            <td>{{ call.end_time|date:"Y-m-d H:i" }}</td>
+                                            <td>{{ call.status }}</td>
+                                            <td>
+                                                <a href="https://api.twilio.com{{ call.subresource_uris.transcriptions }}" class="btn btn-primary btn-sm">Transcriptions</a>
+                                                <a href="{% url 'callapp:get_twilio_call_recordings' call.sid %}" class="btn btn-secondary btn-sm">Recordings</a>
+                                                <a href="https://api.twilio.com{{ call.subresource_uris.streams }}" class="btn btn-info btn-sm">Streams</a>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center no-agents">No Log found.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

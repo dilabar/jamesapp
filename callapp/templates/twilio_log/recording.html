@@ -1,0 +1,22 @@
+
+    <table>
+        <thead>
+            <tr>
+                <th>Recording SID</th>
+                <th>Date Created</th>
+                <th>Duration (s)</th>
+                <th>Play</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for recording in recordings %}
+                <tr>
+                    <td>{{ recording.sid }}</td>
+                    <td>{{ recording.date_created }}</td>
+                    <td>{{ recording.duration }}</td>
+                    <td><a href="{{ recording.uri }}" target="_blank">Play Recording</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+

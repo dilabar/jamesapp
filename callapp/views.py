@@ -1,8 +1,10 @@
+from base64 import urlsafe_b64encode
 import pandas as pd
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from agent.models import PhoneCall, ServiceDetail
+from jamesapp.utils import fetch_data_from_api
 from twilio.rest import Client
 import json
 from django.core.files.storage import default_storage
@@ -110,3 +112,42 @@ def start_twilio_stream(request, user_id,agent_id):
         response.say("Error starting the audio stream. Please try again later.")
     
     return HttpResponse(str(response), content_type="text/xml")
+@login_required
+def getcall_log(request):
+    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+    calls = client.calls.list(limit=20)
+
+    for record in calls:
+        print(record.sid)
+
+    context={
+        'calls_list':calls
+    }
+    return render(request, 'twilio_log/call_log.html',context)
+@login_required
+def get_twilio_call_recordings(request,call_sid):
+    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+
+    try:
+        # Fetch recordings for the specified call SID
+        recordings = client.recordings.list(call_sid=call_sid)
+
+        # Log each recording for debugging
+        for recording in recordings:
+            print(recording.sid, recording.date_created, recording.duration)
+
+        # Pass recordings to the template
+        context = {
+            'recordings': recordings
+        }
+
+    except Exception as e:
+        # Handle exceptions (e.g., Twilio errors)
+        print(f"Error fetching recordings: {e}")
+        context = {
+            'recordings': [],
+            'error': f"Could not retrieve recordings: {e}"
+        }
+    return render(request, 'twilio_log/recording.html',context)
