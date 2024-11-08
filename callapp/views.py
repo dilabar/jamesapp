@@ -9,7 +9,7 @@ from twilio.rest import Client
 import json
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
-from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect
+from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect,Dial
 from django.conf import settings
 
 from django.contrib import messages
@@ -42,6 +42,7 @@ def call_initiate(request, agent_id):
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone
                 )
+                
                 phone_call.call_status = 'initiated'
                 phone_call.twilio_call_id = call.sid
                 phone_call.save()
@@ -94,10 +95,16 @@ def call_initiate(request, agent_id):
    
 @csrf_exempt
 def start_twilio_stream(request, user_id,agent_id):
+    call_sid = request.GET.get('CallSid')
+
+    if call_sid:
+        print(f"Received CallSid: {call_sid}")
+    else:
+        print("No CallSid found in the request")
     response = VoiceResponse()
     
     # Define your WebSocket URL to receive the Twilio stream data
-    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/"
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
 
     try:
         connect = Connect()
@@ -151,3 +158,19 @@ def get_twilio_call_recordings(request,call_sid):
             'error': f"Could not retrieve recordings: {e}"
         }
     return render(request, 'twilio_log/recording.html',context)
+@csrf_exempt
+def transfer_call(request, phone_number):
+    """
+    This view is used to transfer the call to a real agent using Twilio's <Dial> verb.
+    """
+    print("The Action is working")
+    response = VoiceResponse()
+    
+    # Inform the caller about the transfer
+    response.say("Please hold while we transfer you to a real agent.")
+
+    # Dial the specified phone number (the real agent)
+    response.dial(phone_number)
+
+    return HttpResponse(str(response), content_type="text/xml")
+
