@@ -97,7 +97,7 @@ def login(request):
 
 
 
-def logout(request):
+def logout_user(request):
     logout(request)  
     return redirect('agent:login') 
 
