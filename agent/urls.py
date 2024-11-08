@@ -13,7 +13,7 @@ urlpatterns = [
     path('login/', login, name='login'),
     path('signup/', signup, name='signup'),
     path('reset-password/', reset, name='reset'),
-    path('logout/', logout, name='logout'), 
+    path('logout/', logout_user, name='logout'), 
     path('play-ai-service/', service_detail_view, name='play_ai_service'),
     path('twilio-service/', twilio_service_detail_view, name='twilio_service'),
 ]
