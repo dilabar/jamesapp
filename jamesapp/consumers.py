@@ -1,6 +1,6 @@
 import json
 import base64
-from agent.models import ServiceDetail
+from agent.models import PhoneCall, ServiceDetail
 from django.contrib.auth.decorators import login_required
 from channels.generic.websocket import WebsocketConsumer
 from twilio.rest import Client
@@ -20,14 +20,16 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         self.play_ai_connected = False  # Flag to track Play.ai connection status
         self.twilio_connected = False  # Flag to track twilio connection status
         self.call_sid=None
+        self.user_id=None
+        self.conversationId=None
     def connect(self):
         logger.info("Connecting.....")
 
         self.accept()
-        user_id = self.scope["url_route"]["kwargs"]["user_id"]
+        self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
         self.call_sid = self.scope["url_route"]["kwargs"]["call_sid"]
         # user = self.scope["user"]  # Retrieve the logged-in user
-        play_ai_service = ServiceDetail.objects.filter(user_id=user_id,service_name='play_ai').first()
+        play_ai_service = ServiceDetail.objects.filter(user_id=self.user_id,service_name='play_ai').first()
         if play_ai_service:
         # Decrypt the credentials
 
@@ -45,6 +47,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     "outputFormat": "mulaw",
                     "outputSampleRate": 8000,
                     "apiKey": play_ai_service.decrypted_api_key,
+                    "callSid": self.call_sid,
                 }))
                 
                 logger.info("Connected to Play.ai WebSocket")
@@ -98,7 +101,16 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                 play_ai_data = json.loads(play_ai_response)
                 print(f"play_ai_data::{play_ai_data}")
                 # Handle Play.ai's response
-                if play_ai_data.get("type") == "audioStream":
+                if play_ai_data.get("type")== "init":
+                    self.conversationId=play_ai_data.get("conversationId")
+                    # Update PhoneCall model with conversationId
+                    PhoneCall.objects.filter(twilio_call_id=self.call_sid).update(
+                        play_ai_conv_id=self.conversationId,
+                        agent_owner_id=play_ai_data.get("agentOwnerId"),
+                        recording_presigned_url=play_ai_data.get("recordingPresignedUrl")
+                        )
+                    
+                elif play_ai_data.get("type") == "audioStream":
                     # Extract the audio data
                     audio_data = play_ai_data.get("data")
                     if audio_data:
@@ -125,7 +137,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     if real_agent_phone_number:
                         # Initiate transfer to the real agent
                         self.initiate_call_transfer(real_agent_phone_number)
-                    else:
+                    # else:
                         logger.error("Real agent phone number not provided in call transfer event")
 
         except WebSocketConnectionClosedException:
@@ -143,7 +155,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                 twilio = ServiceDetail.objects.filter(user_id=self.user_id, service_name='twilio').first()
                 client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
             # Send redirect event to Twilio with the transfer URL
-            transfer_url = f"https://84e8-202-142-78-177.ngrok-free.app/call/transfer_call/{real_agent_phone_number}/"
+            transfer_url = f"https://7f5b-2401-4900-882b-58ef-5c2-aceb-64af-2801.ngrok-free.app/call/transfer_call/{real_agent_phone_number}/"
 
             #transfer_url = f"{settings.SITE_URL}{reverse('transfer_to_real_agent', args=[real_agent_phone_number])}"
             # self.send(text_data=json.dumps({

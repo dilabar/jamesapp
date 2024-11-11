@@ -163,7 +163,7 @@ def transfer_call(request, phone_number):
     """
     This view is used to transfer the call to a real agent using Twilio's <Dial> verb.
     """
-    print("The Action is working")
+    print("The Action is working",request.GET)
     response = VoiceResponse()
     
     # Inform the caller about the transfer
