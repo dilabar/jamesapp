@@ -52,6 +52,11 @@
                                        value="{{ form.instance.name|default:'' }}">
                             </div>
                             <div class="form-group">
+                                <label for="real_agent_no">Real Agent No:</label>
+                                <input type="text" class="form-control" id="real_agent_no" name="real_agent_no" 
+                                       value="{{ form.instance.real_agent_no|default:'' }}">
+                            </div>
+                            <div class="form-group">
                                 <label for="api_key">Descriptions:</label>
                                 <input type="text" class="form-control" id="description" name="description" 
                                        value="{{ form.instance.description|default:'' }}">
