@@ -75,7 +75,7 @@ class ServiceDetailForm(forms.ModelForm):
 class AgentForm(forms.ModelForm):
     class Meta:
         model = Agent
-        fields = ['agent_id', 'name', 'description']
+        fields = ['agent_id', 'name', 'description','real_agent_no']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
@@ -85,9 +85,13 @@ class AgentForm(forms.ModelForm):
         # Adding custom CSS classes for styling if needed
         self.fields['agent_id'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Agent ID'})
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Agent Name'})
+        self.fields['real_agent_no'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Real Agent No'})
         self.fields['description'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Description'})
+        
         if self.instance.pk:
             self.fields['agent_id'].initial = self.instance.decrypted_agent_id
+            self.fields['real_agent_no'].initial = self.instance.decrypted_agent_id
+
 
     def save(self,user=None, commit=True):
         # Override save to encrypt sensitive data before saving
@@ -95,6 +99,7 @@ class AgentForm(forms.ModelForm):
         # Encrypt data before saving to the database
         instance.agent_id = self.cleaned_data.get('agent_id', '')
         instance.name = self.cleaned_data.get('name', '')
+        instance.real_agent_no = self.cleaned_data.get('real_agent_no', '')
         instance.description = self.cleaned_data.get('description', '')
 
         if user:

@@ -8,6 +8,7 @@ class Agent(models.Model):
     id = models.AutoField(primary_key=True)  # Auto-incrementing primary key
     agent_id = models.CharField(max_length=255, unique=True)  # Unique agent ID from Play.ai
     name = models.CharField(max_length=255)
+    real_agent_no = models.CharField(max_length=20,null=True,blank=True)
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)  # Automatically set at creation
     updated_at = models.DateTimeField(auto_now=True)      # Automatically update on save
@@ -36,6 +37,7 @@ class PhoneCall(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
      # Play.ai-specific fields
     agent_owner_id = models.CharField(max_length=100, null=True)  # Added agentOwnerId
+    agent_id = models.CharField(max_length=255, null=True)  # Added agentOwnerId
     recording_presigned_url = models.URLField(max_length=500, null=True)  # Added recordingPresignedUrl
 
 class ServiceDetail(models.Model):
