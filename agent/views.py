@@ -161,10 +161,10 @@ def twilio_service_detail_view(request):
     })
 
 @login_required
-def create_or_update_agent(request, agent_id=None):
+def create_or_update_agent(request, id=None):
     # If agent_id is provided, try to fetch the agent for editing
-    if agent_id:
-        agent = get_object_or_404(Agent, agent_id=agent_id, user=request.user)
+    if id:
+        agent = get_object_or_404(Agent, id=id, user=request.user)
     else:
         agent = None  # No existing agent, creating a new one
 
@@ -183,9 +183,9 @@ def create_or_update_agent(request, agent_id=None):
     
     return render(request, 'agent/create_or_update_agent.html', {'form': form, 'agent': agent})
 @login_required
-def delete_agent(request, agent_id):
-    dec_agent_id=decrypt(agent_id)
-    agent = get_object_or_404(Agent, agent_id=dec_agent_id)
+def delete_agent(request, id):
+    # dec_agent_id=decrypt(agent_id)
+    agent = get_object_or_404(Agent, id=id)
     if request.method == "POST":
         agent.delete()
         messages.success(request, "Agent deleted successfully.")

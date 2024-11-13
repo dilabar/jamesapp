@@ -90,7 +90,7 @@ class AgentForm(forms.ModelForm):
         
         if self.instance.pk:
             self.fields['agent_id'].initial = self.instance.decrypted_agent_id
-            self.fields['real_agent_no'].initial = self.instance.decrypted_agent_id
+            self.fields['real_agent_no'].initial = self.instance.real_agent_no
 
 
     def save(self,user=None, commit=True):
