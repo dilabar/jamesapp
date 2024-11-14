@@ -23,6 +23,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         self.user_id=None
         self.conversationId=None
         self.agent_id=None
+        self.initial_prompt_sent = False
     def connect(self):
         logger.info("Connecting.....")
 
@@ -49,10 +50,12 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     "outputFormat": "mulaw",
                     "outputSampleRate": 8000,
                     "apiKey": play_ai_service.decrypted_api_key,
-                    "callSid": self.call_sid,
+                    "prompt": f"Hidden prompt with Call SID: {self.call_sid},keep it it for feture use when action call"
+                   
                 }))
                 
                 logger.info("Connected to Play.ai WebSocket")
+                self.play_ai_connected = True
                 # Start a thread to listen for Play.ai responses
                 threading.Thread(target=self.handle_play_ai_response, daemon=True).start()
             except Exception as e:
@@ -73,7 +76,8 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
             if event_type == 'connected':
                 self.twilio_connected = True
                 logger.info("Twilio connected")
-                print(twilio_data)
+                # Send initial prompt once both connections are established
+                # self.send_initial_prompt_if_ready()
             
             elif event_type == "media":
                 # Extract audio payload from Twilio stream
@@ -100,9 +104,8 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         try:
             while True:
                 play_ai_response = self.play_ai_ws.recv()
-                print(f"play ai rspo ..............{play_ai_response}")
                 play_ai_data = json.loads(play_ai_response)
-                print(f"play_ai_data::{play_ai_data.get('action')}")
+                print(f".....{play_ai_data.get('type')}......")
                 # Handle Play.ai's response
               
                 if play_ai_data.get("type")== "init":
@@ -118,18 +121,6 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     msg = play_ai_data.get("message")
                     logger.info(f"Transcript message from Play.ai: {msg}")
 
-                    # Check if the message contains the phrases indicating transfer to a representative
-                    transfer_phrases = [
-                        "Just a moment while I transfer your call",
-                        "I'll transfer you to a representative",
-                        "I'll transfer you to a representative right away.",
-                        "I'll transfer your call to a representative. Please hold on for a moment."
-                    ]
-
-                    # Use `in` to check if the message contains any of the phrases
-                    if any(phrase in msg for phrase in transfer_phrases):
-                        logger.info("Play.ai Agent Transcript: Initiating call transfer to a representative")
-                        # self.initiate_call_transfer('919679728063')
                 elif play_ai_data.get("type") == "audioStream":
                     # Extract the audio data
                     audio_data = play_ai_data.get("data")
@@ -151,18 +142,12 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     self.close()  # Close the WebSocket connection
                     break  # Exit the loop after hangup
 
-                # # Detect the call transfer event
-                elif play_ai_data.get("type") == "voiceActivityEnd":
-                    agent = Agent.objects.filter(agent_id=self.agent_id, user_id=self.user_id).first()
-                    
-                    if agent is None:
-                        logger.error(f"Agent with ID {self.agent_id} not found for user {self.user_id}")
-                        return
-                    if agent.real_agent_no:
-                        # Initiate transfer to the real agent
-                        self.initiate_call_transfer(agent.real_agent_no)
-                    # else:
-                        logger.error("Real agent phone number not provided in call transfer event")
+             
+                elif play_ai_data.get("type")=="error":
+                    logger.error(f"error code {play_ai_data.get('code')} ....message {play_ai_data.get('message')}")
+                    self.close()  # Close the WebSocket connection
+                    break  # Exit the loop after hangup
+
 
         except WebSocketConnectionClosedException:
             logger.error("Play.ai WebSocket closed unexpectedly")
@@ -179,7 +164,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                 twilio = ServiceDetail.objects.filter(user_id=self.user_id, service_name='twilio').first()
                 client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
             # Send redirect event to Twilio with the transfer URL
-            transfer_url = f"https://secretvoiceagent.net/call/transfer_call/{real_agent_phone_number}/"
+            transfer_url = f"https://bd73-2405-201-800d-e867-48-c89d-21c6-c2dd.ngrok-free.app/call/transfer_call/{real_agent_phone_number}/"
 
             #transfer_url = f"{settings.SITE_URL}{reverse('transfer_to_real_agent', args=[real_agent_phone_number])}"
             # self.send(text_data=json.dumps({
@@ -216,7 +201,20 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
             logger.info("Sent audio data to Twilio successfully")
         except Exception as e:
             logger.error(f"Error sending audio data to Twilio: {e}")
-
+    def send_initial_prompt_if_ready(self):
+        # Check if both connections are established and the initial prompt has not been sent
+        if self.play_ai_connected and self.twilio_connected and not self.initial_prompt_sent:
+            try:
+                # Send hidden prompt with call_sid
+                initial_prompt = {
+                    "type": "textIn",
+                    "data": f"please keep my call sid for future reference.Hidden prompt with Call SID: {self.call_sid}",
+                }
+                self.play_ai_ws.send(json.dumps(initial_prompt))
+                self.initial_prompt_sent = True
+                logger.info("Initial prompt sent to Play.ai")
+            except Exception as e:
+                logger.error(f"Error sending initial prompt: {e}")
     def disconnect(self, close_code):
         # Clean up the Play.ai WebSocket on disconnect
         if self.play_ai_ws:
