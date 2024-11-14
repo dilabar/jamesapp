@@ -102,16 +102,16 @@
                         </ul>
                        </li>
                        <li class=" ">
-                        <a href="#conversation" class="collapsed" data-toggle="collapse" aria-expanded="false">
-                            <i class="las la-cog"></i><span>Conversation</span>
+                        <a href="#logs" class="collapsed" data-toggle="collapse" aria-expanded="false">
+                            <i class="las la-cog"></i><span>Logs</span>
                             <i class="las la-angle-right iq-arrow-right arrow-active"></i>
                             <i class="las la-angle-down iq-arrow-right arrow-hover"></i>
                         </a>
-                        <ul id="conversation" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
+                        <ul id="logs" class="iq-submenu collapse" data-parent="#iq-sidebar-toggle">
                               
                                 <li class="">
-                                    <a href="{% url 'agent:agent_list' %}">
-                                        <i class="las la-tools"></i><span>Log</span>
+                                    <a href="{% url 'callapp:getcall_log' %}">
+                                        <i class="las la-tools"></i><span>Twilio Log</span>
                                     </a>
                             </li>
                             

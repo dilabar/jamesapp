@@ -1,8 +1,9 @@
 import json
 import base64
-from agent.models import ServiceDetail
+from agent.models import Agent, PhoneCall, ServiceDetail
 from django.contrib.auth.decorators import login_required
 from channels.generic.websocket import WebsocketConsumer
+from twilio.rest import Client
 from jamesapp.utils import decrypt
 from websocket import create_connection, WebSocketConnectionClosedException
 import logging
@@ -18,18 +19,24 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         self.play_ai_ws = None  # Initialize Play.ai WebSocket connection
         self.play_ai_connected = False  # Flag to track Play.ai connection status
         self.twilio_connected = False  # Flag to track twilio connection status
+        self.call_sid=None
+        self.user_id=None
+        self.conversationId=None
+        self.agent_id=None
     def connect(self):
         logger.info("Connecting.....")
 
         self.accept()
-        user_id = self.scope["url_route"]["kwargs"]["user_id"]
+        self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
+        self.call_sid = self.scope["url_route"]["kwargs"]["call_sid"]
+        self.agent_id = self.scope["url_route"]["kwargs"]["agent_id"]
         # user = self.scope["user"]  # Retrieve the logged-in user
-        play_ai_service = ServiceDetail.objects.filter(user_id=user_id,service_name='play_ai').first()
+        play_ai_service = ServiceDetail.objects.filter(user_id=self.user_id,service_name='play_ai').first()
         if play_ai_service:
         # Decrypt the credentials
 
             try:
-                agent_id = decrypt(self.scope["url_route"]["kwargs"]["agent_id"])
+                agent_id = decrypt(self.agent_id)
                 
                 play_ai_url = f"wss://api.play.ai/v1/talk/{agent_id}"
                 self.play_ai_ws = create_connection(play_ai_url)
@@ -42,6 +49,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                     "outputFormat": "mulaw",
                     "outputSampleRate": 8000,
                     "apiKey": play_ai_service.decrypted_api_key,
+                    "callSid": self.call_sid,
                 }))
                 
                 logger.info("Connected to Play.ai WebSocket")
@@ -65,6 +73,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
             if event_type == 'connected':
                 self.twilio_connected = True
                 logger.info("Twilio connected")
+                print(twilio_data)
             
             elif event_type == "media":
                 # Extract audio payload from Twilio stream
@@ -91,10 +100,37 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         try:
             while True:
                 play_ai_response = self.play_ai_ws.recv()
+                print(f"play ai rspo ..............{play_ai_response}")
                 play_ai_data = json.loads(play_ai_response)
-                
+                print(f"play_ai_data::{play_ai_data.get('action')}")
                 # Handle Play.ai's response
-                if play_ai_data.get("type") == "audioStream":
+              
+                if play_ai_data.get("type")== "init":
+                    self.conversationId=play_ai_data.get("conversationId")
+                    # Update PhoneCall model with conversationId
+                    PhoneCall.objects.filter(twilio_call_id=self.call_sid).update(
+                        play_ai_conv_id=self.conversationId,
+                        agent_owner_id=play_ai_data.get("agentOwnerId"),
+                        recording_presigned_url=play_ai_data.get("recordingPresignedUrl"),
+                        agent_id=self.agent_id
+                        )
+                elif play_ai_data.get("type")=="onAgentTranscript":
+                    msg = play_ai_data.get("message")
+                    logger.info(f"Transcript message from Play.ai: {msg}")
+
+                    # Check if the message contains the phrases indicating transfer to a representative
+                    transfer_phrases = [
+                        "Just a moment while I transfer your call",
+                        "I'll transfer you to a representative",
+                        "I'll transfer you to a representative right away.",
+                        "I'll transfer your call to a representative. Please hold on for a moment."
+                    ]
+
+                    # Use `in` to check if the message contains any of the phrases
+                    if any(phrase in msg for phrase in transfer_phrases):
+                        logger.info("Play.ai Agent Transcript: Initiating call transfer to a representative")
+                        # self.initiate_call_transfer('919679728063')
+                elif play_ai_data.get("type") == "audioStream":
                     # Extract the audio data
                     audio_data = play_ai_data.get("data")
                     if audio_data:
@@ -110,14 +146,55 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                         "event": "hangup",
                         "message": f"The call was ended: {ended_by}"
                     }))
+                    # self.transfer_call_to_real_agent('919679728063')
+
                     self.close()  # Close the WebSocket connection
                     break  # Exit the loop after hangup
+
+                # # Detect the call transfer event
+                elif play_ai_data.get("type") == "voiceActivityEnd":
+                    agent = Agent.objects.filter(agent_id=self.agent_id, user_id=self.user_id).first()
+                    
+                    if agent is None:
+                        logger.error(f"Agent with ID {self.agent_id} not found for user {self.user_id}")
+                        return
+                    if agent.real_agent_no:
+                        # Initiate transfer to the real agent
+                        self.initiate_call_transfer(agent.real_agent_no)
+                    # else:
+                        logger.error("Real agent phone number not provided in call transfer event")
+
         except WebSocketConnectionClosedException:
             logger.error("Play.ai WebSocket closed unexpectedly")
             self.close()
         except Exception as e:
             logger.error(f"Error receiving Play.ai response: {e}")
 
+    def initiate_call_transfer(self, real_agent_phone_number):
+        try:
+            # Close the Play.ai connection
+            if self.play_ai_ws:
+                self.play_ai_ws.close()
+                logger.info("Disconnected Play.ai for transfer to real agent")
+                twilio = ServiceDetail.objects.filter(user_id=self.user_id, service_name='twilio').first()
+                client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+            # Send redirect event to Twilio with the transfer URL
+            transfer_url = f"https://secretvoiceagent.net/call/transfer_call/{real_agent_phone_number}/"
+
+            #transfer_url = f"{settings.SITE_URL}{reverse('transfer_to_real_agent', args=[real_agent_phone_number])}"
+            # self.send(text_data=json.dumps({
+            #     "event": "transfer_call",
+            #     "redirect_url": transfer_url
+            # }))
+            call = client.calls(self.call_sid).update(url=transfer_url, method="POST")
+            PhoneCall.objects.filter(twilio_call_id=self.call_sid).update(
+                        is_call_forwarded=True,
+                        call_status='Forwarded'
+                        )
+            self.close()
+            logger.info("Twilio call redirected to real agent")
+        except Exception as e:
+            logger.error(f"Error transferring call to real agent: {e}")
     def send_audio_to_twilio(self, audio_data):
         """Send audio data to Twilio."""
         try:

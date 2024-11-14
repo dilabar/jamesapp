@@ -1,13 +1,15 @@
+from base64 import urlsafe_b64encode
 import pandas as pd
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from agent.models import PhoneCall, ServiceDetail
+from jamesapp.utils import fetch_data_from_api
 from twilio.rest import Client
 import json
 from django.core.files.storage import default_storage
 from django.views.decorators.csrf import csrf_exempt
-from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect
+from twilio.twiml.voice_response import VoiceResponse, Start, Stream,Connect,Dial
 from django.conf import settings
 
 from django.contrib import messages
@@ -40,6 +42,7 @@ def call_initiate(request, agent_id):
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone
                 )
+                
                 phone_call.call_status = 'initiated'
                 phone_call.twilio_call_id = call.sid
                 phone_call.save()
@@ -92,10 +95,16 @@ def call_initiate(request, agent_id):
    
 @csrf_exempt
 def start_twilio_stream(request, user_id,agent_id):
+    call_sid = request.GET.get('CallSid')
+
+    if call_sid:
+        print(f"Received CallSid: {call_sid}")
+    else:
+        print("No CallSid found in the request")
     response = VoiceResponse()
     
     # Define your WebSocket URL to receive the Twilio stream data
-    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/"
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
 
     try:
         connect = Connect()
@@ -110,3 +119,58 @@ def start_twilio_stream(request, user_id,agent_id):
         response.say("Error starting the audio stream. Please try again later.")
     
     return HttpResponse(str(response), content_type="text/xml")
+@login_required
+def getcall_log(request):
+    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+    calls = client.calls.list(limit=20)
+
+    for record in calls:
+        print(record.sid)
+
+    context={
+        'calls_list':calls
+    }
+    return render(request, 'twilio_log/call_log.html',context)
+@login_required
+def get_twilio_call_recordings(request,call_sid):
+    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+
+    try:
+        # Fetch recordings for the specified call SID
+        recordings = client.recordings.list(call_sid=call_sid)
+
+        # Log each recording for debugging
+        for recording in recordings:
+            print(recording.sid, recording.date_created, recording.duration)
+
+        # Pass recordings to the template
+        context = {
+            'recordings': recordings
+        }
+
+    except Exception as e:
+        # Handle exceptions (e.g., Twilio errors)
+        print(f"Error fetching recordings: {e}")
+        context = {
+            'recordings': [],
+            'error': f"Could not retrieve recordings: {e}"
+        }
+    return render(request, 'twilio_log/recording.html',context)
+@csrf_exempt
+def transfer_call(request, phone_number):
+    """
+    This view is used to transfer the call to a real agent using Twilio's <Dial> verb.
+    """
+    print("The Action is working",request.GET)
+    response = VoiceResponse()
+    
+    # Inform the caller about the transfer
+    response.say("Please hold while we transfer you to a real agent.")
+
+    # Dial the specified phone number (the real agent)
+    response.dial(phone_number)
+
+    return HttpResponse(str(response), content_type="text/xml")
+
