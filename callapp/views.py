@@ -3,8 +3,8 @@ import pandas as pd
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from agent.models import PhoneCall, ServiceDetail
-from jamesapp.utils import fetch_data_from_api
+from agent.models import Agent, PhoneCall, ServiceDetail
+from jamesapp.utils import decrypt, fetch_data_from_api
 from twilio.rest import Client
 import json
 from django.core.files.storage import default_storage
@@ -33,7 +33,8 @@ def call_initiate(request, agent_id):
             # Save phone call log for manual entry
             phone_call = PhoneCall.objects.create(
                 phone_number=phone_number,
-                call_status='pending'
+                call_status='pending',
+                user=request.user
             )
             # Place the call
             try:
@@ -69,7 +70,8 @@ def call_initiate(request, agent_id):
                     if phone:
                         phone_call = PhoneCall.objects.create(
                             phone_number=phone,
-                            call_status='pending'
+                            call_status='pending',
+                            user=request.user
                         )
                         try:
                             call = client.calls.create(
@@ -164,6 +166,7 @@ def transfer_call(request, phone_number):
     This view is used to transfer the call to a real agent using Twilio's <Dial> verb.
     """
     print("The Action is working",request.GET)
+
     response = VoiceResponse()
     
     # Inform the caller about the transfer
@@ -173,4 +176,65 @@ def transfer_call(request, phone_number):
     response.dial(phone_number)
 
     return HttpResponse(str(response), content_type="text/xml")
+@csrf_exempt
+def forward_call(request):
+    """
+    This view is used to transfer a call to a real agent using Twilio's <Dial> verb.
+    """
+    print("The Action is working forward_call",request.GET.get('call_sid'))
+
+    # Retrieve the Call SID from the request query parameters
+    cal_sid = request.GET.get('call_sid')
+    
+    if not cal_sid:
+        logger.error("No Call SID provided in the request.")
+        return HttpResponse("Call SID is missing.", status=400)
+
+    # Fetch the PhoneCall instance using the Call SID
+    lg = PhoneCall.objects.filter(twilio_call_id=cal_sid).first()
+    if not lg:
+        logger.error(f"No phone call found with Call SID: {cal_sid}")
+        return HttpResponse("Call not found.", status=404)
+
+    # Decrypt agent_id and fetch agent data
+    try:
+        agg=lg.agent_id
+        print(agg)
+        print(lg.user)
+        agent = Agent.objects.filter(agent_id=agg, user=lg.user).first()
+        if not agent:
+            logger.error(f"Agent with ID {lg.agent_id} not found.")
+            return HttpResponse("Agent not found.", status=404)
+    except Exception as e:
+        logger.error(f"Error decrypting agent ID: {e}")
+        return HttpResponse("Error processing agent data.", status=500)
+
+    # Fetch Twilio service credentials
+    twilio_service = ServiceDetail.objects.filter(user=lg.user, service_name='twilio').first()
+    if not twilio_service:
+        logger.error(f"Twilio service credentials not found for user {lg.user}.")
+        return HttpResponse("Twilio service credentials missing.", status=404)
+
+    try:
+        # Initialize Twilio client with decrypted credentials
+        client = Client(twilio_service.decrypted_account_sid, twilio_service.decrypted_api_key)
+        print(f" host {request.get_host()}")
+        # Construct the transfer URL with the real agent's phone number
+        transfer_url = f"https://{request.get_host()}/call/transfer_call/{agent.real_agent_no}/"
+
+        # Update the call with the transfer URL to redirect the call
+        call = client.calls(cal_sid).update(url=transfer_url, method="POST")
+
+        # Update the call status to indicate the call has been forwarded to the real agent
+        lg.call_status = 'Forwarded'
+        lg.is_call_forwarded = True  # Optionally track that the call was forwarded
+        lg.save()
+
+        logger.info(f"Call {cal_sid} successfully redirected to agent {agent.real_agent_no}")
+        return HttpResponse("Call transferred to real agent.",status=200)
+
+    except Exception as e:
+        logger.error(f"Error transferring call {cal_sid}: {e}")
+        return HttpResponse("Failed to transfer the call.", status=500)
+
 

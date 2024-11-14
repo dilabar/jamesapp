@@ -37,7 +37,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <form action="{% url 'agent:create_agent' %}" method='POST'>
+                        <form action="{% if agent %}{% url 'agent:update_agent' agent.id %}{% else %}{% url 'agent:create_agent' %}{% endif %}" method="POST">
                             {% csrf_token %}
 
                             <div class="form-group">
