@@ -27,6 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
+
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
 ALLOWED_HOSTS = ["127.0.0.1","secretvoiceagent.net","bd73-2405-201-800d-e867-48-c89d-21c6-c2dd.ngrok-free.app"]
@@ -137,3 +138,4 @@ AUTH_USER_MODEL = 'auth.User'
 ACOUNT_SID=os.getenv('ACOUNT_SID')
 AUTH_TOKEN=os.getenv('AUTH_TOKEN')
 LOGIN_URL = '/login/'
+OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY',default="")

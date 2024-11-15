@@ -97,7 +97,7 @@ def call_initiate(request, agent_id):
    
 @csrf_exempt
 def start_twilio_stream(request, user_id,agent_id):
-    call_sid = request.GET.get('CallSid')
+    call_sid = request.POST.get('CallSid')
 
     if call_sid:
         print(f"Received CallSid: {call_sid}")
