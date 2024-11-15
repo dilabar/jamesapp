@@ -7,7 +7,7 @@ from django.contrib.auth import login as auth_login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-
+import openai
 from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
 from jamesapp.utils import decrypt, get_conversation_data, get_transcript_data
@@ -215,3 +215,45 @@ def get_transcript(request, agent_id,cid):
         # Assume data is a list of results
         context = {"data_list": data}
     return render(request, 'agent/transcript.html', context)
+
+
+# Make sure to set your OpenAI API key
+openai.api_key = 'your-api-key-here'
+
+@login_required
+def summarize_transcript(request, agent_id, cid):
+    try:
+        openai.api_key=settings.OPEN_AI_API_KEY
+        play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
+        ag=decrypt(agent_id)
+        # Call the function to get the transcript data (returns JSON)
+        transcript_list = get_transcript_data(ag, cid, play_ai.decrypted_api_key, play_ai.decrypted_account_sid)
+
+        # Extract the transcript content from the JSON response
+        combined_transcript = "\n\n".join([transcript.get('content', '') for transcript in transcript_list]) # Assuming the JSON has a key 'content' for the transcript
+        if not combined_transcript:
+            return render(request, 'agent/error.html', {'error_message': 'No transcript content available.'})
+
+        # Call the OpenAI API to summarize the transcript
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Updated model
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": f"Summarize the following transcript:\n\n{combined_transcript}"}
+            ],
+            max_tokens=150,  # Set the maximum token limit for the summary
+            temperature=0.5,  # Controls the randomness of the response (lower value = more focused)
+        )
+        # print("OpenAI Response:", response)
+        # Get the summary from the response
+        summary = response['choices'][0]['message']['content'].strip()
+
+        # Return the summary and the original transcript to the template
+        context = {
+            'summary': summary,
+            'combined_transcript': combined_transcript,
+        }
+        return render(request, 'agent/transcript_summary.html', context)
+
+    except Exception as e:
+        return render(request, 'agent/error.html', {'error': f"Error during summarization: {str(e)}"})

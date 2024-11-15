@@ -1,0 +1,38 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
+{% endblock header %}
+
+{% block css %}
+<style>
+    .info-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 col-lg-10 mx-auto">
+                <div class="info-section">
+                    <h4>Transcript Summary</h4>
+
+                    <p>{{ combined_transcript }}</p>
+
+                    <hr>
+
+                    <h5>Summary</h5>
+                    <p>{{ summary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
