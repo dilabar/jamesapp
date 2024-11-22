@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Design Update</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .left-card {
+            flex: 2; /* Left card is larger */
+        }
+
+        .right-card {
+            flex: 1; /* Right card is smaller */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Adds space between buttons */
+        }
+
+        /* Left Card Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-left h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .edit-icon {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #007BFF;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .edit-icon img {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Profile Section (on Header Right) */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-section img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+        }
+
+        .profile-section span {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box; /* Ensures consistent sizing */
+        }
+
+        .form-group textarea {
+            resize: none;
+        }
+
+        .form-group .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Script Section Buttons */
+        .script-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .script-buttons button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .script-buttons button img {
+            width: 16px;
+            height: 16px;
+        }
+
+        .script-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Right Card */
+        .right-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Adds space between buttons */
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button {
+            width: 100%; /* Make button fill the card width */
+            text-align: center;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .test-button:hover {
+            background-color: #218838;
+        }
+
+        .dropdown-menu {
+            width: 100%; /* Align dropdown items with card width */
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Adds spacing between dropdown items */
+        }
+
+        .dropdown-item {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Card -->
+        <div class="card left-card">
+            <!-- Header -->
+            <div class="card-header">
+                <div class="card-header-left">
+                    <h2>Test</h2>
+                    <button class="edit-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16">
+                            <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"/>
+                          </svg>
+                    </button>
+                </div>
+                <div class="profile-section">
+                    <img src="https://via.placeholder.com/40" alt="Profile Picture">
+                    <span>Bishtu</span>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-group">
+                <label for="goal">Goal</label>
+                <input type="text" id="goal" placeholder="Enter your goal">
+            </div>
+
+            <div class="form-group">
+                <label for="who-speaks-first">Who Speaks First</label>
+                <select id="who-speaks-first">
+                    <option value="assistant">Assistant Initiates: Begins with your Call Opening Message</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="welcome-message">Welcome Message</label>
+                <textarea id="welcome-message" rows="3">Hi {first_name}, how are you doing today?</textarea>
+            </div>
+
+            <!-- Script Section -->
+            <div class="form-group">
+                <label for="script">Script</label>
+                <textarea id="script" rows="3">[Open with a Warm Welcome] Hello {first_name}, thank you for reaching out! I'm here to assist you.</textarea>
+                <div class="script-buttons">
+                    <button>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-right-circle-fill" viewBox="0 0 16 16">
+                            <path d="M0 8a8 8 0 1 0 16 0A8 8 0 0 0 0 8m5.904 2.803a.5.5 0 1 1-.707-.707L9.293 6H6.525a.5.5 0 1 1 0-1H10.5a.5.5 0 0 1 .5.5v3.975a.5.5 0 0 1-1 0V6.707z"/>
+                          </svg> Apply Simple Script
+                    </button>
+                    <button>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-save-fill" viewBox="0 0 16 16">
+                            <path d="M8.5 1.5A1.5 1.5 0 0 1 10 0h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h6c-.314.418-.5.937-.5 1.5v7.793L4.854 6.646a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0l3.5-3.5a.5.5 0 0 0-.708-.708L8.5 9.293z"/>
+                          </svg> Save
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Card -->
+        <div class="card right-card">
+            <button class="test-button">Test Call</button>
+
+            <!-- Dropdown Buttons -->
+            <div class="dropdown-menu">
+                <button class="dropdown-item">General Settings </button>
+                <button class="dropdown-item">Speech Settings </button>
+                <button class="dropdown-item">Call Settings</button>
+            </div>
+
+            <!-- Toggle Button for General Settings -->
+           
+
+            
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to toggle the section visibility and change arrow direction
+        document.getElementById('toggle-settings').addEventListener('click', function() {
+            const settingsSection = document.getElementById('general-settings');
+            const arrow = document.querySelector('.toggle-arrow');
+
+            if (settingsSection.style.display === 'none' || settingsSection.style.display === '') {
+                settingsSection.style.display = 'block';
+                arrow.classList.remove('arrow-down');
+                arrow.classList.add('arrow-up');
+            } else {
+                settingsSection.style.display = 'none';
+                arrow.classList.remove('arrow-up');
+                arrow.classList.add('arrow-down');
+            }
+        });
+    </script>
+</body>
+</html>

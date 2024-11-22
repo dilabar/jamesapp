@@ -40,6 +40,7 @@ class PhoneCall(models.Model):
     agent_id = models.CharField(max_length=255, null=True)  # Added agentOwnerId
     recording_presigned_url = models.URLField(max_length=500, null=True)  # Added recordingPresignedUrl
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phonecall',null=True)
+    hand_off_summary=models.TextField(blank=True,null=True)
 
 class ServiceDetail(models.Model):
     SERVICE_CHOICES = [

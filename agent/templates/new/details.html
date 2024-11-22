@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Details Layout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 45%;
+        }
+
+        .card h3 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .details p, .callee-info p {
+            margin: 5px 0;
+        }
+
+        .call-recording {
+            margin-top: 15px;
+        }
+
+        audio {
+            width: 100%;
+        }
+
+        .transcript {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .message.sender {
+            background: #e9f7ff;
+            align-self: flex-start;
+        }
+
+        .message.receiver {
+            background: #f7f7f7;
+            align-self: flex-end;
+        }
+
+        .message p {
+            margin: 0;
+        }
+
+        .message strong {
+            display: block;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Card -->
+        <div class="card">
+            <h3>Call Details</h3>
+            <div class="details">
+                <p><strong>Call Duration:</strong> 0 min 59 secs</p>
+                <p><strong>Date:</strong> 19 November 2024</p>
+                <p><strong>Start Time:</strong> 3:43:29 am</p>
+                <p><strong>End Time:</strong> 3:45:06 am</p>
+                <p><strong>Customer Number:</strong> +919679728063</p>
+                <p><strong>Status:</strong> Completed</p>
+            </div>
+            <div class="call-recording">
+                <h3>Call Recording</h3>
+                <audio controls>
+                    <source src="sample-audio.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </div>
+
+        <!-- Right Card -->
+        <div class="card">
+            <h3>Transcript</h3>
+            <div class="transcript">
+                <div class="message sender">
+                    <strong>3:44:04 am</strong>
+                    <p>Hi Dilabar Hussain, How are you doing today?</p>
+                </div>
+                <div class="message receiver">
+                    <strong>3:44:08 am</strong>
+                    <p>Yeah. Fine.</p>
+                </div>
+                <div class="message sender">
+                    <strong>3:44:11 am</strong>
+                    <p>Great to hear that!</p>
+                </div>
+                <div class="message receiver">
+                    <strong>3:44:11 am</strong>
+                    <p>How did you get my name?</p>
+                </div>
+                <div class="message sender">
+                    <strong>3:44:12 am</strong>
+                    <p>So, Dilabar, I'm -</p>
+                </div>
+                <div class="message sender">
+                    <strong>3:44:17 am</strong>
+                    <p>Oh, um, I just have it as part of the details linked to your contact number.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
