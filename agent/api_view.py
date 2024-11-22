@@ -5,11 +5,11 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def call_history(request):
     
-    return render(request, 'new/call.html')
+    return render(request, 'new/call_history.html')
 @login_required
 def call_detail(request):
     
-    return render(request, 'new/details.html')
+    return render(request, 'new/call_details.html')
 @login_required
 def agent_setup(request):
     
