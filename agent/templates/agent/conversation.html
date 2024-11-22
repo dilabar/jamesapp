@@ -56,6 +56,7 @@
                                     <td>
                                      
                                         <a href="{% url 'agent:get_transcript' agent_id=agent_id cid=cv.id %}" class="btn btn-primary btn-sm">Conversation</a>
+                                        <a href="{% url 'agent:summarize_transcript' agent_id=agent_id cid=cv.id %}" class="btn btn-primary btn-sm">Summarize</a>
                                         
                                     </td>
                                 </tr>

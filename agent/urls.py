@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .api_view import *
 app_name='agent'
 urlpatterns = [
     path('', agent_list, name='agent_list'),
@@ -16,4 +17,9 @@ urlpatterns = [
     path('logout/', logout_user, name='logout'), 
     path('play-ai-service/', service_detail_view, name='play_ai_service'),
     path('twilio-service/', twilio_service_detail_view, name='twilio_service'),
+    path('summarize_transcript/<str:agent_id>/<str:cid>/', summarize_transcript, name='summarize_transcript'),
+    path('call_history/', call_history, name='call_history'),
+    path('call_history/1/', call_detail, name='call_detail'),
+    path('agent/setup/', agent_setup, name='agent_setup'),
+
 ]
