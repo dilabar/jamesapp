@@ -155,31 +155,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         except Exception as e:
             logger.error(f"Error receiving Play.ai response: {e}")
 
-    def initiate_call_transfer(self, real_agent_phone_number):
-        try:
-            # Close the Play.ai connection
-            if self.play_ai_ws:
-                self.play_ai_ws.close()
-                logger.info("Disconnected Play.ai for transfer to real agent")
-                twilio = ServiceDetail.objects.filter(user_id=self.user_id, service_name='twilio').first()
-                client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
-            # Send redirect event to Twilio with the transfer URL
-            transfer_url = f"https://bd73-2405-201-800d-e867-48-c89d-21c6-c2dd.ngrok-free.app/call/transfer_call/{real_agent_phone_number}/"
-
-            #transfer_url = f"{settings.SITE_URL}{reverse('transfer_to_real_agent', args=[real_agent_phone_number])}"
-            # self.send(text_data=json.dumps({
-            #     "event": "transfer_call",
-            #     "redirect_url": transfer_url
-            # }))
-            call = client.calls(self.call_sid).update(url=transfer_url, method="POST")
-            PhoneCall.objects.filter(twilio_call_id=self.call_sid).update(
-                        is_call_forwarded=True,
-                        call_status='Forwarded'
-                        )
-            self.close()
-            logger.info("Twilio call redirected to real agent")
-        except Exception as e:
-            logger.error(f"Error transferring call to real agent: {e}")
+    
     def send_audio_to_twilio(self, audio_data):
         """Send audio data to Twilio."""
         try:
@@ -201,20 +177,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
             logger.info("Sent audio data to Twilio successfully")
         except Exception as e:
             logger.error(f"Error sending audio data to Twilio: {e}")
-    def send_initial_prompt_if_ready(self):
-        # Check if both connections are established and the initial prompt has not been sent
-        if self.play_ai_connected and self.twilio_connected and not self.initial_prompt_sent:
-            try:
-                # Send hidden prompt with call_sid
-                initial_prompt = {
-                    "type": "textIn",
-                    "data": f"please keep my call sid for future reference.Hidden prompt with Call SID: {self.call_sid}",
-                }
-                self.play_ai_ws.send(json.dumps(initial_prompt))
-                self.initial_prompt_sent = True
-                logger.info("Initial prompt sent to Play.ai")
-            except Exception as e:
-                logger.error(f"Error sending initial prompt: {e}")
+
     def disconnect(self, close_code):
         # Clean up the Play.ai WebSocket on disconnect
         if self.play_ai_ws:

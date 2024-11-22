@@ -217,8 +217,7 @@ def get_transcript(request, agent_id,cid):
     return render(request, 'agent/transcript.html', context)
 
 
-# Make sure to set your OpenAI API key
-openai.api_key = 'your-api-key-here'
+
 
 @login_required
 def summarize_transcript(request, agent_id, cid):
