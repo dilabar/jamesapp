@@ -7,22 +7,7 @@
 
 {% block css %}
 <style>
-    /* Global Styles */
-    body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f9f9f9;
-    }
-
-    .container {
-        padding: 20px;
-        margin: 0 auto;
-        max-width: 1200px;
-        
-        border-radius: 8px;
-        
-    }
+  
 
     /* Filters Section */
     .filters {
@@ -54,29 +39,15 @@
         outline: none;
     }
 
-    /* Table Styling */
-    table {
-        width: 100%;
-        border-collapse: collapse; /* Removes table borders */
-    }
+ 
 
-    th, td {
-        text-align: left;
-        padding: 12px;
-    }
+  
 
     thead {
         background-color: #f4f4f4;
     }
 
-    a {
-        color: #007BFF;
-        text-decoration: none;
-    }
 
-    a:hover {
-        text-decoration: underline;
-    }
 
     /* Status Badge Styling */
     .status.ended {
@@ -106,10 +77,8 @@
 
 {% block body %}
 
-</head>
-<body>
-    <br><br>
-    <div class="container" style="padding-top:60px; margin-bottom: 418px;">
+<div class="content-page rtl-page ">
+    <div class="container card">
         <!-- Filters Section -->
         <div class="filters">
             <input type="text" placeholder="Search History" id="search-bar">
@@ -122,7 +91,7 @@
         </div>
 
         <!-- Table Section -->
-        <table>
+        <table class="table table-responsive">
             <thead>
                 <tr>
                     <th>Assistant Name</th>
@@ -132,8 +101,6 @@
                     <th>Status</th>
                     <th>Call Answered</th>
                     <th>Call Duration</th>
-                    <th>Voicemail Detected</th>
-                    <th>Meeting Action Invoked</th>
                     <th>Date</th>
                     <th>Explore More</th>
                 </tr>
@@ -147,14 +114,26 @@
                     <td><button type="button" class="btn btn-success">ENDED</button></td>
                     <td>YES</td>
                     <td>0 min 59 secs</td>
-                    <td><button type="button" class="btn btn-warning">False</button></td>
-                    <td><button type="button" class="btn btn-warning">False</button></td>
+           
+                    <td>November 19, 03:43 am</td>
+                    <td><a href="#" class="explore">↗</a></td>
+                </tr>
+                <tr>
+                    <td>Jessica</td>
+                    <td>demo</td>
+                    <td><a href="#">Dilabar Hussain</a></td>
+                    <td>919679728063</td>
+                    <td><button type="button" class="btn btn-success">ENDED</button></td>
+                    <td>YES</td>
+                    <td>0 min 59 secs</td>
+           
                     <td>November 19, 03:43 am</td>
                     <td><a href="#" class="explore">↗</a></td>
                 </tr>
                 <!-- Add more rows as needed -->
             </tbody>
         </table>
+    </div>
     </div>
     {% endblock body %}
     
