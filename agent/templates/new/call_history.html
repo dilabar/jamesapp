@@ -16,6 +16,7 @@
         align-items: center;
         margin-bottom: 20px;
         gap: 15px;
+        padding: 15px;
     }
 
     #search-bar {
@@ -50,14 +51,27 @@
 
 
     /* Status Badge Styling */
-    .status.ended {
+    .status.completed {
         color: #fff;
         background-color: green;
         padding: 5px 10px;
         border-radius: 50px; /* Fully rounded */
         text-align: center;
     }
-
+    .status.initiated {
+        color: #fff;
+        background-color: rgb(216, 180, 17);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .status.forwarded {
+        color: #fff;
+        background-color: rgb(10, 141, 180);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
     .voicemail.false, .meeting-action.false {
         color: #fff;
         background-color: orange;
@@ -99,40 +113,51 @@
                     <th>Customer Name</th>
                     <th>Phone Number</th>
                     <th>Status</th>
-                    <th>Call Answered</th>
+                    <th>Call Forward</th>
                     <th>Call Duration</th>
                     <th>Date</th>
                     <th>Explore More</th>
                 </tr>
             </thead>
             <tbody>
+                {% for call in page_obj %}
                 <tr>
-                    <td>Jessica</td>
-                    <td>demo</td>
-                    <td><a href="#">Dilabar Hussain</a></td>
-                    <td>919679728063</td>
-                    <td><button type="button" class="btn btn-success">ENDED</button></td>
-                    <td>YES</td>
-                    <td>0 min 59 secs</td>
-           
-                    <td>November 19, 03:43 am</td>
-                    <td><a href="#" class="explore">↗</a></td>
+                    <td>{{ call.assistant_name }}</td>
+                    <td>{{ call.campaign_name|default:"Demo" }}</td>
+                    <td><a href="#">{{ call.customer_name }}</a></td>
+                    <td>{{ call.phone_number }}</td>
+                    <td>
+                        <button type="button" class="btn status {{ call.call_status|lower }}">{{ call.call_status }}</button>
+                    </td>
+                    <td>{{ call.is_call_forwarded|yesno:"YES,NO" }}</td>
+                    <td>{{ call.call_duration|default:"0" }}</td>
+                    <td>{{ call.timestamp|date:"F d, H:i a" }}</td>
+                    <td><a href="{% url 'agent:call_detail' call.id %}" class="explore">↗</a></td>
                 </tr>
+                {% empty %}
                 <tr>
-                    <td>Jessica</td>
-                    <td>demo</td>
-                    <td><a href="#">Dilabar Hussain</a></td>
-                    <td>919679728063</td>
-                    <td><button type="button" class="btn btn-success">ENDED</button></td>
-                    <td>YES</td>
-                    <td>0 min 59 secs</td>
-           
-                    <td>November 19, 03:43 am</td>
-                    <td><a href="#" class="explore">↗</a></td>
+                    <td colspan="9">No call history available.</td>
                 </tr>
-                <!-- Add more rows as needed -->
+                {% endfor %}
             </tbody>
+        
         </table>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% for i in page_range %}
+                    {% if i == page_number %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ i }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+        
     </div>
     </div>
     {% endblock body %}

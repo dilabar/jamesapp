@@ -106,3 +106,4 @@ def fetch_data_from_api(url, headers, params=None):
         return {"error": f"Request error occurred: {req_err}"}
     except Exception as e:
         return {"error": f"An error occurred: {e}"}
+    

@@ -2,537 +2,228 @@
 {% load static %}
 
 {% block header %}
-
 {% endblock header %}
 
 {% block css %}
-
-<style>
-    :root {
-        --primary-color: #000000;
-        --secondary-color: #50e3c2;
-        --background-color: #f5f7fa;
-        --card-background: #ffffff;
-        --text-color: #333333;
-        --text-muted: #666666;
-        --border-radius: 12px;
-        --transition-speed: 0.3s;
-    }
-
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        line-height: 1.6;
-        color: var(--text-color);
-        background-color: var(--background-color);
-        padding: 20px;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    h1 {
-        font-size: 2.5rem;
-        margin-bottom: 1.5rem;
-        color: var(--primary-color);
-        text-align: center;
-    }
-
-    .grid {
-        display: grid;
-        gap: 20px;
-        grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 768px) {
-        .grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
-    .column {
-        display: flex;
-        flex-direction: column;
-        
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-
-    .column::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .column::-webkit-scrollbar-track {
-        background: var(--background-color);
-        border-radius: 3px;
-    }
-
-    .column::-webkit-scrollbar-thumb {
-        background: var(--primary-color);
-        border-radius: 3px;
-    }
-
-    .column::-webkit-scrollbar-thumb:hover {
-        background: var(--secondary-color);
-    }
-
-    .card {
-        background-color: var(--card-background);
-        border-radius: var(--border-radius);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem;
-        transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 0.5rem;
-    }
-
-    h2 {
-        font-size: 1.5rem;
-        color: #ffc02b;
-    }
-
-    .icon {
-        color: var(--primary-color);
-        cursor: help;
-    }
-
-    .grid-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
-    .label {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        margin-bottom: 0.25rem;
-    }
-
-    .value {
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .audio-player {
-        display: flex;
-        align-items: center;
-        background-color: var(--background-color);
-        padding: 1rem;
-        border-radius: var(--border-radius);
-        margin-top: 1rem;
-    }
-
-    .icon-button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--primary-color);
-        font-size: 1.5rem;
-        transition: color var(--transition-speed);
-    }
-
-    .icon-button:hover {
-        color: var(--secondary-color);
-    }
-
-    .progress-bar {
-        flex-grow: 1;
-        height: 6px;
-        background-color: #ddd;
-        margin: 0 1rem;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-
-    .progress {
-        width: 33%;
-        height: 100%;
-        background-color: var(--primary-color);
-        border-radius: 3px;
-        transition: width var(--transition-speed);
-    }
-
-    .duration {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-    }
-
-    .transcript {
-        max-height: 600px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .chat {
-        display: flex;
-        flex-direction: column;
-        
-        overflow-y: auto;
-        max-height: calc(600px - 60px);
-        padding-right: 10px;
-        margin-top: 1rem;
-    }
-
-    .chat::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .chat::-webkit-scrollbar-track {
-        background: var(--background-color);
-        border-radius: 3px;
-    }
-
-    .chat::-webkit-scrollbar-thumb {
-        background: var(--primary-color);
-        border-radius: 3px;
-    }
-
-    .chat::-webkit-scrollbar-thumb:hover {
-        background: var(--secondary-color);
-    }
-
-    .chat-message {
-        display: flex;
-        gap: 10px;
-        animation: fadeIn 0.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .chat-message.user {
-        flex-direction: row-reverse;
-    }
-
-    .avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: #fff;
-        flex-shrink: 0;
-    }
-
-    .avatar.agent {
-        background-color: var(--primary-color);
-    }
-
-    .avatar.user {
-        background-color: var(--secondary-color);
-    }
-
-    .message {
-        max-width: 80%;
-        padding: 0.75rem 1rem;
-        border-radius: var(--border-radius);
-        position: relative;
-    }
-
-    .message::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        border: 8px solid transparent;
-    }
-
-    .message.agent {
-        background-color: var(--primary-color);
-        color: #fff;
-    }
-
-    .message.agent::after {
-        right: 100%;
-        border-right-color: var(--primary-color);
-    }
-
-    .message.user {
-        background-color: var(--secondary-color);
-        color: #fff;
-    }
-
-    .message.user::after {
-        left: 100%;
-        border-left-color: var(--secondary-color);
-    }
-
-    .message p {
-        margin: 0 0 0.5rem 0;
-    }
-
-    .timestamp {
-        font-size: 0.75rem;
-        opacity: 0.7;
-    }
-
-    @media (max-width: 768px) {
-        .grid-2 {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-    
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 {% endblock css %}
-    
-
 
 {% block body %}
+<div class="content-page rtl-page ">
 
+<div class="container py-4">
+    <h3 class="text-left mb-4">Call Details</h3>
 
-
-    <div class="container">
-        <h1>Call Details</h1>
-        
-        <div class="grid">
-            <!-- Left Column -->
-            <div class="column" style="
-            width: 774px;
-        ">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Details</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    </div>
-                    
-                    <div class="grid-2">
-                        <div>
-                            <p class="label">Call Duration</p>
-                            <p class="value">0 min 59 secs</p>
-                        </div>
-                        <div>
-                            <p class="label">Date</p>
-                            <p class="value">19 November 2024</p>
-                        </div>
-                        <div>
-                            <p class="label">Start Time</p>
-                            <p class="value">3:43:29 am</p>
-                        </div>
-                        <div>
-                            <p class="label">End Time</p>
-                            <p class="value">3:45:06 am</p>
-                        </div>
-                        <div>
-                            <p class="label">Customer Number</p>
-                            <p class="value">+919697728063</p>
-                        </div>
-                        <div>
-                            <p class="label">Status</p>
-                            <p class="value">Completed</p>
-                        </div>
-                    </div>
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-md-8" style="height: 600px; overflow-y: auto;">
+            <div class="card shadow-sm" >
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0 text-warning">Details</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Call Recording</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <div class="card-body row">
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Call Duration</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.call_duration}}</p>
                     </div>
-                    
-                    <div class="audio-player">
-                        <button class="icon-button" aria-label="Play">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                        </button>
-                        <div class="progress-bar">
-                            <div class="progress"></div>
-                        </div>
-                        <span class="duration">0:58</span>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Date</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.timestamp}}</p>
                     </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Callee Information</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Start Time</p>
+                        <p class="mb-0 fw-semibold">3:43:29 am</p>
                     </div>
-                    <p class="label">Name</p>
-                    <p class="value">Dilabar Hussain</p>
-                </div>
-
-                <!-- Additional cards for scrolling effect -->
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Previous Interactions</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">End Time</p>
+                        <p class="mb-0 fw-semibold">3:45:06 am</p>
                     </div>
-                    <div class="grid-2">
-                        <div>
-                            <p class="label">Last Call</p>
-                            <p class="value">15 November 2024</p>
-                        </div>
-                        <div>
-                            <p class="label">Total Calls</p>
-                            <p class="value">5</p>
-                        </div>
-                        <div>
-                            <p class="label">Average Duration</p>
-                            <p class="value">3 min 12 secs</p>
-                        </div>
-                        <div>
-                            <p class="label">Satisfaction Score</p>
-                            <p class="value">4.5/5</p>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Customer Number</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.phone_number}}</p>
                     </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Customer Preferences</h2>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    </div>
-                    <div class="grid-2">
-                        <div>
-                            <p class="label">Preferred Contact</p>
-                            <p class="value">Phone</p>
-                        </div>
-                        <div>
-                            <p class="label">Best Time to Call</p>
-                            <p class="value">Afternoon</p>
-                        </div>
-                        <div>
-                            <p class="label">Language</p>
-                            <p class="value">English</p>
-                        </div>
-                        <div>
-                            <p class="label">Special Notes</p>
-                            <p class="value">Prefers detailed explanations</p>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Status</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.call_status}}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column -->
-            <div class="column">
-                <div class="card transcript">
-                    <div class="card-header">
-                        <h2>Transcript</h2>
-                        <button class="icon-button" aria-label="Copy transcript">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                        </button>
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Call Recording</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <!-- audio -->
+                <div class="card-body d-flex align-items-center">
+                  {% if call_obj.recording_url %}
+                    <audio controls style="width: 100%;">
+                        <source src="{% url 'agent:fetch-recording' recording_url=call_obj.recording_url|urlencode %}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    {% endif%}
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Callee Information</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Name</p>
+                    <p class="mb-0 fw-semibold">Dilabar Hussain</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Previous Interactions</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Last Call</p>
+                        <p class="mb-0 fw-semibold">15 November 2024</p>
                     </div>
-                    
-                    <div class="chat">
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Hi Dilabar Hussain, How are you doing today?</p>
-                                <span class="timestamp">3:44:04 am</span>
-                            </div>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Total Calls</p>
+                        <p class="mb-0 fw-semibold">5</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Average Duration</p>
+                        <p class="mb-0 fw-semibold">3 min 12 secs</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Satisfaction Score</p>
+                        <p class="mb-0 fw-semibold">4.5/5</p>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="chat-message user">
-                            <div class="avatar user">U</div>
-                            <div class="message user">
-                                <p>Yeah, Fine.</p>
-                                <span class="timestamp">3:44:08 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Great to hear that!</p>
-                                <span class="timestamp">3:44:11 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message user">
-                            <div class="avatar user">U</div>
-                            <div class="message user">
-                                <p>How did you get my name?</p>
-                                <span class="timestamp">3:44:12 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Oh, um, I just have it as part of the details linked to your contact number.</p>
-                                <span class="timestamp">3:44:17 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message user">
-                            <div class="avatar user">U</div>
-                            <div class="message user">
-                                <p>I see, that makes sense.</p>
-                                <span class="timestamp">3:44:20 am</span>
-                            </div>
-                        </div>
-
-                        <!-- Additional messages for scrolling effect -->
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Is there anything specific I can help you with today?</p>
-                                <span class="timestamp">3:44:25 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message user">
-                            <div class="avatar user">U</div>
-                            <div class="message user">
-                                <p>Yes, I had a question about my recent order.</p>
-                                <span class="timestamp">3:44:30 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Of course! I'd be happy to help. Can you please provide me with your order number?</p>
-                                <span class="timestamp">3:44:35 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message user">
-                            <div class="avatar user">U</div>
-                            <div class="message user">
-                                <p>Sure, it's ORD-12345.</p>
-                                <span class="timestamp">3:44:40 am</span>
-                            </div>
-                        </div>
-
-                        <div class="chat-message">
-                            <div class="avatar agent">A</div>
-                            <div class="message agent">
-                                <p>Thank you. I'm looking up that order now. What specific information do you need about it?</p>
-                                <span class="timestamp">3:44:45 am</span>
-                            </div>
-                        </div>
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Customer Preferences</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Preferred Contact</p>
+                        <p class="mb-0 fw-semibold">Phone</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Best Time to Call</p>
+                        <p class="mb-0 fw-semibold">Afternoon</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Language</p>
+                        <p class="mb-0 fw-semibold">English</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Special Notes</p>
+                        <p class="mb-0 fw-semibold">Prefers detailed explanations</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Transcript Messages</h2>
+                    <button class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="height: 600px; overflow-y: auto;">
+                    <!-- Chat Messages -->
+                    <div class="d-flex flex-column gap-3">
+                        <!-- Sender Message -->
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <img src="{% static  'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-light p-2 rounded mb-0 text-dark">Hello! How can I help you today?</p>
+                                <small class="text-muted">3:43 AM</small>
+                            </div>
+                        </div>
+                        <!-- Receiver Message -->
+                        <div class="d-flex align-items-end flex-row-reverse">
+                            <div class="ms-3">
+                                <img src="{% static 'img/feature/user.png' %}" alt="Receiver" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-primary p-2 rounded mb-0 text-white">I need some information about my account.</p>
+                                <small class="text-muted d-block text-end">3:44 AM</small>
+                            </div>
+                        </div>
+                         <!-- Sender Message -->
+                         <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <img src="{% static  'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-light p-2 rounded mb-0 text-dark">Hello! How can I help you today?</p>
+                                <small class="text-muted">3:43 AM</small>
+                            </div>
+                        </div>
+                        <!-- Receiver Message -->
+                        <div class="d-flex align-items-end flex-row-reverse">
+                            <div class="ms-3">
+                                <img src="{% static 'img/feature/user.png' %}" alt="Receiver" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-primary p-2 rounded mb-0 text-white">I need some information about my account.</p>
+                                <small class="text-muted d-block text-end">3:44 AM</small>
+                            </div>
+                        </div>
+                         <!-- Sender Message -->
+                         <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <img src="{% static  'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-light p-2 rounded mb-0 text-dark">Hello! How can I help you today?</p>
+                                <small class="text-muted">3:43 AM</small>
+                            </div>
+                        </div>
+                        <!-- Receiver Message -->
+                        <div class="d-flex align-items-end flex-row-reverse">
+                            <div class="ms-3">
+                                <img src="{% static 'img/feature/user.png' %}" alt="Receiver" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-primary p-2 rounded mb-0 text-white">I need some information about my account.</p>
+                                <small class="text-muted d-block text-end">3:44 AM</small>
+                            </div>
+                        </div>
+                        <!-- More Messages -->
+                        <div class="d-flex align-items-start">
+                            <div class="me-3">
+                                <img src="{% static 'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-light p-2 rounded mb-0 text-dark">Sure! Let me pull up your details.</p>
+                                <small class="text-muted">3:45 AM</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div class="card-footer">
+                    <form class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Type a message..." />
+                        <button class="btn btn-primary">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div> -->
+            </div>
+        </div>
+        
     </div>
-
+</div>
+</div>
 {% endblock body %}
-    
-
-
-{% block js %}
-    
-{% endblock js %}
-    
