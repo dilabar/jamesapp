@@ -1,0 +1,182 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<style>
+    /* Global Styles */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+    }
+
+    .container {
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 1200px;
+        
+        border-radius: 8px;
+        
+    }
+
+    /* Filters Section */
+    .filters {
+        display: flex;
+        justify-content: flex-end; /* Align content to the right */
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+    }
+
+    #search-bar {
+        padding: 8px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 40px; /* Rounded corners */
+        outline: none;
+    }
+
+    .date-filters label {
+        margin-right: 10px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .date-filters input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 30px; /* Rounded corners for date inputs */
+        outline: none;
+    }
+
+    /* Table Styling */
+    table {
+        width: 100%;
+        border-collapse: collapse; /* Removes table borders */
+    }
+
+    th, td {
+        text-align: left;
+        padding: 12px;
+    }
+
+    thead {
+        background-color: #f4f4f4;
+    }
+
+    a {
+        color: #007BFF;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Status Badge Styling */
+    .status.ended {
+        color: #fff;
+        background-color: green;
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+
+    .voicemail.false, .meeting-action.false {
+        color: #fff;
+        background-color: orange;
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+
+    .explore {
+        color: #000;
+        font-size: 18px;
+    }
+</style>
+{% endblock css %}
+    
+
+
+{% block body %}
+
+</head>
+<body>
+    <br><br>
+    <div class="container" style="padding-top:60px; margin-bottom: 418px;">
+        <!-- Filters Section -->
+        <div class="filters">
+            <input type="text" placeholder="Search History" id="search-bar">
+            <div class="date-filters">
+                <label for="start-date">Start Date</label>
+                <input type="date" id="start-date">
+                <label for="end-date">End Date</label>
+                <input type="date" id="end-date">
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Assistant Name</th>
+                    <th>Campaign Name</th>
+                    <th>Customer Name</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th>Call Answered</th>
+                    <th>Call Duration</th>
+                    <th>Voicemail Detected</th>
+                    <th>Meeting Action Invoked</th>
+                    <th>Date</th>
+                    <th>Explore More</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Jessica</td>
+                    <td>demo</td>
+                    <td><a href="#">Dilabar Hussain</a></td>
+                    <td>919679728063</td>
+                    <td><button type="button" class="btn btn-success">ENDED</button></td>
+                    <td>YES</td>
+                    <td>0 min 59 secs</td>
+                    <td><button type="button" class="btn btn-warning">False</button></td>
+                    <td><button type="button" class="btn btn-warning">False</button></td>
+                    <td>November 19, 03:43 am</td>
+                    <td><a href="#" class="explore">↗</a></td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+    {% endblock body %}
+    
+
+
+    {% block js %}
+    <script>
+        // Search bar filter functionality
+        document.getElementById('search-bar').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const customerName = row.cells[2].textContent.toLowerCase();
+                if (customerName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    {% endblock js %}
+   
+
