@@ -21,23 +21,24 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def call_initiate(request, agent_id):
+    # Fetch Twilio service details
     twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    if not twilio:
+        return HttpResponse("Twilio service details not found.")
+
     client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
-    # Handle form submission
+
     if request.method == "POST":
         phone_number = request.POST.get('phone_number')
         file_upload = request.FILES.get('file_upload')
-        
+
         # Manual entry handling
         if phone_number:
-            # Save phone call log for manual entry
             phone_call = PhoneCall.objects.create(
                 phone_number=phone_number,
                 call_status='pending',
                 user=request.user,
-                
             )
-            # Place the call
             try:
                 call = client.calls.create(
                     url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
@@ -46,59 +47,75 @@ def call_initiate(request, agent_id):
                     record=True,
                     method='POST',
                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
-                    status_callback_method='POST',  # You can also use 'GET' if preferred
+                    status_callback_method='POST',
                     status_callback_event=["initiated", "ringing", "answered", "completed"],
                 )
-                print(f"call....{call}")
                 phone_call.call_status = 'initiated'
                 phone_call.twilio_call_id = call.sid
                 phone_call.save()
+                messages.success(request, f"Call initiated successfully for {phone_number}.")
             except Exception as e:
-                return HttpResponse(f"Error initiating call to {phone_call.phone_number}: {str(e)}")
+                phone_call.call_status = 'failed'
+                phone_call.save()
+                messages.error(request, f"Error initiating call to {phone_number}: {str(e)}")
+            # return redirect('callapp:initiate_call')
 
         # CSV/Excel upload handling
         elif file_upload:
-            # Save file temporarily
-            file_path = default_storage.save(file_upload.name, file_upload)
             ext = file_upload.name.split('.')[-1].lower()
             try:
-                # Read file based on extension
+                # Read the uploaded file
                 if ext == 'csv':
-                    data = pd.read_csv(default_storage.open(file_path))
+                    data = pd.read_csv(file_upload)
                 elif ext in ['xls', 'xlsx']:
-                    data = pd.read_excel(default_storage.open(file_path))
+                    data = pd.read_excel(file_upload)
                 else:
-                    return HttpResponse("Unsupported file format. Please upload a CSV or Excel file.")
+                    messages.error(request, "Unsupported file format. Please upload a CSV or Excel file.")
+                    return redirect('callapp:initiate_call')
 
-                # Extract phone numbers and initiate calls
+                initiated, failed = [], []
+                # Iterate over rows and initiate calls
                 for _, row in data.iterrows():
-                    phone = row.get('phone_number')
-                    if phone:
-                        phone_call = PhoneCall.objects.create(
-                            phone_number=phone,
-                            call_status='pending',
-                            user=request.user
-                        )
-                        try:
-                            call = client.calls.create(
-                                url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
-                                to=phone_call.phone_number,
-                                from_=twilio.decrypted_twilio_phone,
-                                record=True,
-                                method='POST'
+                    phone = row.get('Mobile') or row.get('mobile')
+                    if pd.notna(phone):
+                        phone = str(phone).strip()
+                        if phone:
+                            phone_call = PhoneCall.objects.create(
+                                phone_number=phone,
+                                call_status='pending',
+                                user=request.user
                             )
-                            phone_call.call_status = 'initiated'
-                            phone_call.twilio_call_id = call.sid
-                            phone_call.save()
-                        except Exception as e:
-                            return messages.success(f"Error initiating call to {phone_call.phone_number}: {str(e)}")
+                            try:
+                                call = client.calls.create(
+                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
+                                    to=phone_call.phone_number,
+                                    from_=twilio.decrypted_twilio_phone,
+                                    record=True,
+                                    method='POST',
+                                    status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
+                                    status_callback_event=["initiated", "ringing", "answered", "completed"],
+                                    status_callback_method='POST',
 
-            finally:
-                default_storage.delete(file_path)  # Clean up the temporary file
-        messages.success(request, 'Call Initiated successfully!')
+                                )
+                                phone_call.call_status = 'initiated'
+                                phone_call.twilio_call_id = call.sid
+                                phone_call.save()
+                                initiated.append(phone)
+                            except Exception as e:
+                                phone_call.call_status = 'failed'
+                                phone_call.save()
+                                failed.append(phone)
 
-        # return redirect('agent:agent_list')
-        
+                # Display success and failure messages
+                if initiated:
+                    messages.success(request, f"Calls initiated successfully for: {', '.join(initiated)}.")
+                if failed:
+                    messages.error(request, f"Failed to initiate calls for: {', '.join(failed)}.")
+
+            except Exception as e:
+                messages.error(request, f"Error processing file: {str(e)}")
+                return redirect('callapp:initiate_call')
+
     return render(request, 'callapp/initiate_call.html')
 
 
@@ -241,25 +258,86 @@ def transfer_call(request, phone_number,cal_sid):
  
      # Add the caller to the conference as well
     response.say("You are now in a conference with the agent.", voice='alice', language='en')
+    # response.pause(length=3)
 
 
 
     # Return the TwiML response
     return HttpResponse(str(response), content_type="text/xml")
 @csrf_exempt
-def call_status_callback(request):
+def call_status_callback(request,id):
     if request.method == 'POST':
         call_sid = request.POST.get('CallSid')
         call_status = request.POST.get('CallStatus')
-        if call_status =='initiated':
-            pass
-        elif call_status =='ringing':
-            pass
-        elif call_status =='answered':
-            pass
-        elif call_status =='completed':
-            pass
-    return HttpResponse(status=200)
+        recording_url = request.POST.get('RecordingUrl')
+        recording_sid = request.POST.get('RecordingSid')
+        call_duration = request.POST.get('CallDuration')
+        recording_duration = request.POST.get('RecordingDuration')
+        caller = request.POST.get('Caller')
+        called = request.POST.get('Called')
+        direction = request.POST.get('Direction')
+        from_country = request.POST.get('FromCountry')
+        to_country = request.POST.get('ToCountry')
+        from_city = request.POST.get('FromCity')
+        to_city = request.POST.get('ToCity')
+        call_status = request.POST.get('CallStatus')
+    else:
+        call_sid = request.GET.get('CallSid')
+        call_status = request.GET.get('CallStatus')
+        recording_url = request.GET.get('RecordingUrl')
+        recording_sid = request.GET.get('RecordingSid')
+        call_duration = request.GET.get('CallDuration')
+        recording_duration = request.GET.get('RecordingDuration')
+        caller = request.GET.get('Caller')
+        called = request.GET.get('Called')
+        direction = request.GET.get('Direction')
+        from_country = request.GET.get('FromCountry')
+        to_country = request.GET.get('ToCountry')
+        from_city = request.GET.get('FromCity')
+        to_city = request.GET.get('ToCity')
+        call_status = request.GET.get('CallStatus')
+    lg = PhoneCall.objects.filter(id=id,twilio_call_id=call_sid).first()
+    if not lg:
+        logger.error(f"No phone call found with Call SID: {call_sid}")
+        return HttpResponse("Call not found.", status=404)
+
+    lg.caller = caller
+    lg.called = called
+    lg.direction = direction
+    lg.from_country = from_country
+    lg.to_country = to_country
+    lg.from_city = from_city
+    lg.to_city = to_city
+
+    if call_status =='initiated':
+        logger.info(f"Call {call_sid} initiated.")
+        pass
+    elif call_status =='ringing':
+        logger.info(f"Call {call_sid} is ringing.")
+        lg.call_status='ringing'
+        lg.save()
+        pass
+    elif call_status =='answered':
+        logger.info(f"Call {call_sid} was answered.")
+        lg.call_status='answered'
+        lg.save()
+        pass
+    elif call_status =='completed':
+        logger.info(f"Call {call_sid} completed.")
+        lg.recording_url = recording_url
+        lg.recording_sid = recording_sid
+        lg.call_duration = call_duration if call_duration else None
+        lg.recording_duration = recording_duration if recording_duration else None
+        lg.call_status='completed'
+        lg.save()
+
+    else:
+        lg.call_status=call_status
+        lg.save()
+
+
+    return HttpResponse("Call record updated successfully.", status=200)
+    # return HttpResponse("Invalid request method.", status=405)
 @csrf_exempt
 def join_conference(request):
     """
@@ -324,7 +402,6 @@ def forward_call(request):
     try:
         # Initialize Twilio client with decrypted credentials
         client = Client(twilio_service.decrypted_account_sid, twilio_service.decrypted_api_key)
-        print(f" host {request.get_host()}")
         # # Construct the transfer URL with the real agent's phone number
         transfer_url = f"https://{request.get_host()}/call/transfer_call/{agent.real_agent_no}/{cal_sid}/"
 
@@ -332,7 +409,14 @@ def forward_call(request):
         call = client.calls(cal_sid).update(url=transfer_url, method="POST")
         # Now dial the agent and add them to the same conference
         conf_name = f"Conference_{cal_sid}"
-
+        
+            
+        phone_call = PhoneCall.objects.create(
+                                phone_number=agent.real_agent_no,
+                                call_status='pending',
+                                user=lg.user,
+                                from_call_id=lg
+                            )
         agent_call = client.calls.create(
             to=agent.real_agent_no,  # Agent's phone number
             from_=twilio_service.decrypted_twilio_phone,  # Your Twilio number
@@ -346,16 +430,18 @@ def forward_call(request):
                 </Dial>
             </Response>
             """,
-            status_callback=f"https://{request.get_host()}/call/call_status_callback/2/",  # Your status callback URL
+            status_callback=f"https://{request.get_host()}/call/call_status_callback/{phone_call.id}/",  # Your status callback URL
             status_callback_event=["initiated", "ringing", "answered", "completed"],
             status_callback_method="POST"
         )
-
+        phone_call.call_status='initiated'
+        phone_call.twilio_call_id=agent_call.sid
         # Update the call status to indicate the call has been forwarded to the real agent
         lg.hand_off_summary=summary
         lg.call_status = 'Forwarded'
         lg.is_call_forwarded = True  # Optionally track that the call was forwarded
         lg.save()
+        phone_call.save()
 
         logger.info(f"Call {cal_sid} successfully redirected to agent {agent.real_agent_no}")
         return HttpResponse("Call transferred to real agent.",status=200)
