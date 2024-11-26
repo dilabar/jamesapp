@@ -56,3 +56,8 @@ def fetch_twilio_recording(request,recording_url):
         return HttpResponse(response.content, content_type="audio/mpeg")
     else:
         return HttpResponse("Recording not found or unauthorized.", status=404)
+
+@login_required
+def onboard(request):
+    
+    return render(request, 'new/agent_onboard.html')
