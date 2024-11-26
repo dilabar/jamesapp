@@ -33,11 +33,17 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <p class="text-muted small mb-1">Start Time</p>
-                        <p class="mb-0 fw-semibold">3:43:29 am</p>
+                        <p class="mb-0 fw-semibold">{{ call_obj.timestamp|date:"h:i:s a" }}</p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <p class="text-muted small mb-1">End Time</p>
-                        <p class="mb-0 fw-semibold">3:45:06 am</p>
+                        <p class="mb-0 fw-semibold">
+                            {% if end_time %}
+                            {{ end_time|date:"h:i:s a" }}
+                                {% else %}
+                                    N/A
+                            {% endif %}
+                        </p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <p class="text-muted small mb-1">Customer Number</p>
@@ -76,32 +82,20 @@
                     <p class="mb-0 fw-semibold">Dilabar Hussain</p>
                 </div>
             </div>
-
+            {% if call_obj.hand_off_summary %}
             <div class="card shadow-sm mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="h5 mb-0">Previous Interactions</h2>
+                    <h2 class="h5 mb-0">Call Summarize</h2>
                     <i class="bi bi-info-circle text-dark"></i>
                 </div>
                 <div class="card-body row">
-                    <div class="col-md-6 mb-3">
-                        <p class="text-muted small mb-1">Last Call</p>
-                        <p class="mb-0 fw-semibold">15 November 2024</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <p class="text-muted small mb-1">Total Calls</p>
-                        <p class="mb-0 fw-semibold">5</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <p class="text-muted small mb-1">Average Duration</p>
-                        <p class="mb-0 fw-semibold">3 min 12 secs</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <p class="text-muted small mb-1">Satisfaction Score</p>
-                        <p class="mb-0 fw-semibold">4.5/5</p>
-                    </div>
+                    
+                        <p class="text-muted small mb-1">{{call_obj.hand_off_summary}}</p>
+                  
+                    
                 </div>
             </div>
-
+            {% endif %}
             <div class="card shadow-sm mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="h5 mb-0">Customer Preferences</h2>

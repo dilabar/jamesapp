@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.http import HttpResponse
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
@@ -34,8 +35,14 @@ def call_history(request):
 @login_required
 def call_detail(request,id):
     obj=PhoneCall.objects.filter(user=request.user,id=id).first()
+    # Ensure timestamp and call_duration are valid
+    if obj.timestamp and obj.call_duration:
+        end_time = obj.timestamp + timedelta(seconds=obj.call_duration)
+    else:
+        end_time = None  # Handle invalid data
     context={
-        'call_obj':obj
+        'call_obj':obj,
+        'end_time':end_time
     }
     return render(request, 'new/call_details.html',context)
 @login_required
