@@ -35,6 +35,15 @@ def call_history(request):
 @login_required
 def call_detail(request,id):
     obj=PhoneCall.objects.filter(user=request.user,id=id).first()
+    # twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    # transcription_url = f"{obj.recording_url}/Transcriptions.json"
+    # response = requests.get(transcription_url, auth=(twilio.decrypted_account_sid,twilio.decrypted_api_key)).json()
+
+
+    # # Make a GET request to fetch the transcription JSON
+    # # Extract transcription text if available
+    # transcription_text = response.get('transcription_text', '')
+    # print(f"transcription_text",response)
     # Ensure timestamp and call_duration are valid
     if obj.timestamp and obj.call_duration:
         end_time = obj.timestamp + timedelta(seconds=obj.call_duration)

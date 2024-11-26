@@ -49,6 +49,8 @@ def call_initiate(request, agent_id):
                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
                     status_callback_method='POST',
                     status_callback_event=["initiated", "ringing", "answered", "completed"],
+                
+                    
                 )
                 phone_call.call_status = 'initiated'
                 phone_call.twilio_call_id = call.sid
@@ -95,6 +97,7 @@ def call_initiate(request, agent_id):
                                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
                                     status_callback_event=["initiated", "ringing", "answered", "completed"],
                                     status_callback_method='POST',
+                                    
 
                                 )
                                 phone_call.call_status = 'initiated'
@@ -144,7 +147,7 @@ def start_twilio_stream(request, user_id,agent_id):
         connect.stream(name='Twilio Stream', url=stream_url)
 
         response.append(connect)
-     
+      
         # # Optional: Play an initial message or beep
         # response.say('The stream has started. You may now begin speaking.')
         
@@ -153,6 +156,26 @@ def start_twilio_stream(request, user_id,agent_id):
         response.say("Error starting the audio stream. Please try again later.")
     
     return HttpResponse(str(response), content_type="text/xml")
+@csrf_exempt
+def transcription_callback(request, call_sid):
+    if request.method == 'POST':
+        transcription_text = request.POST.get('TranscriptionText')
+        transcription_sid = request.POST.get('TranscriptionSid')
+        
+        # You can save the transcription text to your model or process it
+        if transcription_text:
+            logger.info(f"Transcription for CallSid {id}: {transcription_text}")
+            # Save transcription text to your database
+            lg = PhoneCall.objects.filter(twilio_call_id=call_sid).first()
+            if lg:
+                lg.transcription_text = transcription_text
+                lg.save()
+            else:
+                logger.error(f"No phone call found with Call SID: {id}")
+
+        return HttpResponse("Transcription received", status=200)
+
+    return HttpResponse("Invalid request", status=400)
 # @csrf_exempt
 # def start_twilio_stream(request, user_id, agent_id):
 #     """
@@ -280,7 +303,7 @@ def call_status_callback(request,id):
         to_country = request.POST.get('ToCountry')
         from_city = request.POST.get('FromCity')
         to_city = request.POST.get('ToCity')
-        call_status = request.POST.get('CallStatus')
+        transcription_text = request.POST.get('TranscriptionText')
     else:
         call_sid = request.GET.get('CallSid')
         call_status = request.GET.get('CallStatus')
@@ -295,7 +318,7 @@ def call_status_callback(request,id):
         to_country = request.GET.get('ToCountry')
         from_city = request.GET.get('FromCity')
         to_city = request.GET.get('ToCity')
-        call_status = request.GET.get('CallStatus')
+        transcription_text = request.GET.get('TranscriptionText')
     lg = PhoneCall.objects.filter(id=id,twilio_call_id=call_sid).first()
     if not lg:
         logger.error(f"No phone call found with Call SID: {call_sid}")
@@ -328,6 +351,7 @@ def call_status_callback(request,id):
         lg.recording_sid = recording_sid
         lg.call_duration = call_duration if call_duration else None
         lg.recording_duration = recording_duration if recording_duration else None
+        lg.transcription_text=transcription_text if transcription_text else None
         lg.call_status='completed'
         lg.save()
 

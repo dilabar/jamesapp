@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
-ALLOWED_HOSTS = ["127.0.0.1","secretvoiceagent.net","10f3-2405-201-800d-e867-94c9-fdb2-508c-da76.ngrok-free.app"]
+ALLOWED_HOSTS = ["127.0.0.1","secretvoiceagent.net","5604-2405-201-800d-e867-78d5-6ee7-5138-fa7e.ngrok-free.app"]
 CSRF_TRUSTED_ORIGINS=['https://*.ngrok-free.app','https://secretvoiceagent.net','http://secretvoiceagent.net']
 # Application definition
 
