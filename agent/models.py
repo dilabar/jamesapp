@@ -41,6 +41,7 @@ class PhoneCall(models.Model):
     recording_presigned_url = models.URLField(max_length=500, null=True)  # Added recordingPresignedUrl
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phonecall',null=True)
     hand_off_summary=models.TextField(blank=True,null=True)
+    transcription_text = models.TextField(blank=True,null=True)
 
     # Self-referential foreign key
     from_call_id = models.ForeignKey(

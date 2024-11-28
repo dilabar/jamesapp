@@ -12,5 +12,6 @@ urlpatterns = [
     path('join_conference/1/', join_conference, name='join_conference'),
     path('conference_dtmf_url/<str:cal_sid>/', conference_dtmf_url, name='conference_dtmf_url'),
     path('call_status_callback/<int:id>/', call_status_callback, name='call_status_callback'),
+    path('transcription_callback/<int:id>/', transcription_callback, name='transcription_callback'),
 
 ]
