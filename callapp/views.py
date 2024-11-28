@@ -49,6 +49,9 @@ def call_initiate(request, agent_id):
                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
                     status_callback_method='POST',
                     status_callback_event=["initiated", "ringing", "answered", "completed"],
+                    # transcribe=True,
+                    # transcribe_callback=f'https://{request.get_host()}/call/transcription_callback/{phone_call.id}/'
+                    
                 
                     
                 )
@@ -97,6 +100,8 @@ def call_initiate(request, agent_id):
                                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
                                     status_callback_event=["initiated", "ringing", "answered", "completed"],
                                     status_callback_method='POST',
+                                    # transcribe=True,
+                                    # transcribe_callback=f'https://{request.get_host()}/call/transcription_callback/{phone_call.id}/'
                                     
 
                                 )
@@ -147,7 +152,6 @@ def start_twilio_stream(request, user_id,agent_id):
         connect.stream(name='Twilio Stream', url=stream_url)
 
         response.append(connect)
-      
         # # Optional: Play an initial message or beep
         # response.say('The stream has started. You may now begin speaking.')
         
@@ -157,7 +161,7 @@ def start_twilio_stream(request, user_id,agent_id):
     
     return HttpResponse(str(response), content_type="text/xml")
 @csrf_exempt
-def transcription_callback(request, call_sid):
+def transcription_callback(request, id):
     if request.method == 'POST':
         transcription_text = request.POST.get('TranscriptionText')
         transcription_sid = request.POST.get('TranscriptionSid')
@@ -166,7 +170,7 @@ def transcription_callback(request, call_sid):
         if transcription_text:
             logger.info(f"Transcription for CallSid {id}: {transcription_text}")
             # Save transcription text to your database
-            lg = PhoneCall.objects.filter(twilio_call_id=call_sid).first()
+            lg = PhoneCall.objects.filter(id=id).first()
             if lg:
                 lg.transcription_text = transcription_text
                 lg.save()
@@ -281,6 +285,8 @@ def transfer_call(request, phone_number,cal_sid):
  
      # Add the caller to the conference as well
     response.say("You are now in a conference with the agent.", voice='alice', language='en')
+    # response.record(transcribe=True, transcribe_callback=f'https://{request.get_host()}/call/transcription_callback/{cal_sid}/')
+
     # response.pause(length=3)
 
 
@@ -454,6 +460,7 @@ def forward_call(request):
                 </Dial>
             </Response>
             """,
+           
             status_callback=f"https://{request.get_host()}/call/call_status_callback/{phone_call.id}/",  # Your status callback URL
             status_callback_event=["initiated", "ringing", "answered", "completed"],
             status_callback_method="POST"

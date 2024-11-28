@@ -1,11 +1,14 @@
 from datetime import timedelta
 from django.http import HttpResponse
 import requests
+from twilio.rest import Client
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import urllib
 from django.core.paginator import Paginator
 from django.db.models import F
+
+from jamesapp.utils import decrypt, get_transcript_data
 from .models import PhoneCall, ServiceDetail
 
 @login_required
@@ -33,27 +36,34 @@ def call_history(request):
     }
     return render(request, 'new/call_history.html', context)
 @login_required
-def call_detail(request,id):
-    obj=PhoneCall.objects.filter(user=request.user,id=id).first()
-    # twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
-    # transcription_url = f"{obj.recording_url}/Transcriptions.json"
-    # response = requests.get(transcription_url, auth=(twilio.decrypted_account_sid,twilio.decrypted_api_key)).json()
+def call_detail(request, id):
+    obj = PhoneCall.objects.filter(user=request.user, id=id).first()
+    if not obj:
+        return render(request, 'new/error.html', {'message': 'Call not found'})  # Handle missing call object
+
+    play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
+    ag=decrypt(obj.agent_id)
+    transcript = None
+    data = get_transcript_data(ag,obj.play_ai_conv_id,play_ai.decrypted_api_key,play_ai.decrypted_account_sid,100,0)
+    if data:
+        transcript=data
+
+    
 
 
-    # # Make a GET request to fetch the transcription JSON
-    # # Extract transcription text if available
-    # transcription_text = response.get('transcription_text', '')
-    # print(f"transcription_text",response)
-    # Ensure timestamp and call_duration are valid
+    # Calculate end time
     if obj.timestamp and obj.call_duration:
         end_time = obj.timestamp + timedelta(seconds=obj.call_duration)
     else:
         end_time = None  # Handle invalid data
-    context={
-        'call_obj':obj,
-        'end_time':end_time
+    print(transcript)
+    # Prepare context
+    context = {
+        'call_obj': obj,
+        'end_time': end_time,
+        'transcript': transcript
     }
-    return render(request, 'new/call_details.html',context)
+    return render(request, 'new/call_details.html', context)
 @login_required
 def agent_setup(request):
     
