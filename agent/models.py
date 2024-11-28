@@ -41,6 +41,32 @@ class PhoneCall(models.Model):
     recording_presigned_url = models.URLField(max_length=500, null=True)  # Added recordingPresignedUrl
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phonecall',null=True)
     hand_off_summary=models.TextField(blank=True,null=True)
+    transcription_text = models.TextField(blank=True,null=True)
+
+    # Self-referential foreign key
+    from_call_id = models.ForeignKey(
+        'self',  # Referencing the same model
+        on_delete=models.SET_NULL,  # Handle deletion of referenced call
+        null=True,
+        blank=True,
+        related_name='related_calls'  # Related name for reverse lookup
+    )
+
+    # Additional metadata from callback
+    recording_url = models.URLField(max_length=500, null=True)  # URL of the recording
+    recording_sid = models.CharField(max_length=100, null=True)  # Recording SID
+    call_duration = models.IntegerField(null=True, blank=True)  # Total call duration in seconds
+    recording_duration = models.IntegerField(null=True, blank=True)  # Recording duration in seconds
+    caller = models.CharField(max_length=20, null=True)  # Caller phone number
+    called = models.CharField(max_length=20, null=True)  # Called phone number
+    direction = models.CharField(max_length=50, null=True)  # Call direction (e.g., outbound-api)
+    from_country = models.CharField(max_length=50, null=True)  # Originating country
+    to_country = models.CharField(max_length=50, null=True)  # Destination country
+    from_city = models.CharField(max_length=100, null=True)  # Originating city
+    to_city = models.CharField(max_length=100, null=True)  # Destination city
+   
+
+
 
 class ServiceDetail(models.Model):
     SERVICE_CHOICES = [

@@ -52,7 +52,7 @@ def get_conversation_data(agent_id,PLAY_AI_API_KEY,PLAY_AI_USER_ID):
     except Exception as e:
         return {"error": f"An error occurred: {e}"}
     
-def get_transcript_data(agent_id,cid,PLAY_AI_API_KEY,PLAY_AI_USER_ID):
+def get_transcript_data(agent_id,cid,PLAY_AI_API_KEY,PLAY_AI_USER_ID,pagesize=10,startafter=0):
     """
     Utility function to fetch data from the Play AI API.
 
@@ -63,7 +63,7 @@ def get_transcript_data(agent_id,cid,PLAY_AI_API_KEY,PLAY_AI_USER_ID):
     - dict: Response data from Play AI or an error message.
     """
     api_url = f"https://api.play.ai/api/v1/agents/{agent_id}/conversations/{cid}/transcript" # Adjust endpoint URL based on Play AI's API documentation
-    querystring = {"pageSize":"50","startAfter":"0"}
+    querystring = {"pageSize":pagesize,"startAfter":startafter}
     headers = {
         "Authorization": f"Bearer {PLAY_AI_API_KEY}",
         "X-USER-ID": PLAY_AI_USER_ID,
@@ -106,3 +106,4 @@ def fetch_data_from_api(url, headers, params=None):
         return {"error": f"Request error occurred: {req_err}"}
     except Exception as e:
         return {"error": f"An error occurred: {e}"}
+    

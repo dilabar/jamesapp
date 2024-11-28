@@ -1,0 +1,200 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<style>
+  
+
+    /* Filters Section */
+    .filters {
+        display: flex;
+        justify-content: flex-end; /* Align content to the right */
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    #search-bar {
+        padding: 8px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 40px; /* Rounded corners */
+        outline: none;
+    }
+
+    .date-filters label {
+        margin-right: 10px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .date-filters input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 30px; /* Rounded corners for date inputs */
+        outline: none;
+    }
+
+ 
+
+  
+
+    thead {
+        background-color: #f4f4f4;
+    }
+
+
+
+    /* Status Badge Styling */
+    .status.completed {
+        color: #fff;
+        background-color: green;
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .status.initiated {
+        color: #fff;
+        background-color: rgb(216, 180, 17);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .status.forwarded {
+        color: #fff;
+        background-color: rgb(10, 141, 180);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .status.failed {
+        color: #fff;
+        background-color: rgb(177, 27, 60);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .status.pending {
+        color: #fff;
+        background-color: rgb(194, 181, 0);
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+    .voicemail.false, .meeting-action.false {
+        color: #fff;
+        background-color: orange;
+        padding: 5px 10px;
+        border-radius: 50px; /* Fully rounded */
+        text-align: center;
+    }
+
+    .explore {
+        color: #000;
+        font-size: 18px;
+    }
+</style>
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="content-page rtl-page ">
+    <div class="container card">
+        <!-- Filters Section -->
+        <div class="filters">
+            <input type="text" placeholder="Search History" id="search-bar">
+            <div class="date-filters">
+                <label for="start-date">Start Date</label>
+                <input type="date" id="start-date">
+                <label for="end-date">End Date</label>
+                <input type="date" id="end-date">
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <table class="table table-responsive">
+            <thead>
+                <tr>
+                    <th>Assistant Name</th>
+                    <th>Campaign Name</th>
+                    <th>Customer Name</th>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th>Call Forward</th>
+                    <th>Call Duration</th>
+                    <th>Date</th>
+                    <th>Explore More</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for call in page_obj %}
+                <tr>
+                    <td>{{ call.assistant_name }}</td>
+                    <td>{{ call.campaign_name|default:"Demo" }}</td>
+                    <td><a href="#">{{ call.customer_name }}</a></td>
+                    <td>{{ call.phone_number }}</td>
+                    <td>
+                        <button type="button" class="btn status {{ call.call_status|lower }}">{{ call.call_status }}</button>
+                    </td>
+                    <td>{{ call.is_call_forwarded|yesno:"YES,NO" }}</td>
+                    <td>{{ call.call_duration|default:"0" }}</td>
+                    <td>{{ call.timestamp|date:"F d, H:i a" }}</td>
+                    <td><a href="{% url 'agent:call_detail' call.id %}" class="explore">↗</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">No call history available.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        
+        </table>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% for i in page_range %}
+                    {% if i == page_number %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ i }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+        
+    </div>
+    </div>
+    {% endblock body %}
+    
+
+
+    {% block js %}
+    <script>
+        // Search bar filter functionality
+        document.getElementById('search-bar').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const customerName = row.cells[2].textContent.toLowerCase();
+                if (customerName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+    {% endblock js %}
+   
+

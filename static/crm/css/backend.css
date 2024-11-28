@@ -18422,17 +18422,17 @@ span.avatar-status {
   clear: both;
   word-break: break-word;
   color: #fff;
-  background: #05bbc9;
+  /* background: #05bbc9; */
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   -ms-border-radius: 8px;
   -o-border-radius: 8px;
   border-radius: 8px;
-  -webkit-box-shadow: 0 2px 4px 0 #50b5ff;
+  /* -webkit-box-shadow: 0 2px 4px 0 #50b5ff;
   -moz-box-shadow: 0 2px 4px 0 #50b5ff;
   -ms-box-shadow: 0 2px 4px 0 #50b5ff;
   -o-box-shadow: 0 2px 4px 0 #50b5ff;
-  box-shadow: 0 2px 4px 0 #50b5ff; }
+  box-shadow: 0 2px 4px 0 #50b5ff; } */
   .chat-message > p {
     margin: 0; }
 

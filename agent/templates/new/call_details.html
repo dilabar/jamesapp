@@ -1,0 +1,225 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+{% endblock header %}
+
+{% block css %}
+<style>
+    .tool-message {
+    background-color: #f1f1f1;
+    border-left: 5px solid #5e72e4;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tool-header {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.tool-content {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.tool-content pre {
+    background-color: #e9ecef;
+    padding: 8px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page ">
+
+<div class="container py-4">
+    <h3 class="text-left mb-4">Call Details</h3>
+
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-md-8" style="height: 600px; overflow-y: auto;">
+            <div class="card shadow-sm" >
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0 text-warning">Details</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Call Duration</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.call_duration}}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Date</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.timestamp}}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Start Time</p>
+                        <p class="mb-0 fw-semibold">{{ call_obj.timestamp|date:"h:i:s a" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">End Time</p>
+                        <p class="mb-0 fw-semibold">
+                            {% if end_time %}
+                            {{ end_time|date:"h:i:s a" }}
+                                {% else %}
+                                    N/A
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Customer Number</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.phone_number}}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Status</p>
+                        <p class="mb-0 fw-semibold">{{call_obj.call_status}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Call Recording</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <!-- audio -->
+                <div class="card-body d-flex align-items-center">
+                  {% if call_obj.recording_url %}
+                    <audio controls style="width: 100%;">
+                        <source src="{% url 'agent:fetch-recording' recording_url=call_obj.recording_url|urlencode %}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    {% endif%}
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Callee Information</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Name</p>
+                    <p class="mb-0 fw-semibold">Dilabar Hussain</p>
+                </div>
+            </div>
+            {% if call_obj.hand_off_summary %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Call Summarize</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body row">
+                    
+                        <p class="text-muted small mb-1">{{call_obj.hand_off_summary}}</p>
+                  
+                    
+                </div>
+            </div>
+            {% endif %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Customer Preferences</h2>
+                    <i class="bi bi-info-circle text-dark"></i>
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Preferred Contact</p>
+                        <p class="mb-0 fw-semibold">Phone</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Best Time to Call</p>
+                        <p class="mb-0 fw-semibold">Afternoon</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Language</p>
+                        <p class="mb-0 fw-semibold">English</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p class="text-muted small mb-1">Special Notes</p>
+                        <p class="mb-0 fw-semibold">Prefers detailed explanations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Transcript Messages</h2>
+                    <button class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+                <div class="card-body" style="height: 600px; overflow-y: auto;">
+                    <!-- Chat Messages -->
+                    <div class="d-flex flex-column gap-3">
+                   
+                        {% if transcript %}
+                        {% for data in transcript %}
+                            {% if data.role == "assistant" %}
+                        <!-- Sender Message -->
+                        <div class="d-flex align-items-start mb-1">
+                            <div class="me-3">
+                                <img src="{% static  'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-light p-2 rounded mb-0 text-dark">{{data.content}}</p>
+                                <small class="text-muted">{{data.timestamp}}</small>
+                            </div>
+                        </div>
+                        {% elif data.role == "user" %}
+                        <!-- Receiver Message -->
+                        <div class="d-flex align-items-end flex-row-reverse mb-1">
+                            <div class="ms-3">
+                                <img src="{% static 'img/feature/user.png' %}" alt="Receiver" class="rounded-circle" width="40" height="40">
+                            </div>
+                            <div>
+                                <p class="bg-primary p-2 rounded mb-0 text-white">{{data.content}}</p>
+                                <small class="text-muted d-block text-end">{{data.timestamp}}</small>
+                            </div>
+                        </div>
+                        {% elif data.role == "tool" %}
+                        <div class="tool-message mb-3">
+                            <div class="tool-header">
+                                <strong>{{ data.name }}</strong>
+                            </div>
+                            <div class="tool-content">
+                                <strong>Input:</strong> <pre>{{ data.input }}</pre>
+                                <strong>Output:</strong> <pre>{{ data.output }}</pre>
+                                <strong>Call Duration:</strong> {{ data.callDuration }} seconds
+                                <br>
+                                <strong>Timestamp:</strong> {{ data.timestamp|date:"h:i:s a" }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    </div>
+                </div>
+                <!-- <div class="card-footer">
+                    <form class="d-flex gap-2">
+                        <input type="text" class="form-control" placeholder="Type a message..." />
+                        <button class="btn btn-primary">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+                </div> -->
+            </div>
+        </div>
+        
+    </div>
+</div>
+</div>
+{% endblock body %}
