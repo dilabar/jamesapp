@@ -569,3 +569,48 @@ def get_twilio_call_recordings(request,call_sid):
         }
     return render(request, 'twilio_log/recording.html',context)
 
+@csrf_exempt
+def twilio_voice(request, user_id, agent_id):
+    """
+    Handles Twilio webhook for voice and saves call details in PhoneCall model.
+    """
+    logger.info(f"Received call: request {request.POST}")
+    if request.method == 'POST':
+        # Extract details from the POST request
+        call_sid = request.POST.get('CallSid')
+        from_number = request.POST.get('From')
+        to_number = request.POST.get('To')
+        call_status = request.POST.get('CallStatus', 'initiated')
+
+        # Log the received data
+        logger.info(f"Received call: SID={call_sid}, From={from_number}, To={to_number}")
+
+        try:
+            PhoneCall.objects.update_or_create(
+                twilio_call_id=call_sid,
+                defaults={
+                    'phone_number': from_number,
+                    'call_status': call_status,
+                    'user_id': user_id,
+                    'agent_id': agent_id,
+                },
+            )
+            logger.info(f"Call {call_sid} saved successfully.")
+        except Exception as e:
+            logger.error(f"Error saving call {call_sid}: {str(e)}")
+
+    # Create Twilio VoiceResponse
+    response = VoiceResponse()
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
+
+    try:
+        connect = Connect()
+        connect.stream(name='TwilioStream', url=stream_url)
+        connect.record()
+        response.append(connect)
+        response.say("Audio stream is now active. Please speak.")
+    except Exception as e:
+        logger.error(f"Error starting Twilio stream: {str(e)}")
+        response.say("Error starting the audio stream. Please try again later.")
+
+    return HttpResponse(str(response), content_type="text/xml")
