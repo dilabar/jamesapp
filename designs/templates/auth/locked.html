@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load static %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Partner Login - James App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Google font-->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/font-awesome.css' %}">
+    <!-- ico-font-->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/themify.css' %}">
+    <!-- Plugins css start-->
+    <!-- Plugins css Ends-->
+    <!-- Bootstrap css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/bootstrap.css' %}">
+    <!-- App css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/style.css' %}">
+    <link id="color" rel="stylesheet" href="{% static 'manish/css/color-1.css' %}" media="screen">
+    <!-- Responsive css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/responsive.css' %}">
+  </head>
+  <body>
+    <!-- login page start-->
+    <div class="container-fluid p-0">
+        
+
+        <div class="row">
+            <div class="col-12">
+              <div class="login-card login-dark">
+                <div>
+                  <div><a class="logo" href="#"><img class="img-fluid for-dark" 
+                    src="{% static 'manish/images/logo/logo.png' %}" alt="looginpage"><img class="img-fluid for-light" 
+                    src="{% static 'manish/images/logo/logo_dark.png' %}" alt="looginpage"></a></div>
+                  <div class="login-main">
+                    <form class="theme-form">
+                      <h4>Unlock</h4>
+                      <div class="form-group">
+                        <label class="col-form-label">Enter your Password</label>
+                        <div class="form-input position-relative">
+                          <input class="form-control" type="password" name="login[password]" required="" placeholder="*********">
+                          <div class="show-hide"><span class="show">                      </span></div>
+                        </div>
+                      </div>
+                      <div class="form-group mb-0">
+                        <div class="checkbox p-0">
+                          <input id="checkbox1" type="checkbox">
+                          <label class="text-muted" for="checkbox1">Remember password</label>
+                        </div>
+                        <button class="btn btn-primary btn-block w-100" type="submit">Unlock</button>
+                      </div>
+                      <p class="mt-4 mb-0">Already Have an account?<a class="ms-2" href="login.html">Sign in</a></p>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+     
+    </div>
+
+     <!-- latest jquery-->
+     <script src="{% static 'manish/js/jquery.min.js' %}"></script>
+     <!-- Bootstrap js-->
+     <script src="{% static 'manish/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+     <!-- feather icon js-->
+     <script src="{% static 'manish/js/icons/feather-icon/feather.min.js' %}"></script>
+     <script src="{% static 'manish/js/icons/feather-icon/feather-icon.js' %}"></script>
+     <!-- scrollbar js-->
+     <!-- Sidebar jquery-->
+     <script src="{% static 'manish/js/config.js' %}"></script>
+     <!-- Plugins JS start-->
+     <!-- calendar js-->
+     <!-- Plugins JS Ends-->
+     <!-- Theme js-->
+     <script src="{% static 'manish/js/script.js' %}"></script>
+
+  </body>
+</html>
