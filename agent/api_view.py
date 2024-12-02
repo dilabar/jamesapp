@@ -1,4 +1,6 @@
-from datetime import timedelta
+from datetime import time, timedelta
+import random
+from django.conf import settings
 from django.http import HttpResponse
 import requests
 from twilio.rest import Client
@@ -9,7 +11,14 @@ from django.core.paginator import Paginator
 from django.db.models import F
 
 from jamesapp.utils import decrypt, get_transcript_data
-from .models import PhoneCall, ServiceDetail
+from .models import PhoneCall, ServiceDetail,GoogleCalendarEvent
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+import json
 
 @login_required
 def call_history(request):
@@ -87,3 +96,71 @@ def fetch_twilio_recording(request,recording_url):
 def onboard(request):
     
     return render(request, 'new/agent_onboard.html')
+
+
+@csrf_exempt
+def playai_webhook(request):
+    """
+    Handles Play.ai webhook calls, creates a Google Calendar event, and saves details to the database.
+    """
+    if request.method == "POST":
+        try:
+            # Parse incoming JSON payload
+            data = json.loads(request.body)
+            print(data)
+            # Extract event details from the payload
+            summary = data.get("summary", "No Title")
+            start_time = data.get("start_time")
+            end_time = data.get("end_time")
+            description = data.get("description", "No Description")
+            attendees = data.get("attendees", [])
+
+            # # Google Calendar API setup using service account
+            # SCOPES = ['https://www.googleapis.com/auth/calendar']
+            # credentials = service_account.Credentials.from_service_account_file(
+            #     'client_secret.json', scopes=SCOPES
+            # )
+            # service = build('calendar', 'v3', credentials=credentials)
+
+            # # Create Google Calendar event payload
+            # event = {
+            #     "summary": summary,
+            #     "description": description,
+            #     "start": {"dateTime": start_time, "timeZone": "UTC"},
+            #     "end": {"dateTime": end_time, "timeZone": "UTC"},
+            #     "attendees": [{"email": attendee} for attendee in attendees],
+            # }
+
+            # Call Google Calendar API to create event
+            # calendar_event = service.events().insert(calendarId='primary', body=event).execute()
+
+            # Save event details to the database
+            saved_event = GoogleCalendarEvent.objects.create(
+                summary=summary,
+                start_time=start_time,
+                end_time=end_time,
+                description=description,
+                attendees=attendees,
+                calendar_event_id=f"event_{random.randint(1000, 9999)}",
+           
+                calendar_link=f"http://127.0.0.1:4040/?event_{random.randint(1000, 9999)}",
+            )
+
+            # Respond with success and event details
+            return JsonResponse({
+                "status": "success",
+                "message": "Event booked successfully.",
+                "event": {
+                    "id": saved_event.id,
+                    "summary": saved_event.summary,
+                    "start_time": saved_event.start_time,
+                    "end_time": saved_event.end_time,
+                    "calendar_link": saved_event.calendar_link,
+                },
+            })
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": f"Error occurred: {str(e)}"}, status=400)
+
+    # Handle non-POST requests
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)

@@ -75,7 +75,7 @@ class ServiceDetailForm(forms.ModelForm):
 class AgentForm(forms.ModelForm):
     class Meta:
         model = Agent
-        fields = ['agent_id', 'name', 'description','real_agent_no']
+        fields = ['agent_id', 'display_name', 'description','real_agent_no']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
@@ -84,7 +84,7 @@ class AgentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Adding custom CSS classes for styling if needed
         self.fields['agent_id'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Agent ID'})
-        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Agent Name'})
+        self.fields['display_name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Agent Name'})
         self.fields['real_agent_no'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Real Agent No'})
         self.fields['description'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Enter Description'})
         
@@ -98,7 +98,7 @@ class AgentForm(forms.ModelForm):
         instance = super().save(commit=False)
         # Encrypt data before saving to the database
         instance.agent_id = self.cleaned_data.get('agent_id', '')
-        instance.name = self.cleaned_data.get('name', '')
+        instance.display_name = self.cleaned_data.get('display_name', '')
         instance.real_agent_no = self.cleaned_data.get('real_agent_no', '')
         instance.description = self.cleaned_data.get('description', '')
 

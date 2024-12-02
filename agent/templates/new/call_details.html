@@ -6,9 +6,25 @@
 
 {% block css %}
 <style>
+    .avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #007bff; /* Example background color */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.avatar-text {
+    display: inline-block;
+}
     .tool-message {
     background-color: #f1f1f1;
-    border-left: 5px solid #5e72e4;
+    border-left: 5px solid #5ee496;
     padding: 10px;
     margin: 20px 0;
     border-radius: 8px;
@@ -172,7 +188,9 @@
                         <!-- Sender Message -->
                         <div class="d-flex align-items-start mb-1">
                             <div class="me-3">
-                                <img src="{% static  'img/feature/user.png' %}" alt="Sender" class="rounded-circle" width="40" height="40">
+                                <div class="avatar">
+                                    <span class="avatar-text">A</span>
+                                </div>
                             </div>
                             <div>
                                 <p class="bg-light p-2 rounded mb-0 text-dark">{{data.content}}</p>
@@ -183,7 +201,9 @@
                         <!-- Receiver Message -->
                         <div class="d-flex align-items-end flex-row-reverse mb-1">
                             <div class="ms-3">
-                                <img src="{% static 'img/feature/user.png' %}" alt="Receiver" class="rounded-circle" width="40" height="40">
+                                <div class="avatar">
+                                    <span class="avatar-text">U</span>
+                                </div>
                             </div>
                             <div>
                                 <p class="bg-primary p-2 rounded mb-0 text-white">{{data.content}}</p>

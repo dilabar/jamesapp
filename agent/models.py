@@ -1,16 +1,32 @@
 from django.db import models
 
+
 from jamesapp import settings
 from jamesapp.utils import decrypt, encrypt
 
 # Create your models here.
 class Agent(models.Model):
     id = models.AutoField(primary_key=True)  # Auto-incrementing primary key
-    agent_id = models.CharField(max_length=255, unique=True)  # Unique agent ID from Play.ai
-    name = models.CharField(max_length=255)
-    real_agent_no = models.CharField(max_length=20,null=True,blank=True)
+    agent_id = models.CharField(max_length=255, unique=True)
+    voice = models.URLField(null=True, blank=True)
+    voice_speed = models.FloatField(null=True, blank=True)
+    display_name = models.CharField(max_length=255,null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set at creation
+    greeting = models.TextField(null=True, blank=True)
+    prompt = models.TextField(null=True, blank=True)
+    critical_knowledge = models.TextField(null=True, blank=True)
+    visibility = models.CharField(max_length=50,null=True, blank=True)
+    answer_only_from_critical_knowledge = models.BooleanField(null=True, blank=True)
+    avatar_photo_url = models.URLField(null=True, blank=True)
+    critical_knowledge_files = models.JSONField(null=True, blank=True)
+    phone_numbers = models.JSONField(null=True, blank=True)  # To store list of phone numbers as JSON
+    real_agent_no = models.CharField(max_length=20,null=True,blank=True)
+    llm_base_url = models.URLField(null=True, blank=True)
+    llm_api_key = models.CharField(max_length=255,null=True, blank=True)
+    llm_model = models.CharField(max_length=255,null=True, blank=True)
+    llm_temperature = models.FloatField(null=True, blank=True)
+    llm_max_tokens = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)      # Automatically update on save
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='agents',null=True)
 
@@ -24,7 +40,7 @@ class Agent(models.Model):
         return decrypt(self.agent_id)
     
     def __str__(self):
-        return self.name
+        return f"{self.display_name}"
 
     
 class PhoneCall(models.Model):
@@ -111,3 +127,35 @@ class ServiceDetail(models.Model):
 
     def __str__(self):
         return f"{self.service_name}"
+    
+class GoogleCalendarEvent(models.Model):
+    # Event Title
+    summary = models.CharField(max_length=255)
+    
+    # Event Start and End Times
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    # Event Description
+    description = models.TextField()
+
+    # Attendees (storing emails of attendees)
+    attendees = models.JSONField()  # To store a list of email addresses
+    
+    # Google Calendar Event ID and Link
+    calendar_event_id = models.CharField(max_length=255, unique=True)
+    calendar_link = models.URLField()
+
+    # Status of the booking
+    status = models.CharField(max_length=50, choices=[
+        ('booked', 'Booked'),
+        ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
+    ], default='booked')
+
+    # Timestamps for when the event was created/modified
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Meeting: {self.summary} on {self.start_time}"
