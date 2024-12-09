@@ -604,9 +604,16 @@ def twilio_voice(request, user_id, agent_id):
     stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
 
     try:
+        # response.record(
+        #     max_length=3600,  # Maximum recording length (in seconds)
+        #     action=f"/twilio/recording_status/{call_sid}/",  # URL to handle recording completion
+        #     method="POST",  # POST method to send data back
+        #     timeout=10,  # Wait for silence timeout in seconds
+        #     play_beep=True,  # Play a beep when starting the recording
+        #     transcribe=False  # Set to True if you want automatic transcription of the recording
+        # )
         connect = Connect()
         connect.stream(name='TwilioStream', url=stream_url)
-        connect.record()
         response.append(connect)
         response.say("Audio stream is now active. Please speak.")
     except Exception as e:
