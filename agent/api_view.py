@@ -1,4 +1,8 @@
-from datetime import timedelta
+from datetime import time, timedelta
+from hashlib import sha256
+import os
+import random
+from django.conf import settings
 from django.http import HttpResponse
 import requests
 from twilio.rest import Client
@@ -8,8 +12,16 @@ import urllib
 from django.core.paginator import Paginator
 from django.db.models import F
 
-from jamesapp.utils import decrypt, get_transcript_data
-from .models import PhoneCall, ServiceDetail
+from scheduling.models import CalendarConnection
+from jamesapp.utils import decrypt, encrypt, get_transcript_data
+from .models import Agent, PhoneCall, ServiceDetail,GoogleCalendarEvent
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.views import View
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+import json
 
 @login_required
 def call_history(request):
@@ -87,3 +99,83 @@ def fetch_twilio_recording(request,recording_url):
 def onboard(request):
     
     return render(request, 'new/agent_onboard.html')
+
+
+@csrf_exempt
+def playai_webhook(request):
+    """
+    Handles Play.ai webhook calls, creates a Google Calendar event, and saves details to the database.
+    """
+    if request.method == "POST":
+        try:
+            # Parse incoming JSON payload
+            data = json.loads(request.body)
+            # Extract event details from the payload
+            summary = data.get("summary", "No Title")
+            start_time = data.get("start_time")
+            end_time = data.get("end_time")
+            description = data.get("description", "No Description")
+            attendees = data.get("attendees")
+            agentId = data.get("agentId")
+            agent_id_hash = sha256(agentId.encode()).hexdigest()
+
+            agd=Agent.objects.filter(agent_id_hash=agent_id_hash).first()
+
+            # Optionally, add to Google Calendar
+            user = agd.user  # Ensure the user is set correctly
+            calendar_connection = CalendarConnection.objects.get(user_id=user)
+            if calendar_connection.provider == 'google':
+                raw_credentials = calendar_connection.credentials
+                credentials = Credentials(
+                token=raw_credentials.get("token"),
+                refresh_token=raw_credentials.get("refresh_token"),
+                token_uri=raw_credentials.get("token_uri"),
+                client_id=raw_credentials.get("client_id"),
+                client_secret=raw_credentials.get("client_secret"),
+                )
+                # credentials = Credentials(**calendar_connection.credentials)
+                service = build('calendar', 'v3', credentials=credentials)
+               
+                event = {
+                    "summary": summary,
+                    "description": description,
+                    "start": {"dateTime": start_time, "timeZone": "UTC"},
+                    "end": {"dateTime": end_time, "timeZone": "UTC"},
+                    "attendees": [{"email": attendees}],
+                    # "attendees": [{"email": 'dilbarh2@gmail.com'}],
+                }
+                calendar_event = service.events().insert(calendarId='primary', body=event).execute()
+
+                # Save event details to the database
+                saved_event = GoogleCalendarEvent.objects.create(
+                    summary=summary,
+                    start_time=start_time,
+                    end_time=end_time,
+                    description=description,
+                    attendees=attendees,
+                    calendar_event_id=f"{calendar_event['id']}",  # Access event ID as string
+                    calendar_link=calendar_event['htmlLink'],  # Use htmlLink for the event URL
+                )
+
+            # Respond with success and event details
+            return JsonResponse({
+                "status": "success",
+                "message": "Event booked successfully.",
+                "event": {
+                    "id": saved_event.id,
+                    "summary": saved_event.summary,
+                    "start_time": saved_event.start_time,
+                    "end_time": saved_event.end_time,
+                    "calendar_link": saved_event.calendar_link,
+                },
+            })
+
+        except Exception as e:
+            print(f"Error occurred: {str(e)}")
+            return JsonResponse({"status": "error", "message": f"Error occurred: {str(e)}"}, status=400)
+
+    # Handle non-POST requests
+    return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+
+
+  

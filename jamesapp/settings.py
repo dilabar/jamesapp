@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
-ALLOWED_HOSTS = ["127.0.0.1","secretvoiceagent.net","1515-2405-201-800d-e867-9d60-73ab-aa97-8c0b.ngrok-free.app"]
+ALLOWED_HOSTS = ["127.0.0.1","localhost","secretvoiceagent.net","3d45-2401-4900-3bf6-8777-1d22-f330-edfa-248a.ngrok-free.app"]
 CSRF_TRUSTED_ORIGINS=['https://*.ngrok-free.app','https://secretvoiceagent.net','http://secretvoiceagent.net']
 # Application definition
 
@@ -44,10 +44,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'callapp',
-    'agent'
+    'agent',
+    'scheduling',
+    'sslserver'
 ]
-
+CORS_ALLOW_ALL_ORIGINS = True
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -59,7 +62,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'jamesapp.urls'
-
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -139,3 +142,4 @@ ACOUNT_SID=os.getenv('ACOUNT_SID')
 AUTH_TOKEN=os.getenv('AUTH_TOKEN')
 LOGIN_URL = '/login/'
 OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY',default="")
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY',default="")

@@ -23,5 +23,6 @@ urlpatterns = [
     path('call_history/<int:id>/', call_detail, name='call_detail'),
     path('agent/setup/', agent_setup, name='agent_setup'),
     path('onboard/', onboard, name='onboard'),
+    path('api/playai/webhook/', playai_webhook, name='playai-webhook'),
 
 ]
