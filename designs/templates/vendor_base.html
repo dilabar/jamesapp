@@ -35,6 +35,11 @@
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/prism.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/fullcalender.css' %}">
     <!-- Plugins css Ends-->
+     
+     {% block css %}
+      
+     {% endblock css %}
+      
     <!-- Bootstrap css-->
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/bootstrap.css' %}">
     <!-- App css-->
@@ -124,9 +129,11 @@
     <script src="{% static 'manish/js/dashboard/dashboard_2.js' %}"></script>
     <script src="{% static 'manish/js/animation/wow/wow.min.js' %}"></script>
     <!-- Plugins JS Ends-->
+    {% block js %}
+    {% endblock js %}
     <!-- Theme js-->
     <script src="{% static 'manish/js/script.js' %}"></script>
-    <script src="{% static 'manish/js/theme-customizer/customizer.js' %}"></script>
+ 
     <script>new WOW().init();</script>
   </body>
 </html> 

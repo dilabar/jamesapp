@@ -10,5 +10,15 @@ urlpatterns = [
 
     path('dashboard/', dashboard, name='dashboard'),
 
-    #
+    #agents
+    path('agent-onboarding/', onboard, name='onboard'),
+    path('agent-list/', agent_list, name='agent_list'),
+    path('agent-card/', start_card, name='start_card'),
+    path('start-calling/', start_calling, name='start_calling'),
+    path('all-conversation/', all_conversation, name='all_conversation'),
+    path('all-conversation-detail/', all_conversation_detail, name='all_conversation_detail'),
+    
+    
+    path('agent-card-2/', start_card2, name='start_card2'),
+
 ]

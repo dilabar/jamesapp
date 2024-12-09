@@ -1,0 +1,198 @@
+
+
+
+  {% extends 'vendor_base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+            <h4></h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">                                       
+                  <svg class="stroke-icon">
+                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                  </svg></a></li>
+              <li class="breadcrumb-item">Agents</li>
+              <li class="breadcrumb-item active">Call Log </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+   
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+        <div class="row">
+          
+          
+
+            <div class="col-xxl-12 col-xl-12 col-md-12 box-col-12">
+                <div class="card right-sidebar-chat">
+                  <div class="right-sidebar-title">
+                    <div class="common-space"> 
+                      <div class="chat-time">
+                        <div class="active-profile"><img class="img-fluid rounded-circle" src="{% static 'manish/images/blog/comment.jpg' %}" alt="user">
+                          <div class="status bg-success"></div>
+                        </div>
+                        <div><span class="f-w-500">Darrell Steward</span>
+                          <p>Call Successful</p>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2">
+                           
+                        <div class="contact-edit chat-alert"><i class="icon-info-alt"></i></div>
+                        <div class="contact-edit chat-alert">
+                          
+                                <svg class="dropdown-toggle" role="menu" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#menubar"></use>
+                                  </svg>
+                            
+
+                          
+                          <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#!">View details</a><a class="dropdown-item" href="#!">
+                               Summarize</a><a class="dropdown-item" href="#!">
+                               Add to favorites</a>
+                               <a class="dropdown-item" href="#!">
+                                Sentiment Analysis</a></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="right-sidebar-Chats"> 
+                    <div class="msger">
+                      <div class="msger-chat">
+                        <div class="msg left-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Theresa Webb</div>
+                              <div class="msg-info-time">01:14 PM</div>
+                            </div>
+                            <div class="msg-text">Hey, I'm looking to redesign my website. Can you help me? 😄</div>
+                          </div>
+                        </div>
+                        <div class="msg right-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Darrell Steward</div>
+                              <div class="msg-info-time">12:14 PM</div>
+                            </div>
+                            <div class="msg-text"> Absolutely! I'd be happy to assist you.</div>
+                          </div>
+                        </div>
+                        <div class="msg right-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Darrell Steward</div>
+                              <div class="msg-info-time">12:14 PM</div>
+                            </div>
+                            <div class="msg-text">What kind of design aesthetic are you aiming for?</div>
+                          </div>
+                        </div>
+                        <div class="msg left-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Theresa Webb</div>
+                              <div class="msg-info-time">01:14 PM</div>
+                            </div>
+                            <div class="msg-text">I want a clean and modern look with a focus on user experience.</div>
+                          </div>
+                        </div>
+                        <div class="msg right-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Darrell Steward</div>
+                              <div class="msg-info-time">12:14 PM</div>
+                            </div>
+                            <div class="msg-text">Great!  Do you have any specific color schemes in mind?</div>
+                          </div>
+                        </div>
+                        <div class="msg left-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Theresa Webb</div>
+                              <div class="msg-info-time">01:14 PM</div>
+                            </div>
+                            <div class="msg-text">I'm thinking of using a combination of blues and grays.</div>
+                          </div>
+                        </div>
+                        <div class="msg right-msg">
+                          <div class="msg-img"></div>
+                          <div class="msg-bubble">
+                            <div class="msg-info">
+                              <div class="msg-info-name">Darrell Steward</div>
+                              <div class="msg-info-time">12:14 PM</div>
+                            </div>
+                            <div class="msg-text">Excellent choice! Those colors can definitely create a professional.</div>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <form class="msger-inputarea">
+                        <div class="dropdown-form dropdown-toggle" role="main" data-bs-toggle="dropdown" aria-expanded="false"><i class="icon-plus"></i>
+                          <div class="chat-icon dropdown-menu dropdown-menu-start">
+                            <div class="dropdown-item mb-2">
+                              <svg> 
+                                <use href="../assets/svg/icon-sprite.svg#camera"></use>
+                              </svg>
+                            </div>
+                            <div class="dropdown-item">
+                              <svg> 
+                                <use href="../assets/svg/icon-sprite.svg#attchment"></use>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                        <input class="msger-input two uk-textarea" type="text" placeholder="Type Message here..">
+                        <div class="open-emoji">
+                          <div class="second-btn uk-button"></div>
+                        </div>
+                        <button class="msger-send-btn" type="submit"><i class="fa fa-location-arrow"></i></button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+          
+        
+        </div>
+      </div>
+      <!-- Container-fluid Ends-->
+
+
+</div>            
+
+{% endblock body %}
+    
+
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+{% endblock js %}
+    

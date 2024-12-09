@@ -21,3 +21,24 @@ def maintainance(request):
 
 def dashboard(request):
     return render(request, 'dashboard/dashboard.html')
+
+def onboard(request):
+    return render(request, 'agent/onboard.html')
+
+def agent_list(request):
+    return render(request, 'agent/my_agent_list.html')
+
+def start_card(request):
+    return render(request, 'agent/agent_card.html')
+
+def start_card2(request):
+    return render(request, 'agent/agent_card2.html')
+
+def start_calling(request):
+    return render(request, 'agent/start_calling.html')
+
+def all_conversation(request):
+    return render(request, 'agent/all_conversation.html')
+
+def all_conversation_detail(request):
+    return render(request, 'agent/all_conversation_detail.html')
