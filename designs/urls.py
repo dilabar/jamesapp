@@ -8,4 +8,7 @@ urlpatterns = [
     path('forgot-password/', forgot_password, name='register'),
     path('maintainance/', maintainance, name='maintainance'),
 
+    path('dashboard/', dashboard, name='dashboard'),
+
+    #
 ]

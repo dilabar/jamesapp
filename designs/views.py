@@ -18,3 +18,6 @@ def forgot_password(request):
 
 def maintainance(request):
     return render(request, 'auth/maintain.html')
+
+def dashboard(request):
+    return render(request, 'dashboard/dashboard.html')
