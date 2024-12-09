@@ -1,0 +1,49 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">
+{% endblock header %}
+
+{% block css %}
+<style>
+    .integration-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 10px;
+        text-align: center;
+    }
+    .integration-card img {
+        max-width: 50px;
+        margin-bottom: 10px;
+    }
+    .connect-btn {
+        margin-top: 10px;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+        <h5 class="">Integrations & App</h5>
+        <div class="row">
+            {% for integration in integrations %}
+            <div class="col-md-4">
+                <div class="integration-card">
+                    <img src="{{ integration.icon }}" alt="{{ integration.name }}">
+                    <h5>{{ integration.name }}</h5>
+                    <p>{{ integration.description }}</p>
+                    {% if integration.is_connected %}
+                    <button class="btn btn-outline-success" disabled>Connected</button>
+                    {% else %}
+                    <a href="{{ integration.connect_url }}" class="btn btn-primary connect-btn">Connect</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock body %}

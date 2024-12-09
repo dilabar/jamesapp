@@ -1,3 +1,4 @@
+import hashlib
 from django.db import models
 
 
@@ -8,6 +9,7 @@ from jamesapp.utils import decrypt, encrypt
 class Agent(models.Model):
     id = models.AutoField(primary_key=True)  # Auto-incrementing primary key
     agent_id = models.CharField(max_length=255, unique=True)
+    agent_id_hash = models.CharField(max_length=64, unique=True, null=True, blank=True)  # Use SHA-256 hash
     voice = models.URLField(null=True, blank=True)
     voice_speed = models.FloatField(null=True, blank=True)
     display_name = models.CharField(max_length=255,null=True, blank=True)
@@ -33,6 +35,7 @@ class Agent(models.Model):
     def save(self, *args, **kwargs):
         # Encrypt sensitive data before saving
         if self.agent_id:
+            self.agent_id_hash = hashlib.sha256(self.agent_id.encode()).hexdigest()
             self.agent_id = encrypt(self.agent_id)
         super().save(*args, **kwargs)
     @property
