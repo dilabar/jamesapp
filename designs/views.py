@@ -42,3 +42,6 @@ def all_conversation(request):
 
 def all_conversation_detail(request):
     return render(request, 'agent/all_conversation_detail.html')
+
+def all_conversation_log(request):
+    return render(request, 'agent/all_conversation_log.html')
