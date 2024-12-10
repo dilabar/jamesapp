@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'callapp',
     'agent',
     'scheduling',
-    'sslserver'
+    
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 MIDDLEWARE = [
