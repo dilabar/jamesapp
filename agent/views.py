@@ -47,7 +47,7 @@ def agent_list(request):
 @login_required
 def dashboards(request):
     
-    return render(request, 'crm/dash.html')
+    return render(request, 'dashboard/dashboard.html')
 
 
 
@@ -107,7 +107,7 @@ def logout_user(request):
 
 def reset(request):
     
-    return render(request, 'crm/resetpassword.html')
+    return render(request, 'auth/forgot_password.html')
 @login_required
 def service_detail_view(request):
     # Get the user's existing service details for Twilio and Play.ai
