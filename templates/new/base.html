@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% load static %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Riho admin is super flexible, powerful, clean &amp; modern responsive bootstrap 5 admin template with unlimited possibilities.">
+    <meta name="keywords" content="admin template, Riho admin template, dashboard template, flat admin template, responsive admin template, web app">
+    <meta name="author" content="pixelstrap">
+    <link rel="icon" href="{% static 'manish/images/favicon.png' %}" type="image/x-icon">
+    <link rel="shortcut icon" href="{% static 'manish/images/favicon.png' %}" type="image/x-icon">
+    <title>James App</title>
+    <!-- Google font-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/font-awesome.css' %}">
+    <!-- ico-font-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/icofont.css' %}">
+    <!-- Themify icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/themify.css' %}">
+    <!-- Flag icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/flag-icon.css' %}">
+    <!-- Feather icon-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/feather-icon.css' %}">
+    <!-- Plugins css start-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick-theme.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/scrollbar.css' %}">
+    <!-- Range slider css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/rangeslider/rSlider.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/animate.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/prism.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/fullcalender.css' %}">
+    <!-- Plugins css Ends-->
+     
+     {% block css %}
+      
+     {% endblock css %}
+      
+    <!-- Bootstrap css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/bootstrap.css' %}">
+    <!-- App css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/style.css' %}">
+    <link id="color" rel="stylesheet" href="{% static 'manish/css/color-1.css' %}" media="screen">
+    <!-- Responsive css-->
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/responsive.css' %}">
+  </head>
+  <body>  
+    
+    <!-- loader starts-->
+    <div class="loader-wrapper">
+      <div class="loader"> 
+        <div class="loader4"></div>
+      </div>
+    </div>
+    <!-- loader ends-->
+    
+    <!-- tap on top starts-->
+    <div class="tap-top"><i data-feather="chevrons-up"></i></div>
+    <!-- tap on tap ends-->
+
+
+    <!-- page-wrapper Start-->
+    <div class="page-wrapper compact-wrapper" id="pageWrapper">
+      
+    {% include 'components/header.html' %}
+
+
+      <!-- Page Body Start-->
+      <div class="page-body-wrapper">
+        <!-- Page Sidebar Start-->
+        {% include 'components/sidebar.html' %}
+        <!-- Page Sidebar Ends-->
+        
+        
+        {% block body %}
+            
+        {% endblock body %}
+            
+
+
+        <!-- footer start-->
+        <footer class="footer">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-12 footer-copyright text-center">
+                <p class="mb-0">Copyright 2024 © James Call App  </p>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+    <!-- latest jquery-->
+    <script src="{% static 'manish/js/jquery.min.js' %}"></script>
+    <!-- Bootstrap js-->
+    <script src="{% static 'manish/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <!-- feather icon js-->
+    <script src="{% static 'manish/js/icons/feather-icon/feather.min.js' %}"></script>
+    <script src="{% static 'manish/js/icons/feather-icon/feather-icon.js' %}"></script>
+    <!-- scrollbar js-->
+    <script src="{% static 'manish/js/scrollbar/simplebar.js' %}"></script>
+    <script src="{% static 'manish/js/scrollbar/custom.js' %}"></script>
+    <!-- Sidebar jquery-->
+    <script src="{% static 'manish/js/config.js' %}"></script>
+    <!-- Plugins JS start-->
+    <script src="{% static 'manish/js/sidebar-menu.js' %}"></script>
+    <script src="{% static 'manish/js/sidebar-pin.js' %}"></script>
+    <script src="{% static 'manish/js/slick/slick.min.js' %}"></script>
+    <script src="{% static 'manish/js/slick/slick.js' %}"></script>
+    <script src="{% static 'manish/js/header-slick.js' %}"></script>
+    <script src="{% static 'manish/js/chart/apex-chart/apex-chart.js' %}"></script>
+    <script src="{% static 'manish/js/chart/apex-chart/stock-prices.js' %}"></script>
+    <!-- Range Slider js-->
+    <script src="{% static 'manish/js/range-slider/rSlider.min.js' %}"></script>
+    <script src="{% static 'manish/js/rangeslider/rangeslider.js' %}"></script>
+    <script src="{% static 'manish/js/prism/prism.min.js' %}"></script>
+    <script src="{% static 'manish/js/clipboard/clipboard.min.js' %}"></script>
+    <script src="{% static 'manish/js/counter/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'manish/js/counter/jquery.counterup.min.js' %}"></script>
+    <script src="{% static 'manish/js/counter/counter-custom.js' %}"></script>
+    <script src="{% static 'manish/js/custom-card/custom-card.js' %}"></script>
+    <!-- calendar js-->
+    <script src="{% static 'manish/js/calendar/fullcalender.js' %}"></script>
+    <script src="{% static 'manish/js/calendar/custom-calendar.js' %}"></script>
+    <script src="{% static 'manish/js/dashboard/dashboard_2.js' %}"></script>
+    <script src="{% static 'manish/js/animation/wow/wow.min.js' %}"></script>
+    <!-- Plugins JS Ends-->
+    {% block js %}
+    {% endblock js %}
+    <!-- Theme js-->
+    <script src="{% static 'manish/js/script.js' %}"></script>
+ 
+    <script>new WOW().init();</script>
+  </body>
+</html> 

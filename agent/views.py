@@ -42,7 +42,7 @@ def agent_list(request):
     context={
         'agents': agents
     }
-    return render(request, 'agent/agent_list.html', context)
+    return render(request, 'new/my_agent_list.html', context)
 
 @login_required
 def dashboards(request):
@@ -79,7 +79,7 @@ def signup(request):
             except Exception as e:
                 messages.error(request, f"Error occurred: {e}")
 
-    return render(request, 'crm/signup.html')
+    return render(request, 'auth/register.html')
 
 
 # Login View
@@ -94,7 +94,7 @@ def login(request):
         else:
             messages.error(request, "Invalid username or password.")
     
-    return render(request, 'crm/login.html')
+    return render(request, 'auth/login.html')
 
 
 
