@@ -182,7 +182,7 @@ def create_or_update_agent(request, id=None):
     else:
         form = AgentForm(instance=agent)
     
-    return render(request, 'agent/create_or_update_agent.html', {'form': form, 'agent': agent})
+    return render(request, 'new/onboard.html', {'form': form, 'agent': agent})
 @login_required
 def delete_agent(request, id):
     # dec_agent_id=decrypt(agent_id)
@@ -202,7 +202,7 @@ def get_conversation(request, agent_id):
     else:
         # Assume data is a list of results
         context = {"data_list": data,"agent_id":agent_id}
-    return render(request, 'agent/conversation.html', context)
+    return render(request, 'new/all_conversation.html', context)
 
 @login_required
 def get_transcript(request, agent_id,cid):

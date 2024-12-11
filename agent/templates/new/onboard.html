@@ -1,0 +1,98 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+            <h4></h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">                                       
+                  <svg class="stroke-icon">
+                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                  </svg></a></li>
+              <li class="breadcrumb-item">Agents</li>
+              <li class="breadcrumb-item active">Onboard Agent</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+      <div class="row">
+          <div class="col-xl-12">
+              <div class="card height-equal">
+                  <div class="card-header">
+                      <h4>{{ agent.name|default:"Onboarding Existing Agent" }}</h4>
+                      <p class="f-m-light mt-1">
+                          Use this form to onboard an existing AI agent by providing the required details such as Agent ID, Name, Real Agent Number, and Description. Ensure that all information is accurate before submitting.
+                      </p>
+                  </div>
+                  <div class="card-body custom-input">
+                      {% if messages %}
+                          <ul>
+                              {% for message in messages %}
+                                  <li>{{ message }}</li>
+                              {% endfor %}
+                          </ul>
+                      {% endif %}
+                      <form class="row g-3" action="{% if agent %}{% url 'agent:update_agent' agent.id %}{% else %}{% url 'agent:create_agent' %}{% endif %}" method="POST">
+                          {% csrf_token %}
+                          <div class="col-4">
+                              <label class="form-label" for="agent-id">Agent ID</label>
+                              <input class="form-control" id="agent-id" name="agent_id" type="text" placeholder="Enter Agent ID" 
+                                     value="{{ form.instance.decrypted_agent_id|default:'' }}" required>
+                          </div>
+                          <div class="col-4">
+                              <label class="form-label" for="name">Name</label>
+                              <input class="form-control" id="name" name="name" type="text" placeholder="Enter Agent Name" 
+                                     value="{{ form.instance.name|default:'' }}" required>
+                          </div>
+                          <div class="col-4">
+                              <label class="form-label" for="real-agent-no">Real Agent No</label>
+                              <input class="form-control" id="real-agent-no" name="real_agent_no" type="text" placeholder="Enter Real Agent Number" 
+                                     value="{{ form.instance.real_agent_no|default:'' }}" required>
+                          </div>
+                          <div class="col-12">
+                              <label class="form-label" for="descriptions">Descriptions</label>
+                              <textarea class="form-control" id="descriptions" name="description" rows="3" placeholder="Enter Description" required>{{ form.instance.description|default:'' }}</textarea>
+                          </div>
+                          <div class="col-12">
+                              <button class="btn btn-primary" type="submit">
+                                  {% if agent %}Update Agent{% else %}Add Agent{% endif %}
+                              </button>
+                          </div>
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+</div>            
+
+{% endblock body %}
+    
+
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+{% endblock js %}
+    
