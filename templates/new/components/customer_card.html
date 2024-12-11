@@ -1,42 +1,46 @@
 {% load static %}
 
 <div class="fade tab-pane active show" id="pills-created" role="tabpanel" aria-labelledby="pills-created-tab">
-         <!-- Callee Information Section -->
- <div class="card mb-4">
-    <div class="card-header">
-        <h4 class="fw-bold">Callee Information</h4>
-    </div>
-    <div class="card-body">
-        <p class="mb-2"><strong>Name:</strong> <span class="text-muted">Dilabar Hussain</span></p>
-    </div>
-  </div>
+    <!-- Callee Information Section -->
+    <div class="card mb-4">
         <div class="card-header">
-            <h4 class="fw-bold">Call Stats</h4>
+            <h4 class="fw-bold">Details</h4>
         </div>
         <div class="card-body">
-            <!-- Details Section -->
+            <!-- Call Stats -->
             <div class="row mb-4">
                 <div class="col-md-6 mb-3">
-                    <p class="mb-2"><strong>Call Duration:</strong> <span class="text-muted">343</span></p>
-                    <p class="mb-2"><strong>Start Time:</strong> <span class="text-muted">09:10:15 p.m.</span></p>
-                    <p class="mb-2"><strong>Customer Number:</strong> <span class="text-muted">919679728063</span></p>
+                    <p class="mb-2"><strong>Call Duration:</strong> <span class="text-muted">{{ call_obj.call_duration }}</span></p>
+                    <p class="mb-2"><strong>Date:</strong> <span class="text-muted">{{ call_obj.timestamp }}</span></p>
+                    <p class="mb-2"><strong>Start Time:</strong> <span class="text-muted">{{ call_obj.timestamp|date:"h:i:s a" }}</span></p>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <p class="mb-2"><strong>Date:</strong> <span class="text-muted">Dec. 9, 2024, 9:10 p.m.</span></p>
-                    <p class="mb-2"><strong>End Time:</strong> <span class="text-muted">09:15:58 p.m.</span></p>
-                    <p class="mb-2"><strong>Status:</strong> <span class="text-success fw-bold">Completed</span></p>
+                    <p class="mb-2"><strong>End Time:</strong> 
+                        <span class="text-muted"> 
+                            {% if end_time %}
+                                {{ end_time|date:"h:i:s a" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </span>
+                    </p>
+                    <p class="mb-2"><strong>Customer Number:</strong> <span class="text-muted">{{ call_obj.phone_number }}</span></p>
+                    <p class="mb-2"><strong>Status:</strong> <span class="text-muted">{{ call_obj.call_status }}</span></p>
                 </div>
             </div>
 
             <!-- Call Recording Section -->
             <div class="mb-3">
                 <h5 class="fw-bold mb-3">Call Recording</h5>
-                <audio controls class="w-100">
-                    <source src="call-recording.mp3" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
+                {% if call_obj.recording_url %}
+                    <audio controls class="w-100">
+                        <source src="{% url 'agent:fetch-recording' recording_url=call_obj.recording_url|urlencode %}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                {% else %}
+                    <p class="text-muted">No recording available.</p>
+                {% endif %}
             </div>
         </div>
-    
+    </div>
 </div>
-

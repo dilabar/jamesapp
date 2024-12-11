@@ -1,0 +1,115 @@
+{% extends 'vendor_base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+            <h4></h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">                                       
+                    <svg class="stroke-icon">
+                      <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                    </svg></a></li>
+              <li class="breadcrumb-item">Agents</li>
+              <li class="breadcrumb-item active">Agent List</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+      <div class="row">
+            <!-- Scroll - vertical dynamic Starts -->
+<div class="col-sm-12">
+    <div class="card">
+        <div class="card-header pb-0 card-no-border">
+            <h4>Agent Conversation List</h4>
+            <span>Easily track and manage agent conversations, including details like source, caller email, duration, and actions. Use the buttons to view the conversation or generate a summary.</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive user-datatable custom-scrollbar">
+                <table class="display" id="basic-10">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Source</th>
+                            <th>Caller Email</th>
+                            <th>Started At</th>
+                            <th>Ended At</th>
+                            <th>Duration (Seconds)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cv in data_list %}
+                            <tr>
+                                <td>{{ cv.id }}</td>
+                                <td>{{ cv.source }}</td>
+                                <td>{{ cv.callerEmail }}</td>
+                                <td>{{ cv.startedAt }}</td>
+                                <td>{{ cv.endedAt }}</td>
+                                <td>{{ cv.durationInSeconds }}</td>
+                                <td>
+                                    <a href="{% url 'agent:get_transcript' agent_id=agent_id cid=cv.id %}" class="btn btn-success mt-2">Details</a>
+                                    <a href="{% url 'agent:summarize_transcript' agent_id=agent_id cid=cv.id %}" class="btn btn-primary mt-2">Summarize</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center no-agents">No agents found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    
+                    <tfoot>
+                        <tr>
+                            <th>ID</th>
+                            <th>Source</th>
+                            <th>Caller Email</th>
+                            <th>Started At</th>
+                            <th>Ended At</th>
+                            <th>Duration (Seconds)</th>
+                            <th>Action</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Scroll - vertical dynamic Ends -->
+
+          
+        </div>
+    </div>
+</div>            
+
+
+
+
+{% endblock body %}
+    
+
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+{% endblock js %}
+    

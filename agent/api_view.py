@@ -46,7 +46,7 @@ def call_history(request):
         'total_pages': total_pages,  # Total number of pages
         'page_range': range(1, total_pages + 1),  # Create a range of pages
     }
-    return render(request, 'new/call_history.html', context)
+    return render(request, 'new/calls_history.html', context)
 @login_required
 def call_detail(request, id):
     obj = PhoneCall.objects.filter(user=request.user, id=id).first()
@@ -75,7 +75,7 @@ def call_detail(request, id):
         'end_time': end_time,
         'transcript': transcript
     }
-    return render(request, 'new/call_details.html', context)
+    return render(request, 'new/all_conversation_log.html', context)
 @login_required
 def agent_setup(request):
     
