@@ -124,9 +124,17 @@ def call_initiate(request, agent_id):
                 messages.error(request, f"Error processing file: {str(e)}")
                 return redirect('callapp:initiate_call')
 
-    return render(request, 'callapp/initiate_call.html')
-
-
+    return render(request, 'callapp/start_calling.html')
+@login_required
+def start_calling(request):
+    return render(request, 'callapp/start_calling.html')
+@login_required
+def start_card(request):
+    agents = Agent.objects.filter(user =request.user)  # Fetch all agents from the database
+    context={
+        'agents': agents
+    }
+    return render(request, 'callapp/agent_card.html',context)
    
 @csrf_exempt
 def start_twilio_stream(request, user_id,agent_id):
