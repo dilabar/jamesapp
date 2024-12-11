@@ -1,4 +1,4 @@
-{% extends 'cbase.html' %}
+{% extends 'new/base.html' %}
 {% load static %}
 
 {% block header %}
@@ -6,44 +6,78 @@
 {% endblock header %}
 
 {% block css %}
-<style>
-    .integration-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 10px;
-        text-align: center;
-    }
-    .integration-card img {
-        max-width: 50px;
-        margin-bottom: 10px;
-    }
-    .connect-btn {
-        margin-top: 10px;
-    }
-</style>
+
 {% endblock css %}
 
 {% block body %}
-<div class="content-page rtl-page">
-    <div class="container">
-        <h5 class="">Integrations & App</h5>
+
+
+
+
+
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
         <div class="row">
+          <div class="col-6">
+            <h4></h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">                                       
+                  <svg class="stroke-icon">
+                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                  </svg></a></li>
+              <li class="breadcrumb-item">Integrations & App</li>
+              <li class="breadcrumb-item active">App</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+        <div class="row">
+          
             {% for integration in integrations %}
-            <div class="col-md-4">
-                <div class="integration-card">
-                    <img src="{{ integration.icon }}" alt="{{ integration.name }}">
-                    <h5>{{ integration.name }}</h5>
-                    <p>{{ integration.description }}</p>
-                    {% if integration.is_connected %}
-                    <button class="btn btn-outline-success" disabled>Connected</button>
-                    {% else %}
-                    <a href="{{ integration.connect_url }}" class="btn btn-primary connect-btn">Connect</a>
-                    {% endif %}
+
+            <div class="col-xl-4 col-sm-6 col-xxl-3 col-ed-4 box-col-4">
+                <div class="card social-profile">
+                    <div class="card-body">
+                        <div class="social-img-wrap">
+                            <div class="social-img"><img src="{{ integration.icon }}" alt="{{ integration.name }}"></div>
+                            
+                        </div>
+                        <div class="social-details">
+                            <h5 class="mb-1"><a href="social-app.html">{{ integration.name }}</a></h5>
+                            <span class="f-light">{{ integration.description }}</span>
+            
+                           
+                                {% if integration.is_connected %}
+                                    <a href="#" class="btn btn-pill btn-outline-primary mt-2" disabled>Connected</a>
+                                {% else %}
+                                <a href="{{ integration.connect_url }}" class="btn btn-primary mt-2">Connect</a>
+                                {% endif %}
+                               
+            
+                            
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
+              
+
+
+          
+        
         </div>
-    </div>
-</div>
+      </div>
+      <!-- Container-fluid Ends-->
+
+
+</div>            
+
 {% endblock body %}
