@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 # Twilio API credentials
 
 @login_required
-def call_initiate(request, agent_id):
+def call_initiate(request, agnt_id):
     # Fetch Twilio service details
     twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
     if not twilio:
@@ -38,10 +38,11 @@ def call_initiate(request, agent_id):
                 phone_number=phone_number,
                 call_status='pending',
                 user=request.user,
+                agnt_id=agnt_id
             )
             try:
                 call = client.calls.create(
-                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
+                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agnt_id}/',
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone,
                     record=True,
@@ -88,11 +89,12 @@ def call_initiate(request, agent_id):
                             phone_call = PhoneCall.objects.create(
                                 phone_number=phone,
                                 call_status='pending',
-                                user=request.user
+                                user=request.user,
+                                agnt_id=agnt_id
                             )
                             try:
                                 call = client.calls.create(
-                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent_id}/',
+                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agnt_id}/',
                                     to=phone_call.phone_number,
                                     from_=twilio.decrypted_twilio_phone,
                                     record=True,
@@ -137,7 +139,7 @@ def start_card(request):
     return render(request, 'callapp/agent_card.html',context)
    
 @csrf_exempt
-def start_twilio_stream(request, user_id,agent_id):
+def start_twilio_stream(request, user_id,agnt_id):
     if request.method == 'POST':
         call_sid = request.POST.get('CallSid')
     else:
@@ -151,7 +153,7 @@ def start_twilio_stream(request, user_id,agent_id):
     response = VoiceResponse()
     
     # Define your WebSocket URL to receive the Twilio stream data
-    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agnt_id}/{call_sid}/"
     try:
      
 
