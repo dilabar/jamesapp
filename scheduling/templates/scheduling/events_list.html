@@ -1,0 +1,122 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+            <h4>Event List</h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#">                                       
+                  <svg class="stroke-icon">
+                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                  </svg></a></li>
+              <li class="breadcrumb-item">Calendar</li>
+              <li class="breadcrumb-item active">Event List</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Event List Table -->
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header pb-0 card-no-border">
+                    <h4>Event List</h4>
+                    <span>View all Google Calendar events in a tabular format.</span>
+                </div>
+                
+                <div class="card-body">
+                    <div class="table-responsive user-datatable custom-scrollbar">
+                        <table class="display" id="basic-10">
+                            <thead>
+                                <tr>
+                                    <th>Summary</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Description</th>
+                                    <th>Attendees</th>
+                                    <th>Calendar Event ID</th>
+                                    <th>Calendar Link</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                <tr>
+                                    <td>{{ event.summary }}</td>
+                                    <td>{{ event.start_time|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ event.end_time|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ event.description|default:"No description" }}</td>
+                                    <td>{{ event.attendees}}</td>
+                                    <td>{{ event.calendar_event_id }}</td>
+                                    <td><a href="{{ event.calendar_link }}" target="_blank">View Event</a></td>
+
+                                    <td>
+                                        {% if event.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        {% elif event.end_time < now %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Upcoming</span>
+                                        {% endif %}
+                                    </td>
+
+                                    
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No events found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Summary</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Description</th>
+                                    <th>Attendees</th>
+                                    <th>Calendar Event ID</th>
+                                    <th>Calendar Link</th>
+                                    <th>Status</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+
+{% endblock body %}
+    
+
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+{% endblock js %}
+    

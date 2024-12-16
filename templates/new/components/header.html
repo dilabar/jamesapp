@@ -29,7 +29,7 @@
       <div class="left-header col-xxl-5 col-xl-6 col-lg-5 col-md-4 col-sm-3 p-0">
         <div> <a class="toggle-sidebar" href="#"> <i class="iconly-Category icli"> </i></a>
           <div class="d-flex align-items-center gap-2 ">
-            <h4 class="f-w-600">Welcome James</h4><img class="mt-0" src="{% static 'manish/images/hand.gif' %}" alt="hand-gif">
+            <h4 class="f-w-600">Welcome {{ user.username }}</h4><img class="mt-0" src="{% static 'manish/images/hand.gif' %}" alt="hand-gif">
           </div>
         </div>
         <div class="welcome-content d-xl-block d-none"><span class="text-truncate col-12">Here’s what’s happening with your sales bots today. </span></div>
@@ -109,17 +109,17 @@
             <div class="notification-box"> 
               <svg> 
                 <use href="{% static 'manish/svg/icon-sprite.svg' %}#notification-header"></use>
-              </svg><span class="badge rounded-pill badge-secondary">4 </span>
+              </svg><span class="badge rounded-pill badge-secondary">0</span>
             </div>
             <div class="onhover-show-div notification-dropdown"> 
               <div class="card mb-0"> 
                 <div class="card-header">
                   <div class="common-space"> 
                     <h4 class="text-start f-w-600">Notitications</h4>
-                    <div><span>4 New</span></div>
+                    <div><span></span></div>
                   </div>
                 </div>
-                <div class="card-body">
+                {% comment %} <div class="card-body">
                   <div class="notitications-bar">
                     
                     <div class="tab-content" id="pills-tabContent">
@@ -183,12 +183,12 @@
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> {% endcomment %}
               </div>
             </div>
           </li>
           <li class="profile-nav onhover-dropdown"> 
-            <div class="media profile-media"><img class="b-r-10" src="{% static 'manish/images/dashboard/profile.png' %}" alt="">
+            <div class="media profile-media"><img class="b-r-10" src="{% static 'ai_user.png' %}" alt="">
               <div class="media-body d-xxl-block d-none box-col-none">
                 <div class="d-flex align-items-center gap-2">
                   <span>{{ user.username }}</span>
@@ -199,10 +199,10 @@
               </div>
             </div>
             <ul class="profile-dropdown onhover-show-div">
-              <li><a href="#"><i data-feather="user"></i><span>My Profile</span></a></li>
-              <li><a href="#"><i data-feather="phone"></i><span>Call History</span></a></li>
-              <li> <a href="#"> <i data-feather="settings"></i><span>Settings</span></a></li>
-              <li><a class="btn btn-pill btn-outline-primary btn-sm" href="#">Log Out</a></li>
+              
+              <li><a href="{% url 'agent:call_history' %}"><i data-feather="phone"></i><span>Call History</span></a></li>
+              
+              <li><a class="btn btn-pill btn-outline-primary btn-sm" href="{% url 'agent:logout' %}">Log Out</a></li>
             </ul>
 
           </li>
