@@ -2,9 +2,10 @@ import json
 import base64
 import logging
 import threading
+from django.shortcuts import get_object_or_404
 from websocket import create_connection, WebSocketConnectionClosedException
 from django.conf import settings
-from agent.models import PhoneCall, ServiceDetail
+from agent.models import Agent, PhoneCall, ServiceDetail
 from jamesapp.utils import decrypt
 from channels.generic.websocket import WebsocketConsumer
 
@@ -21,7 +22,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         self.call_sid = None
         self.user_id = None
         self.conversationId = None
-        self.agent_id = None
+        self.agnt_id = None
         self.initial_prompt_sent = False
         self.conversation_started = False
 
@@ -32,7 +33,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         # Retrieve URL route parameters
         self.user_id = self.scope["url_route"]["kwargs"]["user_id"]
         self.call_sid = self.scope["url_route"]["kwargs"]["call_sid"]
-        self.agent_id = self.scope["url_route"]["kwargs"]["agent_id"]
+        self.agnt_id = self.scope["url_route"]["kwargs"]["agnt_id"]
 
         # Fetch Play.ai service details
         play_ai_service = ServiceDetail.objects.filter(
@@ -41,7 +42,8 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
 
         if play_ai_service:
             try:
-                agent_id = decrypt(self.agent_id)
+                agobj=get_object_or_404(Agent, id=self.agnt_id)
+                agent_id = decrypt(agobj.agent_id)
                 play_ai_url = f"wss://api.play.ai/v1/talk/{agent_id}"
                 self.play_ai_ws = create_connection(play_ai_url)
 

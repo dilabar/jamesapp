@@ -1,5 +1,6 @@
 from datetime import time, timedelta
 from hashlib import sha256
+import hashlib
 import os
 import random
 from django.conf import settings
@@ -26,11 +27,42 @@ import json
 @login_required
 def call_history(request):
     # Fetch phone calls for the logged-in user
+    # print(f"start..........")
+    # phone_cals = PhoneCall.objects.all()  # Filter by user if required
+
+    # for phone_call in phone_cals:
+    #     print(f"phone_call..........",phone_call.id)
+
+    #     # Retrieve the Agent object based on agent_id
+    #     if phone_call.agent_id:
+    #         ag=decrypt(phone_call.agent_id)
+    #         hs=hashlib.sha256(ag.encode()).hexdigest()
+    #         print(f"ag..........",ag)
+    #         print(f"hs..........",hs)
+       
+    #         agent = get_object_or_404(Agent, agent_id_hash=hs)  # Match by agent_id
+
+    #         # Update the PhoneCall with the corresponding Agent
+    #         phone_call.agnt = agent  # Set the agent foreign key field
+    #         phone_call.save()  # Save the updated PhoneCall object
+    #         print(f"phone_call..........",phone_call.id)
+    #     # else:
+    #     # phone_call.agent_id=encrypt("YOUR-AI-CLONE-0k26dDh7LesuHadHoV8YH")
+
+    #     # print(f"phone_call. update.........",phone_call.id)
+    #     # phone_call.save()
+
+    # print(f"done..........")
+        
+    # phone_calls = (
+    #     PhoneCall.objects.filter(user=request.user)
+    #     .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'date' descending
+    # )
     phone_calls = (
         PhoneCall.objects.filter(user=request.user)
-        .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'date' descending
+        .select_related('agnt')  # Include related Agent data (join with Agent model)
+        .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'timestamp' descending
     )
-
     # Apply offset and limit for pagination
     page_number = request.GET.get('page', 1)  # Default to the first page
     limit = 10  # Number of records per page
@@ -39,7 +71,7 @@ def call_history(request):
     # Calculate the total number of pages
     total_records = phone_calls.count()
     total_pages = (total_records + limit - 1) // limit  # Ceil division
-
+    # print(paginated_calls.first().agnt)
     context = {
         'page_obj': paginated_calls,  # Paginated phone calls
         'page_number': page_number,  # Current page number
@@ -49,7 +81,8 @@ def call_history(request):
     return render(request, 'new/calls_history.html', context)
 @login_required
 def call_detail(request, id):
-    obj = PhoneCall.objects.filter(user=request.user, id=id).first()
+    # obj = PhoneCall.objects.filter(user=request.user, id=id).first()
+    obj = PhoneCall.objects.select_related('agnt').filter(user=request.user, id=id).first()
     if not obj:
         return render(request, 'new/error.html', {'message': 'Call not found'})  # Handle missing call object
 
@@ -60,15 +93,11 @@ def call_detail(request, id):
     if data:
         transcript=data
 
-    
-
-
     # Calculate end time
     if obj.timestamp and obj.call_duration:
         end_time = obj.timestamp + timedelta(seconds=obj.call_duration)
     else:
         end_time = None  # Handle invalid data
-    print(transcript)
     # Prepare context
     context = {
         'call_obj': obj,

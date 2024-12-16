@@ -5,8 +5,8 @@ urlpatterns = [
     
     path('start-calling/', start_calling, name='start_calling'),
     path('agent-card/', start_card, name='start_card'),
-    path('start-calling/<str:agent_id>/', call_initiate, name='call'),
-    path('start_twilio_voice/<int:user_id>/<str:agent_id>/', twilio_voice, name='twilio_voice'),
+    path('start-calling/<int:agnt_id>/', call_initiate, name='call'),
+    path('start_twilio_voice/<int:user_id>/<int:agnt_id>/', twilio_voice, name='twilio_voice'),
     path('start_twilio_stream/<int:user_id>/<str:agent_id>/', start_twilio_stream, name='start_twilio_stream'),
     path('twilio/get_call_log/', getcall_log, name='getcall_log'),
     path('twilio/get_twilio_call_recordings/<str:call_sid>/', get_twilio_call_recordings, name='get_twilio_call_recordings'),

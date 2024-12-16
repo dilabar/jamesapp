@@ -43,7 +43,7 @@ class Agent(models.Model):
         return decrypt(self.agent_id)
     
     def __str__(self):
-        return f"{self.display_name}"
+        return f"{self.id}"
 
     
 class PhoneCall(models.Model):
@@ -57,6 +57,8 @@ class PhoneCall(models.Model):
      # Play.ai-specific fields
     agent_owner_id = models.CharField(max_length=100, null=True)  # Added agentOwnerId
     agent_id = models.CharField(max_length=255, null=True)  # Added agentOwnerId
+    # Use ForeignKey to connect with Agent model
+    agnt = models.ForeignKey(Agent, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls')
     recording_presigned_url = models.URLField(max_length=500, null=True)  # Added recordingPresignedUrl
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phonecall',null=True)
     hand_off_summary=models.TextField(blank=True,null=True)

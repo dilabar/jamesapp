@@ -61,8 +61,7 @@
                           </div>
                           <div class="col-4">
                               <label class="form-label" for="name">Name</label>
-                              <input class="form-control" id="name" name="name" type="text" placeholder="Enter Agent Name" 
-                                     value="{{ form.instance.name|default:'' }}" required>
+                              <input class="form-control" id="display-name" name="display_name" type="text" value="{{ form.instance.display_name|default:'' }}" required>
                           </div>
                           <div class="col-4">
                               <label class="form-label" for="real-agent-no">Real Agent No</label>

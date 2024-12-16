@@ -2,8 +2,11 @@ from django.shortcuts import render
 from google_auth_oauthlib.flow import Flow
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from requests import request
+from django.utils.timezone import now
 
 from .models import CalendarConnection
+
+from agent.models import GoogleCalendarEvent
 
 # Create your views here.
 def google_oauth(request):
@@ -68,3 +71,18 @@ def integrations_view(request):
         
     ]
     return render(request, 'scheduling/integrations_list.html', {'integrations': integrations})
+
+
+
+
+
+
+
+
+def event_list(request):
+    """
+    View to list all calendar events.
+    """
+    events = GoogleCalendarEvent.objects.all().order_by('-start_time')
+    current_time = now()
+    return render(request, 'scheduling/events_list.html', {'events': events, 'now': current_time})

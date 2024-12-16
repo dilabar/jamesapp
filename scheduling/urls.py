@@ -6,5 +6,5 @@ urlpatterns = [
     path('', integrations_view, name='integrations_view'),
     path('oauth/', google_oauth, name='google_oauth'),
     path('oauth/callback/', google_oauth_callback, name='google_oauth_callback'),
-    
+    path('event-list/' , event_list , name='event_list'),
 ]
