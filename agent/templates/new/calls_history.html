@@ -67,12 +67,33 @@
                                 <tbody>
                                     {% for call in page_obj %}
                                     <tr>
-                                        <td>{{ call.assistant_name }}</td>
-                                        <td>{{ call.campaign_name|default:"Demo" }}</td>
-                                        <td><a href="#">{{ call.customer_name }}</a></td>
+                                        <td>{{  call.agnt.description |capfirst| default:"NA" }}</td>
+                                        <td>{{ call.campaign_name|capfirst |default:"Demo" }}</td>
+                                        <td><a href="#">{{ call.customer_name|capfirst |default:"NA"  }}</a></td>
                                         <td>{{ call.phone_number }}</td>
                                         <td>
-                                            <button type="button" class="btn status {{ call.call_status|lower }}">{{ call.call_status }}</button>
+                                            <span class="badge 
+                                            {% if call.call_status|lower == 'initiated' %}
+                                                badge-primary
+                                            {% elif call.call_status|lower == 'completed' %}
+                                                badge-success
+                                            {% elif call.call_status|lower == 'ringing' %}
+                                                badge-warning
+                                            {% elif call.call_status|lower == 'failed' %}
+                                                badge-danger
+                                            {% elif call.call_status|lower == 'forwarded' %}
+                                                badge-secondary
+                                            {% elif call.call_status|lower == 'inprogress' %}
+                                                badge-info
+                                            {% elif call.call_status|lower == 'pending' %}
+                                                badge-light
+                                            {% else %}
+                                                badge-dark
+                                            {% endif %}
+                                        ">
+                                            {{ call.call_status|capfirst  }}
+                                        </span>
+                                        
                                         </td>
                                         <td>{{ call.is_call_forwarded|yesno:"YES,NO" }}</td>
                                         <td>{{ call.call_duration|default:"0" }}</td>

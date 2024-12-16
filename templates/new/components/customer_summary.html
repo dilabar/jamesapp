@@ -1,14 +1,6 @@
 {% load static %}
-<div class="fade tab-pane active show" id="pills-created" role="tabpanel" aria-labelledby="pills-created-tab">
-  <!-- Callee Information Section -->
-  <div class="card mb-4">
-      <div class="card-header">
-          <h4 class="fw-bold">Callee Information</h4>
-      </div>
-      <div class="card-body">
-          <p class="mb-2"><strong>Name:</strong> <span class="text-muted">{{ call_obj.name }}</span></p>
-      </div>
-  </div>
+<div class="fade tab-pane " id="pills-call-summary" role="tabpanel" aria-labelledby="pills-call-summary-tab">
+
 
   <!-- Call Summarize Section -->
   {% if call_obj.hand_off_summary %}
