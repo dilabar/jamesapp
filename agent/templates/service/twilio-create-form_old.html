@@ -1,0 +1,99 @@
+{% extends 'cbase.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">  <!-- Ensure you include Bootstrap CSS -->
+{% endblock header %}
+
+{% block css %}
+<style>
+    .step {
+        display: none;
+    }
+    .step.active {
+        display: block;
+    }
+    .info-section {
+        background-color: #f8f9fa; /* Light background for better visibility */
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="content-page rtl-page">
+    <div class="container">
+       <div class="row">
+            <div class="col-sm-12 col-lg-6">
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                           <h4 class="card-title">Twilio API Details</h4>
+                        </div>
+                     </div>
+                     <div class="card-body">
+                        <form action="" method='POST'>
+                            {% csrf_token %}
+                            <input type="hidden" name="service_name" value="twilio">
+                           
+                            <div class="form-group">
+                                <label for="account_sid">Account SID:</label>
+                                <input type="text" class="form-control" id="account_sid" name="account_sid" 
+                                       value="{{ twilio_form.instance.decrypted_account_sid|default:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="api_key">Auth Token:</label>
+                                <input type="password" class="form-control" id="api_key" name="api_key" 
+                                       value="{{ twilio_form.instance.decrypted_api_key|default:'' }}">
+                                <input type="checkbox" id="show_key" onclick="togglePassword()"> Show Auth Token
+                            </div>
+                            <div class="form-group">
+                                <label for="twilio_phone">Twilio Phone Number:</label>
+                                <input type="text" class="form-control" id="twilio_phone" name="twilio_phone" 
+                                       value="{{ twilio_form.instance.decrypted_twilio_phone|default:'' }}">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Column -->
+            <div class="col-sm-12 col-lg-6">
+                <div class="info-section">
+                    <h4>How to Collect Twilio API Credentials</h4>
+                    <p>Follow the steps below to obtain your Twilio API credentials:</p>
+                    <ol>
+                        <li><strong>Log in</strong> to your Twilio account.</li>
+                        <li>Navigate to the <strong>Console Dashboard</strong> in your Twilio account.</li>
+                        <li>Locate your <strong>Account SID</strong> and <strong>Auth Token</strong> under the "Project Info" section.</li>
+                        <li>Copy the <strong>Account SID</strong> and <strong>Auth Token</strong> into the corresponding fields in the form.</li>
+                        <li>If you don’t have a <strong>Twilio phone number</strong>, go to the "Phone Numbers" section to purchase or retrieve your number.</li>
+                    </ol>
+                    <p>For more details, refer to the <a href="https://www.twilio.com/docs/usage/your-account" target="_blank">Twilio documentation</a> or contact <a href="https://support.twilio.com" target="_blank">Twilio support</a> if you have any questions.</p>
+                </div>
+            </div>
+       </div>
+    </div>
+</div>
+
+{% endblock body %}
+{% block js %}
+<script>
+    function togglePassword() {
+        const passwordField = document.getElementById('api_key');
+        const showKeyCheckbox = document.getElementById('show_key');
+        // Toggle the input type between "password" and "text"
+        passwordField.type = showKeyCheckbox.checked ? 'text' : 'password';
+    }
+</script>
+{% endblock js %}
