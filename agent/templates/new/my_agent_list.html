@@ -72,6 +72,7 @@
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger mt-2" onclick="return confirm('Are you sure you want to delete this agent?');">Delete</button>
                                         </form>
+
                                         <a href="{% url 'callapp:call' agent.agent_id %}" class="btn btn-success mt-2">Call</a>
                                         {% comment %} <a href="{% url 'agent:get_conversation' agent.agent_id %}" class="btn btn-warning mt-2">Conversation</a> {% endcomment %}
                                     </td>

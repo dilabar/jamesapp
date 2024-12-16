@@ -52,12 +52,12 @@
                             </div>
                         </div>
                         <div class="social-details">
-                            <h5 class="mb-1"><a href="social-app.html">{{ag.display_name}}</a></h5>
-                            <span class="f-light">{{ag.display_name}}</span>
+                            <h5 class="mb-1"><a href="social-app.html">{{ag.display_name|default:"NA"}}</a></h5>
+                            <span class="f-light">{{ag.description}}</span>
             
                             <ul class="social-follow align-items-center">
                                 <li>
-                                    <a href="{% url 'callapp:call' agent_id=ag.agent_id %}" class="btn btn-primary mt-2">Start a Call</a>
+                                    <a href="{% url 'callapp:call' agnt_id=ag.id %}" class="btn btn-primary mt-2" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="tooltip" data-bs-original-title="Start a call">Call</a>
                                 </li>
                                 <li>
                                     <a href="" class="btn btn-danger mt-2">Summaries</a>

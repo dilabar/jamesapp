@@ -29,8 +29,8 @@
                   <svg class="stroke-icon">
                     <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                   </svg></a></li>
-              <li class="breadcrumb-item">Agents</li>
-              <li class="breadcrumb-item active">Call Log </li>
+              <li class="breadcrumb-item">Call History</li>
+              <li class="breadcrumb-item active">{{call_obj.agnt.description}} </li>
             </ol>
           </div>
         </div>
@@ -51,8 +51,8 @@
                           <div class="media">
                             <div class="media-size-email"><img class="me-3 rounded-circle" src="{% static 'manish/images/user/user.png' %}" alt=""></div>
                             <div class="media-body">
-                              <h6 class="f-w-600">MARK JENCO</h6>
-                              <p>Markjecno@gmail.com</p>
+                              <h6 class="f-w-600">{{call_obj.agnt.description|capfirst|default:"NA" }}</h6>
+                              <!-- <p>Markjecno@gmail.com</p> -->
                             </div>
                           </div>
                           <ul class="nav main-menu" role="tablist">
@@ -61,16 +61,16 @@
                               type="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
                               <i class="me-2" data-feather="bookmark"></i> Add Remarks  </button>
                             </li>
-                            <li class="nav-item"> <span class="main-title f-w-500"> Views </span></li>
+                            <!-- <li class="nav-item"> <span class="main-title f-w-500"> Views </span></li> -->
                             <li> <a class="active" id="pills-created-tab" data-bs-toggle="pill" href="#pills-created" role="tab" aria-controls="pills-created" 
-                                aria-selected="true"><span class="title f-w-400"> Call Summary</span></a></li>
+                                aria-selected="true"><span class="title f-w-400"> Call Details</span></a></li>
                             <li><a id="pills-favourites-tab" data-bs-toggle="pill" href="#pills-favourites" role="tab" aria-controls="pills-favourites" 
                                 aria-selected="false"><span class="title f-w-400"> Conversation Log</span></a></li>
-                            <li><a id="pills-shared-tab" data-bs-toggle="pill" href="#pills-shared" role="tab" aria-controls="pills-shared" 
-                                aria-selected="false"><span class="title f-w-400"> Call Summary</span></a></li>
-                            {% comment %} <li><a id="pills-bookmark-tab" data-bs-toggle="pill" href="#pills-bookmark" role="tab" aria-controls="pills-bookmark" 
-                                aria-selected="false"><span class="title f-w-400"> Customer Preferences</span></a></li>
-                            <li> {% endcomment %}
+                                <li><a id="pills-call-summary-tab" data-bs-toggle="pill" href="#pills-call-summary" role="tab" aria-controls="pills-call-summary" 
+                                  aria-selected="false"><span class="title f-w-400"> Call Summary</span></a></li>
+                          
+                           
+                            <li> 
                               <hr>
                             </li>
                             <li><span class="main-title f-w-500"> Tags<span class="pull-right">
@@ -97,7 +97,7 @@
                      {% include 'new/components/customer_card.html' %}
                      {% include 'new/components/customer_log.html' %}
                      {% include 'new/components/customer_summary.html' %}
-                     {% include 'new/components/customer_preference.html' %}
+              
                      
 
                     
