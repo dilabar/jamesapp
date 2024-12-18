@@ -43,7 +43,8 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         if play_ai_service:
             try:
                 agobj=get_object_or_404(Agent, id=self.agnt_id)
-                agent_id = decrypt(agobj.agent_id)
+                print(agobj.decrypted_agent_id)
+                agent_id = agobj.decrypted_agent_id
                 play_ai_url = f"wss://api.play.ai/v1/talk/{agent_id}"
                 self.play_ai_ws = create_connection(play_ai_url)
 
@@ -112,7 +113,7 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
                         play_ai_conv_id=self.conversationId,
                         agent_owner_id=play_ai_data.get("agentOwnerId"),
                         recording_presigned_url=play_ai_data.get("recordingPresignedUrl"),
-                        agent_id=self.agent_id
+                        agnt_id=self.agnt_id
                     )
                 elif response_type == "onAgentTranscript":
                     msg = play_ai_data.get("message")
