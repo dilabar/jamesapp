@@ -580,7 +580,7 @@ def get_twilio_call_recordings(request,call_sid):
     return render(request, 'twilio_log/recording.html',context)
 
 @csrf_exempt
-def twilio_voice(request, user_id, agent_id):
+def twilio_voice(request, user_id, agnt_id):
     """
     Handles Twilio webhook for voice and saves call details in PhoneCall model.
     """
@@ -602,7 +602,7 @@ def twilio_voice(request, user_id, agent_id):
                     'phone_number': from_number,
                     'call_status': call_status,
                     'user_id': user_id,
-                    'agent_id': agent_id,
+                    'agnt_id': agnt_id,
                 },
             )
             logger.info(f"Call {call_sid} saved successfully.")
@@ -611,7 +611,7 @@ def twilio_voice(request, user_id, agent_id):
 
     # Create Twilio VoiceResponse
     response = VoiceResponse()
-    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agent_id}/{call_sid}/"
+    stream_url = f"wss://{request.get_host()}/ws/play_ai/{user_id}/{agnt_id}/{call_sid}/"
 
     try:
         # response.record(
