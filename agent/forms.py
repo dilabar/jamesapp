@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from .models import *
 
 class RegisterForm(UserCreationForm):
     class Meta:
@@ -108,3 +109,29 @@ class AgentForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+
+
+
+
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = Contact
+        fields = ['first_name', 'last_name', 'email', 'phone', 'contact_type', 'time_zone', 'photo']
+        
+    # You can customize widgets, add validation here if needed
+
+class EmailForm(forms.ModelForm):
+    class Meta:
+        model = Email
+        fields = ['email']
+
+class PhoneNumberForm(forms.ModelForm):
+    class Meta:
+        model = PhoneNumber
+        fields = ['phone']
+
+
+
+class ExcelUploadForm(forms.Form):
+    excel_file = forms.FileField(label='Upload Excel File')
