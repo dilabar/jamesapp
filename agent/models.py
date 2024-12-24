@@ -1,7 +1,7 @@
 import hashlib
 from django.db import models
 
-
+from django.core.validators import RegexValidator
 from jamesapp import settings
 from jamesapp.utils import decrypt, encrypt
 
@@ -164,3 +164,32 @@ class GoogleCalendarEvent(models.Model):
 
     def __str__(self):
         return f"Meeting: {self.summary} on {self.start_time}"
+    
+
+
+
+
+
+
+class Contact(models.Model):
+    photo = models.ImageField(upload_to='photos/', blank=True, null=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20,blank=True, null=True)
+    contact_type = models.CharField(max_length=50, choices=[('Customer', 'Customer'), ('Vendor', 'Vendor')])
+    time_zone = models.CharField(max_length=50, blank=True, null=True)
+    # Removed dnd_preferences for now
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name or ''}"
+    
+
+
+class Email(models.Model):
+    contact = models.ForeignKey(Contact, related_name='emails', on_delete=models.CASCADE)
+    email = models.EmailField()
+
+class PhoneNumber(models.Model):
+    contact = models.ForeignKey(Contact, related_name='phone_numbers', on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20)

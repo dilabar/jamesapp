@@ -1,0 +1,141 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+<div class="page-body">
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <h4>Add Contact</h4>
+                </div>
+                <div class="col-6">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Contacts</li>
+                        <li class="breadcrumb-item active">Add Contact</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form starts -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Raise input style</h4>
+                            <p class="f-m-light mt-1">
+                               Use the <code>input-air-* </code>through defined bottom box-shadow.
+                            </p>
+                        </div>
+                        <form class="form theme-form dark-inputs" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <!-- Contact Fields -->
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="first_name">First Name</label>
+                                            <input class="form-control input-air-primary" id="first_name" type="text" placeholder="John" name="first_name">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="last_name">Last Name</label>
+                                            <input class="form-control input-air-primary" id="last_name" type="text" placeholder="Doe" name="last_name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Email & Phone -->
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="email">Email</label>
+                                            <input class="form-control input-air-primary" id="email" type="email" placeholder="name@example.com" name="email">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="phone">Phone Number</label>
+                                            <input class="form-control input-air-primary" id="phone" type="text" placeholder="123-456-7890" name="phone">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Type and Time Zone -->
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="contact_type">Contact Type</label>
+                                            <select class="form-select input-air-primary digits" id="contact_type" name="contact_type">
+                                                <option value="Customer">Customer</option>
+                                                <option value="Vendor">Vendor</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="time_zone">Time Zone</label>
+                                            <select class="form-select input-air-primary digits" id="time_zone" name="time_zone">
+                                                <option value="GMT">GMT</option>
+                                                <option value="EST">EST</option>
+                                                <option value="CST">CST</option>
+                                                <option value="PST">PST</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Photo Upload (Image) -->
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="photo">Photo</label>
+                                            <input class="form-control input-air-primary" id="photo" type="file" name="photo">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer text-end">
+                                <button class="btn btn-primary me-3" type="submit">Submit</button>
+                                <input class="btn btn-light" type="reset" value="Cancel">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Form ends -->
+    </div>
+</div>
+
+
+    
+{% endblock body %}
+    
+
+
+{% block js %}
+    
+{% endblock js %}
+    
