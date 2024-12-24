@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'callapp',
     'agent',
     'scheduling',
+    'agency'
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True
