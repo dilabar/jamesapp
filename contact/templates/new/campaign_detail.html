@@ -1,0 +1,11 @@
+<h1>{{ campaign.name }}</h1>
+<p>Status: {{ campaign.get_status_display }}</p>
+<p>Scheduled At: {{ campaign.scheduled_at }}</p>
+<p>{{ campaign.content }}</p>
+
+<h3>Contacts in this Campaign:</h3>
+<ul>
+    {% for contact in campaign.get_recipients %}
+        <li>{{ contact.first_name }} {{ contact.last_name }} - {{ contact.contact_type }}</li>
+    {% endfor %}
+</ul>

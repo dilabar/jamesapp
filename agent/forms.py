@@ -135,3 +135,47 @@ class PhoneNumberForm(forms.ModelForm):
 
 class ExcelUploadForm(forms.Form):
     excel_file = forms.FileField(label='Upload Excel File')
+
+
+
+
+# Form for the List Model
+class ListForm(forms.ModelForm):
+    contacts = forms.ModelMultipleChoiceField(
+        queryset=Contact.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = List
+        fields = ['name', 'description', 'contacts']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control'}),
+        }
+
+
+# Form for the Campaign Model
+class CampaignForm(forms.ModelForm):
+    lists = forms.ModelMultipleChoiceField(
+        queryset=List.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+    individual_contacts = forms.ModelMultipleChoiceField(
+        queryset=Contact.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = Campaign
+        fields = ['name', 'subject', 'content', 'lists', 'individual_contacts', 'scheduled_at', 'status']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control'}),
+            'scheduled_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+        }
