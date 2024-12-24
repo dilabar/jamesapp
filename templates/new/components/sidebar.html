@@ -122,6 +122,44 @@
 
                 </li> -->
 
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="">Contact</h6> </div>
+                </li>
+                
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:contact_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>All Contact</span></a>
+
+                </li>
+
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:list_overview' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>list</span></a>
+
+                </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:create_campaign' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>Campaign</span></a>
+
+                </li>
 
 
                 <li class="sidebar-main-title">

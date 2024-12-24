@@ -24,8 +24,6 @@ urlpatterns = [
     path('agent/setup/', agent_setup, name='agent_setup'),
     path('onboard/', onboard, name='onboard'),
     path('api/playai/webhook/', playai_webhook, name='playai-webhook'),
-    path('contact/', contact_list, name='contact_list'),
-    path('contact/add/', add_contact, name='add_contact'),
-    path('contact/upload/', upload_excel, name='upload_excel'),
+    
 
 ]

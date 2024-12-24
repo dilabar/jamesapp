@@ -54,41 +54,41 @@
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="first_name">First Name</label>
-                                            <input class="form-control input-air-primary" id="first_name" type="text" placeholder="John" name="first_name">
+                                            <input class="form-control input-air-primary" id="first_name" type="text" placeholder="John" name="first_name" value="{{ form.first_name.value }}">
                                         </div>
                                     </div>
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="last_name">Last Name</label>
-                                            <input class="form-control input-air-primary" id="last_name" type="text" placeholder="Doe" name="last_name">
+                                            <input class="form-control input-air-primary" id="last_name" type="text" placeholder="Doe" name="last_name" value="{{ form.last_name.value }}">
                                         </div>
                                     </div>
                                 </div>
-
+                        
                                 <!-- Email & Phone -->
                                 <div class="row">
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="email">Email</label>
-                                            <input class="form-control input-air-primary" id="email" type="email" placeholder="name@example.com" name="email">
+                                            <input class="form-control input-air-primary" id="email" type="email" placeholder="name@example.com" name="email" value="{{ form.email.value }}">
                                         </div>
                                     </div>
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="phone">Phone Number</label>
-                                            <input class="form-control input-air-primary" id="phone" type="text" placeholder="123-456-7890" name="phone">
+                                            <input class="form-control input-air-primary" id="phone" type="text" placeholder="123-456-7890" name="phone" value="{{ form.phone.value }}">
                                         </div>
                                     </div>
                                 </div>
-
+                        
                                 <!-- Contact Type and Time Zone -->
                                 <div class="row">
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="contact_type">Contact Type</label>
                                             <select class="form-select input-air-primary digits" id="contact_type" name="contact_type">
-                                                <option value="Customer">Customer</option>
-                                                <option value="Vendor">Vendor</option>
+                                                <option value="Customer" {% if form.contact_type.value == 'Customer' %}selected{% endif %}>Customer</option>
+                                                <option value="Vendor" {% if form.contact_type.value == 'Vendor' %}selected{% endif %}>Vendor</option>
                                             </select>
                                         </div>
                                     </div>
@@ -96,31 +96,60 @@
                                         <div class="mb-3">
                                             <label class="form-label" for="time_zone">Time Zone</label>
                                             <select class="form-select input-air-primary digits" id="time_zone" name="time_zone">
-                                                <option value="GMT">GMT</option>
-                                                <option value="EST">EST</option>
-                                                <option value="CST">CST</option>
-                                                <option value="PST">PST</option>
+                                                <option value="GMT" {% if form.time_zone.value == 'GMT' %}selected{% endif %}>GMT</option>
+                                                <option value="EST" {% if form.time_zone.value == 'EST' %}selected{% endif %}>EST</option>
+                                                <option value="CST" {% if form.time_zone.value == 'CST' %}selected{% endif %}>CST</option>
+                                                <option value="PST" {% if form.time_zone.value == 'PST' %}selected{% endif %}>PST</option>
                                             </select>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Photo Upload (Image) -->
+                        
+                               
+                        
+                                <!-- Lists and Campaigns -->
                                 <div class="row">
                                     <div class="col">
                                         <div class="mb-3">
-                                            <label class="form-label" for="photo">Photo</label>
-                                            <input class="form-control input-air-primary" id="photo" type="file" name="photo">
+                                            <label class="form-label" for="lists">Lists</label>
+                                            {% if all_lists %}
+                                                <select class="form-select input-air-primary" id="lists" name="lists" multiple>
+                                                    {% for list in all_lists %}
+                                                        <option value="{{ list.id }}" {% if list.id in form.lists.value %}selected{% endif %}>
+                                                            {{ list.name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <p>No lists available. <a href="{% url 'create_list' %}">Create a new list</a>.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label class="form-label" for="campaigns">Campaigns</label>
+                                            {% if all_campaigns %}
+                                                <select class="form-select input-air-primary" id="campaigns" name="campaigns" multiple>
+                                                    {% for campaign in all_campaigns %}
+                                                        <option value="{{ campaign.id }}" {% if campaign.id in form.campaigns.value %}selected{% endif %}>
+                                                            {{ campaign.name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            {% else %}
+                                                <p>No campaigns available. <a href="{% url 'contact:create_campaign' %}">Create a new campaign</a>.</p>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
+                        
                             <div class="card-footer text-end">
                                 <button class="btn btn-primary me-3" type="submit">Submit</button>
                                 <input class="btn btn-light" type="reset" value="Cancel">
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>
