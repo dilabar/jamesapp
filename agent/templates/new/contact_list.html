@@ -1,0 +1,139 @@
+
+
+    
+    {% extends 'new/base.html' %}
+    {% load static %}
+    
+    {% block header %}
+    
+    {% endblock header %}
+    
+    {% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+    {% endblock css %}
+        
+    
+    
+    {% block body %}
+    
+    <div class="page-body">
+        <div class="container-fluid">
+          <div class="page-title">
+            <div class="row">
+              <div class="col-6">
+                <h4></h4>
+              </div>
+              <div class="col-6">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="#">                                       
+                        <svg class="stroke-icon">
+                          <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                        </svg></a></li>
+                  <li class="breadcrumb-item">Agents</li>
+                  <li class="breadcrumb-item active">Call History</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Scroll - vertical dynamic Starts-->
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header pb-0 card-no-border">
+                            <a href="{% url 'agent:add_contact' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add Contact</a>
+                            <a href="{% url 'agent:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a>
+
+                            <span>Easily manage your AI Agents by editing, deleting, or initiating a conversation directly from the table.</span>
+                        </div>
+        
+                        <div class="card-body">
+                            <!-- Table Section -->
+                            <div class="table-responsive user-datatable custom-scrollbar">
+                                <table class="display" id="basic-10">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>  <!-- New column for Image -->
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Created</th>
+                                            <th>Contact Type</th>
+                                            <th>Time Zone</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for contact in page_obj %}
+                                        <tr>
+                                            <td>
+                                                {% if contact.photo %}
+                                                    <img src="{{ contact.photo.url }}" alt="Contact Photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                                                {% else %}
+                                                    <img src="{% static 'default-avatar.png' %}" alt="Default Photo" style="width: 50px; height: 50px; border-radius: 50%;">
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ contact.first_name }} {{ contact.last_name }}</td>
+                                            <td>{{ contact.email }}</td>
+                                            <td>{{ contact.phone }}</td>
+                                            <td>{{ contact.created_at|date:"F d, Y" }}</td>
+                                            <td>{{ contact.contact_type }}</td>
+                                            <td>{{ contact.time_zone }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7">No contacts available.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Image</th>  <!-- New column for Image -->
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone Number</th>
+                                            <th>Created</th>
+                                            <th>Contact Type</th>
+                                            <th>Time Zone</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+        
+                            <!-- Pagination -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    {% for i in page_range %}
+                                        {% if i == page_number %}
+                                            <li class="page-item active" aria-current="page">
+                                                <span class="page-link">{{ i }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <!-- Scroll - vertical dynamic Ends-->
+            </div>
+        </div>
+        
+        
+    </div>            
+    
+    {% endblock body %}
+        
+    
+    
+    {% block js %}
+    <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    {% endblock js %}
+        
+    

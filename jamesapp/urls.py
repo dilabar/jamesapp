@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('call/', include('callapp.urls')),
     path('', include('agent.urls')),
+    path('agency/', include('agency.urls')),
     path('scheduling/', include('scheduling.urls', namespace='scheduling')), 
 ]
