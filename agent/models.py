@@ -193,3 +193,53 @@ class Email(models.Model):
 class PhoneNumber(models.Model):
     contact = models.ForeignKey(Contact, related_name='phone_numbers', on_delete=models.CASCADE)
     phone = models.CharField(max_length=20)
+
+
+
+# List Model (Group Contacts)
+class List(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+    contacts = models.ManyToManyField(Contact, related_name='lists', through='ListContact')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+# ListContact Model (Tracks Contact Subscription to a List)
+class ListContact(models.Model):
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    list = models.ForeignKey(List, on_delete=models.CASCADE)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('contact', 'list')
+
+
+# Campaign Model
+class Campaign(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('scheduled', 'Scheduled'),
+        ('sent', 'Sent'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    name = models.CharField(max_length=255, unique=True)
+    subject = models.CharField(max_length=255, blank=True, null=True)
+    content = models.TextField(blank=True, null=True)
+    lists = models.ManyToManyField(List, related_name='campaigns', blank=True)
+    individual_contacts = models.ManyToManyField(Contact, related_name='campaigns', blank=True)
+    scheduled_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_recipients(self):
+        """Get all contacts targeted by this campaign."""
+        contacts_from_lists = Contact.objects.filter(lists__in=self.lists.all()).distinct()
+        direct_contacts = self.individual_contacts.all()
+        return contacts_from_lists.union(direct_contacts)

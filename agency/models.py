@@ -47,7 +47,7 @@ class Configuration(models.Model):
     subaccount = models.OneToOneField(Subaccount, on_delete=models.CASCADE, related_name="configuration")
     crm_enabled = models.BooleanField(default=True)
     automation_enabled = models.BooleanField(default=True)
-    custom_data = models.JSONField(default=dict)  # Store custom settings per client
+    user_limit = models.PositiveBigIntegerField(default=5)
 
     def __str__(self):
         return f"Configuration for {self.subaccount.name}"

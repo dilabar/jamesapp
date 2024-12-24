@@ -36,7 +36,27 @@
                             <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-home"></use>
                         </svg><span class="">Dashboard</span></a>
                 </li>
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="">User Management</h6> </div>
+                </li>
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'agency:create_subaccount' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>Sub Account</span></a>
+                        <a class="sidebar-link sidebar-title link-nav" href="{% url 'agency:list_subaccounts' %}">
+                            <svg class="stroke-icon">
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            </svg>
+                            <svg class="fill-icon ">
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            </svg><span>View Sub Account</span></a>
 
+                </li>
 
 
                 <li class="sidebar-main-title">
@@ -67,7 +87,7 @@
 
                 <li class="sidebar-main-title">
                     <div>
-                        <h6 class="">Call Management</h6> </div>
+                        <h6 class="javascript:void(0);">Call Management</h6> </div>
                 </li>
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'callapp:start_card' %}">
@@ -122,6 +142,44 @@
 
                 </li> -->
 
+                <li class="sidebar-main-title">
+                    <div>
+                        <h6 class="">Contact</h6> </div>
+                </li>
+                
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:contact_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>All Contact</span></a>
+
+                </li>
+
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:list_overview' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>list</span></a>
+
+                </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:create_campaign' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>Campaign</span></a>
+
+                </li>
 
 
                 <li class="sidebar-main-title">

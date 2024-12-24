@@ -13,10 +13,9 @@ from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
 from jamesapp.utils import decrypt, get_conversation_data, get_transcript_data
 
-from django.views.generic import ListView
-from .models import Contact
+
 from .forms import *
-import openpyxl
+
 
 
 def call_play_ai_api(request, agent_id):
@@ -265,103 +264,3 @@ def summarize_transcript(request, agent_id, cid):
 
 
 
-
-from django.core.paginator import Paginator
-
-
-def contact_list(request):
-    contacts = Contact.objects.all()
-    
-    # Pagination setup
-    paginator = Paginator(contacts, 10)  # Show 10 contacts per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the contacts for the current page
-    
-    # Prepare context
-    context = {
-        'page_obj': page_obj,
-        'contacts': contacts,  # You can also pass the full list if needed elsewhere
-        'page_range': paginator.page_range,  # The range of page numbers
-        'page_number': page_obj.number,  # Current page number
-    }
-    
-    return render(request, 'new/contact_list.html', context)
-
-
-
-def add_contact(request):
-    if request.method == 'POST':
-        contact_form = ContactForm(request.POST, request.FILES)
-        email_form = EmailForm(request.POST)
-        phone_form = PhoneNumberForm(request.POST)
-
-        if contact_form.is_valid() and email_form.is_valid() and phone_form.is_valid():
-            # Save the contact
-            contact = contact_form.save()
-
-            # Save the associated emails and phone numbers
-            email = email_form.save(commit=False)
-            phone_number = phone_form.save(commit=False)
-
-            email.contact = contact
-            phone_number.contact = contact
-
-            email.save()
-            phone_number.save()
-
-            return redirect('agent:contact_list')  # Redirect to the contact list page
-    else:
-        contact_form = ContactForm()
-        email_form = EmailForm()
-        phone_form = PhoneNumberForm()
-
-    return render(request, 'new/add_contact.html', {
-        'contact_form': contact_form,
-        'email_form': email_form,
-        'phone_form': phone_form
-    })
-
-
-
-
-
-
-def upload_excel(request):
-    if request.method == 'POST' and request.FILES['excel_file']:
-        excel_file = request.FILES['excel_file']
-        
-        # Open the Excel file
-        workbook = openpyxl.load_workbook(excel_file)
-        sheet = workbook.active
-        
-        # Iterate through rows in the Excel file
-        for row in sheet.iter_rows(min_row=2, values_only=True):  # Start from row 2 (skip headers)
-            first_name = row[0]  # Assuming first name is in column A
-            last_name = row[1]   # Assuming last name is in column B
-            email = row[2]       # Assuming email is in column C
-            phone = row[3]       # Assuming phone number is in column D
-            contact_type = row[4]  # Assuming contact type is in column E
-            time_zone = row[5]     # Assuming time zone is in column F
-            
-            # Create a new contact
-            contact = Contact.objects.create(
-                first_name=first_name,
-                last_name=last_name,
-                email=email,
-                phone=phone,
-                contact_type=contact_type,
-                time_zone=time_zone
-            )
-            
-            # Add email if present
-            if email:
-                Email.objects.create(contact=contact, email=email)
-            
-            # Add phone if present
-            if phone:
-                PhoneNumber.objects.create(contact=contact, phone=phone)
-
-        messages.success(request, 'Excel file uploaded and contacts created successfully!')
-        return redirect('agent:contact_list')  # Redirect to the contact list page after successful upload
-
-    return render(request, 'new/upload_contact.html', {'form': ExcelUploadForm()})

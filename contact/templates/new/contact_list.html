@@ -43,8 +43,8 @@
                 <div class="col-sm-12">
                     <div class="card">
                         <div class="card-header pb-0 card-no-border">
-                            <a href="{% url 'agent:add_contact' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add Contact</a>
-                            <a href="{% url 'agent:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a>
+                            <a href="{% url 'contact:add_contact' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add Contact</a>
+                            <a href="{% url 'contact:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a>
 
                             <span>Easily manage your AI Agents by editing, deleting, or initiating a conversation directly from the table.</span>
                         </div>
@@ -55,52 +55,72 @@
                                 <table class="display" id="basic-10">
                                     <thead>
                                         <tr>
-                                            <th>Image</th>  <!-- New column for Image -->
+                                             <!-- New column for Image -->
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone Number</th>
                                             <th>Created</th>
                                             <th>Contact Type</th>
                                             <th>Time Zone</th>
+                                            <th>Lists</th> <!-- New column for Lists -->
+                                            <th>Campaigns</th> <!-- New column for Campaigns -->
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for contact in page_obj %}
                                         <tr>
-                                            <td>
-                                                {% if contact.photo %}
-                                                    <img src="{{ contact.photo.url }}" alt="Contact Photo" style="width: 50px; height: 50px; border-radius: 50%;">
-                                                {% else %}
-                                                    <img src="{% static 'default-avatar.png' %}" alt="Default Photo" style="width: 50px; height: 50px; border-radius: 50%;">
-                                                {% endif %}
-                                            </td>
+                                            
                                             <td>{{ contact.first_name }} {{ contact.last_name }}</td>
                                             <td>{{ contact.email }}</td>
                                             <td>{{ contact.phone }}</td>
                                             <td>{{ contact.created_at|date:"F d, Y" }}</td>
                                             <td>{{ contact.contact_type }}</td>
                                             <td>{{ contact.time_zone }}</td>
+                                            <td>
+                                                {% if contact.lists.exists %}
+                                                    <ul>
+                                                        {% for list in contact.lists.all %}
+                                                            <li>{{ list.name }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    <a href="{% url 'contact:create_list' %}">Create a List</a>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if contact.campaigns.exists %}
+                                                    <ul>
+                                                        {% for campaign in contact.campaigns.all %}
+                                                            <li>{{ campaign.name }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    <a href="{% url 'contact:create_campaign' %}">Create a Campaign</a>
+                                                {% endif %}
+                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="7">No contacts available.</td>
+                                            <td colspan="9">No contacts available.</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <th>Image</th>  <!-- New column for Image -->
+                                             <!-- New column for Image -->
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone Number</th>
                                             <th>Created</th>
                                             <th>Contact Type</th>
                                             <th>Time Zone</th>
+                                            <th>Lists</th> <!-- New column for Lists -->
+                                            <th>Campaigns</th> <!-- New column for Campaigns -->
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
-        
+                        
                             <!-- Pagination -->
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
@@ -118,6 +138,7 @@
                                 </ul>
                             </nav>
                         </div>
+                        
                     </div>
                 </div>
                 <!-- Scroll - vertical dynamic Ends-->
