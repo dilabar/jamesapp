@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'callapp',
     'agent',
     'scheduling',
-    'agency'
+    'agency',
     'contact',
     'campaign',
     
