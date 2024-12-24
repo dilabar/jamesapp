@@ -1,0 +1,142 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+   
+{% endblock header %}
+
+{% block css %}
+<!-- Add any necessary CSS -->
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <h1>Configure settings for {{ subaccount.name }}</h1>
+                </div>
+                <div class="col-6">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">                                       
+                            <svg class="stroke-icon">
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                            </svg></a></li>
+                        <li class="breadcrumb-item">Agency </li>
+                        <li class="breadcrumb-item active"><a href="{% url 'agency:list_subaccounts' %}">Sub account</a></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+
+    <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h4>Account Info</h4>
+            <p class="f-m-light mt-1">
+               Fill up your true details and next proceed.</p>
+          </div>
+          <div class="card-body">
+            <div class="row shopping-wizard">
+              <div class="col-12"> 
+                <div class="row shipping-form g-5">
+                  <div class="col-xl-8 shipping-border">
+                    <div class="nav nav-pills horizontal-options shipping-options" id="cart-options-tab" role="tablist" aria-orientation="vertical"><a class="nav-link b-r-0 active" id="bill-wizard-tab" data-bs-toggle="pill" href="#bill-wizard" role="tab" aria-controls="bill-wizard" aria-selected="false" tabindex="-1"> 
+                        <div class="cart-options">
+                          <div class="stroke-icon-wizard"><i class="fa fa-user"></i></div>
+                          <div class="cart-options-content"> 
+                            <h6>Account Info</h6>
+                          </div>
+                        </div></a>
+                        <a class="nav-link b-r-0 " id="config-wizard-tab" data-bs-toggle="pill" href="#config-wizard" role="tab" aria-controls="config-wizard" aria-selected="true"> 
+                        <div class="cart-options">
+                          <div class="stroke-icon-wizard"><i class="fa fa-money"></i></div>
+                          <div class="cart-options-content"> 
+                            <h6>Configuration</h6>
+                          </div>
+                        </div>
+                    </a>
+                      </div>
+                    <div class="tab-content dark-field shipping-content" id="cart-options-tabContent">
+                      <div class="tab-pane fade show active" id="bill-wizard" role="tabpanel" aria-labelledby="bill-wizard-tab">
+                        <h6>Account Information </h6>
+                        <p class="f-light">Fill up the following  Account information </p>
+                        <form class="row g-3 needs-validation" novalidate="">
+                          <div class="col-sm-6">
+                            <label class="form-label" for="customFirstname">First Name<span class="txt-danger">*</span></label>
+                          {{subaccount_form.name}}
+                            <div class="valid-feedback">Looks good!</div>
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="customLastname">Last Name<span class="txt-danger">*</span></label>
+                            {{subaccount_form.name}}
+
+                            <div class="valid-feedback">Looks good!</div>
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="customContact">Contact Number</label>
+                            {{subaccount_form.phone_number}}
+
+                            <div class="valid-feedback">Looks good!</div>
+                          </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="customEmail">Email<span class="txt-danger">*</span></label>
+                            {{subaccount_form.email}}
+
+                            <div class="valid-feedback">Looks good!</div>
+                          </div>
+                          <div class="col-12 text-end">
+                            <button class="btn btn-primary">Update<i class="fa fa-update proceed-next pe-2"></i></button>
+                          </div>
+                        
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="config-wizard" role="tabpanel" aria-labelledby="config-wizard-tab">
+                        <h6>Configuration Information </h6>
+                  
+                        <form class="row g-3 needs-validation" novalidate="">
+                            <div class="col-sm-6">
+                                <label class="form-label" for="userLimit">Crm Enable<span class="txt-danger">*</span></label>
+                                {{form.crm_enabled}}
+                                <div class="valid-feedback">Looks good!</div>
+                              </div>
+                              <div class="col-sm-6">
+                                <label class="form-label" for="userLimit">Automation Enable<span class="txt-danger">*</span></label>
+                                {{form.automation_enabled}}
+                                <div class="valid-feedback">Looks good!</div>
+                              </div>
+                          <div class="col-sm-6">
+                            <label class="form-label" for="userLimit">User limit<span class="txt-danger">*</span></label>
+                            {{form.user_limit}}
+                            <div class="valid-feedback">Looks good!</div>
+                          </div>
+                          <div class="col-12 text-end">
+                            <button class="btn btn-primary">Update<i class="fa fa-update proceed-next pe-2"></i></button>
+                          </div>
+                      
+                        
+                        </form>
+                      </div>
+                     
+                  
+                    </div>
+                  </div>
+        
+                </div>
+              </div>
+              <!-- Container-fluid Ends-->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock body %}
+
+{% block js %}
+<!-- Add any necessary JS -->
+{% endblock js %}
