@@ -44,4 +44,19 @@ class SubaccountForm(forms.ModelForm):
 class ConfigurationForm(forms.ModelForm):
     class Meta:
         model = Configuration
-        fields = ['crm_enabled', 'automation_enabled', 'custom_data']
+        fields = ['crm_enabled', 'automation_enabled', 'user_limit']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add custom CSS classes and placeholders for each field
+        self.fields['crm_enabled'].widget.attrs.update({
+            'class': 'form-check-input',
+        })
+        self.fields['automation_enabled'].widget.attrs.update({
+            'class': 'form-check-input',
+        })
+        self.fields['user_limit'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter User limit'
+        })
+      
