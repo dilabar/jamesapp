@@ -105,7 +105,7 @@
                                 <select class="form-control form-input position-relative" name="permissions" multiple class="form-control">
                                     <option value="">-- Select Permissions --</option>
                                     {% for permission in permissions %}
-                                    <option value="{{ permission.id }}">{{ permission.name }}</option>
+                                    <option value="{{ permission.name }}">{{ permission.name }}</option>
                                     {% endfor %}
                                 </select>
                                 <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) key to select multiple permissions.</small>

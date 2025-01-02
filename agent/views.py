@@ -84,7 +84,7 @@ def signup(request):
                         group = Group.objects.get(name=group_name)
                         user.groups.add(group)
                     if permission_codenames:
-                        permissions = Permission.objects.filter(content_type_id__in=permission_codenames)
+                        permissions = Permission.objects.filter(name__in=permission_codenames)
                         print("permissions",permissions)
                         user.user_permissions.add(*permissions)
                 elif user_type == 'superuser':
@@ -95,7 +95,7 @@ def signup(request):
                         group = Group.objects.get(name=group_name)
                         user.groups.add(group)
                     if permission_codenames:
-                        permissions = Permission.objects.filter(content_type_id__in=permission_codenames)
+                        permissions = Permission.objects.filter(name__in=permission_codenames)
                         print("permissions",permissions)
                         user.user_permissions.add(*permissions)
                 user.save()
