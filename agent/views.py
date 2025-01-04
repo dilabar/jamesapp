@@ -2,7 +2,7 @@ from django.http import HttpResponse
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
 
 from django.contrib.auth import login as auth_login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -65,6 +65,9 @@ def signup(request):
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        user_type = request.POST['user_type']
+        group_name = request.POST.get('group', None)
+        permission_codenames = request.POST.getlist('permissions', None)
 
         # Check if the username or email is already taken
         if User.objects.filter(username=username).exists():
@@ -75,15 +78,35 @@ def signup(request):
             messages.error(request, "Passwords do not match.")
         else:
             try:
-                user = User.objects.create_user(username=username, email=email, password=password1)
+                if user_type == 'normal':
+                    user = User.objects.create_user(username=username, email=email, password=password1, is_staff=True)
+                    if group_name:
+                        group = Group.objects.get(name=group_name)
+                        user.groups.add(group)
+                    if permission_codenames:
+                        permissions = Permission.objects.filter(name__in=permission_codenames)
+                        print("permissions",permissions)
+                        user.user_permissions.add(*permissions)
+                elif user_type == 'superuser':
+                    user = User.objects.create_superuser(username=username, email=email, password=password1)
+                elif user_type == 'operator':
+                    user = User.objects.create_user(username, email, password1)
+                    if group_name:
+                        group = Group.objects.get(name=group_name)
+                        user.groups.add(group)
+                    if permission_codenames:
+                        permissions = Permission.objects.filter(name__in=permission_codenames)
+                        print("permissions",permissions)
+                        user.user_permissions.add(*permissions)
                 user.save()
                 auth_login(request, user)  # Automatically log in the user after signup
                 messages.success(request, "Registration successful! Welcome!")
                 return redirect('agent:login')  # Redirect to a home or success page after signup
             except Exception as e:
                 messages.error(request, f"Error occurred: {e}")
-
-    return render(request, 'auth/register.html')
+    groups = Group.objects.all()
+    permissions = Permission.objects.all()
+    return render(request, 'auth/register.html', {'groups': groups, 'permissions': permissions})
 
 
 # Login View

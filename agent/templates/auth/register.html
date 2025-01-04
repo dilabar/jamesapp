@@ -26,6 +26,7 @@
     <link id="color" rel="stylesheet" href="{% static 'manish/css/color-1.css' %}" media="screen">
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/responsive.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
   </head>
   <body>
     <!-- login page start-->
@@ -78,6 +79,37 @@
                                     <div class="show-hide"><span class="show"></span></div>
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="col-form-label">User Type</label>
+                                <select class="form-control form-input position-relative" name="user_type" required>
+                                    <option value="">-- Select User Type --</option>
+                                    <option value="normal">User</option>
+                                    <option value="operator">Operator</option>
+                                    <option value="superuser">Superuser</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-form-label">Group</label>
+                                <select class="form-control form-input position-relative" name="group">
+                                    <option value="">-- Select Group --</option>
+                                    {% for group in groups %}
+                                    <option value="{{ group.name }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-form-label">Permissions</label>
+                                <select class="form-control form-input position-relative" name="permissions" multiple class="form-control">
+                                    <option value="">-- Select Permissions --</option>
+                                    {% for permission in permissions %}
+                                    <option value="{{ permission.name }}">{{ permission.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) key to select multiple permissions.</small>
+                            </div>
     
                             <div class="form-group mb-0">
                                 <div class="checkbox p-0">
@@ -112,6 +144,11 @@
      <!-- Plugins JS Ends-->
      <!-- Theme js-->
      <script src="{% static 'manish/js/script.js' %}"></script>
-
+     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+     <script>
+         $(document).ready(function() {
+             $('select[multiple]').select2();
+         });
+     </script>
   </body>
 </html>
