@@ -13,6 +13,13 @@
 
 {% block body %}
 <div class="page-body">
+    {% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
     <div class="container-fluid">
         <div class="page-title">
             <div class="row">
@@ -52,13 +59,13 @@
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="first_name">First Name</label>
-                                            <input class="form-control input-air-primary" id="first_name" type="text" placeholder="John" name="first_name" value="{{ form.first_name.value }}">
+                                            {{ contact_form.first_name }}
                                         </div>
                                     </div>
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="last_name">Last Name</label>
-                                            <input class="form-control input-air-primary" id="last_name" type="text" placeholder="Doe" name="last_name" value="{{ form.last_name.value }}">
+                                      {{contact_form.last_name }}
                                         </div>
                                     </div>
                                 </div>
@@ -68,13 +75,13 @@
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="email">Email</label>
-                                            <input class="form-control input-air-primary" id="email" type="email" placeholder="name@example.com" name="email" value="{{ form.email.value }}">
+                                        {{ email_form.email }}
                                         </div>
                                     </div>
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="phone">Phone Number</label>
-                                            <input class="form-control input-air-primary" id="phone" type="text" placeholder="123-456-7890" name="phone" value="{{ form.phone.value }}">
+                                           {{phone_form.phone_number }}
                                         </div>
                                     </div>
                                 </div>
@@ -119,7 +126,7 @@
                                                     {% endfor %}
                                                 </select>
                                             {% else %}
-                                                <p>No lists available. <a href="{% url 'create_list' %}">Create a new list</a>.</p>
+                                                <p>No lists available. <a href="{% url 'contact:create_list' %}">Create a new list</a>.</p>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -163,6 +170,18 @@
 
 
 {% block js %}
-    
+<script>
+    // Auto-close messages after 5 seconds with fade-out animation and space removal
+    setTimeout(function () {
+        let alert = document.getElementById('messages');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s ease, height 0.5s ease'; // Smooth fade-out and height collapse
+            alert.style.opacity = '0'; // Start fade-out animation
+            alert.style.height = '0'; // Collapse height to remove space
+            alert.style.overflow = 'hidden'; // Prevent content overflow
+            setTimeout(() => alert.remove(), 500); // Remove element after animation
+        }
+    }, 5000); // Adjust the timeout as needed
+  </script>
 {% endblock js %}
     

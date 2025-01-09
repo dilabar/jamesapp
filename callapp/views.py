@@ -4,6 +4,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from agent.models import Agent, PhoneCall, ServiceDetail
+from contact.models import Campaign
 from jamesapp.utils import decrypt, fetch_data_from_api
 from twilio.rest import Client
 import json
@@ -22,7 +23,22 @@ logger = logging.getLogger(__name__)
 @login_required
 def call_initiate(request, agnt_id):
     # Fetch Twilio service details
-    twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+    if request.user.is_agency():
+        # Show agents for the agency and all its sub-accounts
+        user=request.user
+        campaigns = Campaign.objects.filter(user__in=user.get_all_subaccounts())  # Agency campaigns
+        print(campaigns)
+    else:
+        # Show only the logged-in user's agents
+        user=request.user.parent_agency
+        campaigns = Campaign.objects.filter(user=request.user)  # Subaccount campaigns
+
+
+
+    print(campaigns)
+        
+        
+    twilio = ServiceDetail.objects.filter(user=user, service_name='twilio').first()
     if not twilio:
         return HttpResponse("Twilio service details not found.")
 
@@ -31,6 +47,12 @@ def call_initiate(request, agnt_id):
     if request.method == "POST":
         phone_number = request.POST.get('phone_number')
         file_upload = request.FILES.get('file_upload')
+        campaign_id = request.POST.get('campaign')
+
+                # Fetch the selected campaign if provided
+        selected_campaign = None
+        if campaign_id:
+            selected_campaign = Campaign.objects.filter(id=campaign_id, user__in=user.get_all_subaccounts()).first()
 
         # Manual entry handling
         if phone_number:
@@ -38,11 +60,12 @@ def call_initiate(request, agnt_id):
                 phone_number=phone_number,
                 call_status='pending',
                 user=request.user,
-                agnt_id=agnt_id
+                agnt_id=agnt_id,
+                campaign=selected_campaign
             )
             try:
                 call = client.calls.create(
-                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agnt_id}/',
+                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/',
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone,
                     record=True,
@@ -90,11 +113,12 @@ def call_initiate(request, agnt_id):
                                 phone_number=phone,
                                 call_status='pending',
                                 user=request.user,
-                                agnt_id=agnt_id
+                                agnt_id=agnt_id,
+                                campaign=selected_campaign
                             )
                             try:
                                 call = client.calls.create(
-                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agnt_id}/',
+                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/',
                                     to=phone_call.phone_number,
                                     from_=twilio.decrypted_twilio_phone,
                                     record=True,
@@ -126,13 +150,20 @@ def call_initiate(request, agnt_id):
                 messages.error(request, f"Error processing file: {str(e)}")
                 return redirect('callapp:initiate_call')
 
-    return render(request, 'callapp/start_calling.html')
+    return render(request, 'callapp/start_calling.html',{'campaigns': campaigns})
 @login_required
 def start_calling(request):
     return render(request, 'callapp/start_calling.html')
 @login_required
 def start_card(request):
-    agents = Agent.objects.filter(user =request.user)  # Fetch all agents from the database
+    # agents = Agent.objects.filter(user =request.user)  # Fetch all agents from the database
+    if request.user.is_agency():
+        # Show agents for the agency and all its sub-accounts
+        agents = Agent.objects.filter(user=request.user)
+    else:
+        # Show only the logged-in user's agents
+        agents = Agent.objects.filter(user=request.user.parent_agency)
+        
     context={
         'agents': agents
     }

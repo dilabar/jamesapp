@@ -73,6 +73,15 @@
                             <div class="card-body pb-0">
                                 <div class="form"> 
                                     <div class="mb-3">
+                                      
+                                        <label class="form-label" for="campaign">Select Campaign</label>
+                                        <select name="campaign" id="campaign" class="form-control">
+                                            <option value="">No Campaign</option>
+                                            {% for campaign in campaigns %}
+                                                <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                 
                                     <label class="form-label" for="phone_number">Phone  Number</label>
                                     <input class="form-control"  type="text"  id="phone_number" name="phone_number"  placeholder="+1 (022) 223 1232">
                                     </div>

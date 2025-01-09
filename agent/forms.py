@@ -1,26 +1,50 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from agency.models import AgencyAccount, User
 from .models import *
 
 class RegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    agency_name = forms.CharField(max_length=255, required=True)
     class Meta:
         model = User
         fields = ["username", "email", "password1", "password2"]
 
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
+        self.fields['agency_name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Agency name'})
         self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Username'})
         self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Email'})
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm Password'})
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("A user with this email address already exists.")
+        return email
+    def save(self, commit=True):
+        # Save the user instance
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.user_type = 'agency'  # Set user type to 'agency'
+                # Check if passwords match (handled by UserCreationForm, but we are overriding the save method)
+        if self.cleaned_data.get('password1') != self.cleaned_data.get('password2'):
+            raise forms.ValidationError("Passwords do not match.")
 
+        if commit:
+            user.save()
+            # Create the associated AgencyAccount
+            AgencyAccount.objects.create(
+                agency=user,    
+                agency_name=self.cleaned_data['agency_name']
+            )
+        return user
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
 
-from django import forms
-from .models import Agent, ServiceDetail
+
 
 class ServiceDetailForm(forms.ModelForm):
     # Custom fields to display decrypted values and allow encrypted input
@@ -114,68 +138,3 @@ class AgentForm(forms.ModelForm):
 
 
 
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = Contact
-        fields = ['first_name', 'last_name', 'email', 'phone', 'contact_type', 'time_zone', 'photo']
-        
-    # You can customize widgets, add validation here if needed
-
-class EmailForm(forms.ModelForm):
-    class Meta:
-        model = Email
-        fields = ['email']
-
-class PhoneNumberForm(forms.ModelForm):
-    class Meta:
-        model = PhoneNumber
-        fields = ['phone']
-
-
-
-class ExcelUploadForm(forms.Form):
-    excel_file = forms.FileField(label='Upload Excel File')
-
-
-
-
-# Form for the List Model
-class ListForm(forms.ModelForm):
-    contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = List
-        fields = ['name', 'description', 'contacts']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control'}),
-        }
-
-
-# Form for the Campaign Model
-class CampaignForm(forms.ModelForm):
-    lists = forms.ModelMultipleChoiceField(
-        queryset=List.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-    individual_contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
-
-    class Meta:
-        model = Campaign
-        fields = ['name', 'subject', 'content', 'lists', 'individual_contacts', 'scheduled_at', 'status']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'subject': forms.TextInput(attrs={'class': 'form-control'}),
-            'content': forms.Textarea(attrs={'class': 'form-control'}),
-            'scheduled_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-        }
