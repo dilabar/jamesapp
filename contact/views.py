@@ -8,6 +8,9 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from twilio.rest import Client
+from django.http import JsonResponse
+import json
+from django.utils import timezone
 
 from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm, PhoneNumberForm
 from contact.models import *
@@ -48,68 +51,93 @@ def add_contact(request):
     all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()  # Filter campaigns by user's lists
 
     if request.method == 'POST':
-        contact_form = ContactForm(request.POST, request.FILES)  # Include files for handling uploaded photos
-        email_form = EmailForm(request.POST)
-        phone_form = PhoneNumberForm(request.POST)
-        selected_lists = request.POST.getlist('lists')
-        selected_campaigns = request.POST.getlist('campaigns')
+        
+        try:
+            # Parse JSON data
+            data = json.loads(request.body)
 
-        if contact_form.is_valid() and email_form.is_valid() and phone_form.is_valid():
-            # Save the contact
-            contact = contact_form.save(commit=False)
-            contact.user = request.user  # Assign the logged-in user
+            # Process `contact_info` or save to database
+            first_name = data.get('firstName', '')
+            last_name = data.get('lastName', '')
+            emails = data.get('emails', {})
+            phone_data = data.get('phoneData', {})
+            contact_type = data.get('contactType', '')
+            time_zone = data.get('timeZone', '')
+
+            contact = Contact.objects.create(user=request.user,first_name=first_name,last_name=last_name,email=emails,phone=phone_data,contact_type=contact_type,time_zone=time_zone,created_at=timezone.now())
             contact.save()
 
-            # Save the associated email
-            email = email_form.save(commit=False)
-            email.contact = contact
-            email.user = request.user  # Assign the logged-in user
-            email.save()
+            # Example response
+            return JsonResponse({'status': 'success', 'message': 'Contact added successfully!'})
 
-            # Handle phone number uniqueness
-            phone_number = phone_form.save(commit=False)
-            phone_number.contact = contact
-            phone_number.user = request.user  # Assign the logged-in user
-
-            try:
-                # Check if this phone number already exists for the user
-                existing_phone_number = PhoneNumber.objects.filter(user=request.user, phone_number=phone_number.phone_number).first()
-                if existing_phone_number:
-                    # If it exists, display an error message
-                    messages.error(request, f"The phone number {phone_number.phone_number} is already associated with your account.")
-                    return redirect('contact:add_contact')
-
-                # If the phone number is unique, save it
-                phone_number.save()
-
-            except IntegrityError:
-                # Handle IntegrityError if any happens (to be extra cautious)
-                messages.error(request, "There was an error saving the phone number. Please try again.")
-                return redirect('contact:add_contact')
-
-            # Associate contact with selected lists
-            for list_id in selected_lists:
-                list_obj = get_object_or_404(List, id=list_id, user=request.user)
-                list_obj.contacts.add(contact)
-
-            # Associate contact with selected campaigns
-            for campaign_id in selected_campaigns:
-                campaign_obj = get_object_or_404(Campaign, id=campaign_id, lists__user=request.user)
-                campaign_obj.individual_contacts.add(contact)
-
-            return redirect('contact:contact_list')  # Redirect to the contact list page
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
     else:
-        contact_form = ContactForm()
-        email_form = EmailForm()
-        phone_form = PhoneNumberForm()
+        return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+    #     contact_form = ContactForm(request.POST, request.FILES)  # Include files for handling uploaded photos
+    #     email_form = EmailForm(request.POST)
+    #     phone_form = PhoneNumberForm(request.POST)
+    #     selected_lists = request.POST.getlist('lists')
+    #     selected_campaigns = request.POST.getlist('campaigns')
 
-    return render(request, 'new/add_contact.html', {
-        'contact_form': contact_form,
-        'email_form': email_form,
-        'phone_form': phone_form,
-        'all_lists': all_lists,
-        'all_campaigns': all_campaigns,
-    })
+    #     if contact_form.is_valid() and email_form.is_valid() and phone_form.is_valid():
+    #         # Save the contact
+    #         contact = contact_form.save(commit=False)
+    #         contact.user = request.user  # Assign the logged-in user
+    #         contact.save()
+
+    #         # Save the associated email
+    #         email = email_form.save(commit=False)
+    #         email.contact = contact
+    #         email.user = request.user  # Assign the logged-in user
+    #         email.save()
+
+    #         # Handle phone number uniqueness
+    #         phone_number = phone_form.save(commit=False)
+    #         phone_number.contact = contact
+    #         phone_number.user = request.user  # Assign the logged-in user
+
+    #         try:
+    #             # Check if this phone number already exists for the user
+    #             existing_phone_number = PhoneNumber.objects.filter(user=request.user, phone_number=phone_number.phone_number).first()
+    #             if existing_phone_number:
+    #                 # If it exists, display an error message
+    #                 messages.error(request, f"The phone number {phone_number.phone_number} is already associated with your account.")
+    #                 return redirect('contact:add_contact')
+
+    #             # If the phone number is unique, save it
+    #             phone_number.save()
+
+    #         except IntegrityError:
+    #             # Handle IntegrityError if any happens (to be extra cautious)
+    #             messages.error(request, "There was an error saving the phone number. Please try again.")
+    #             return redirect('contact:add_contact')
+
+    #         # Associate contact with selected lists
+    #         for list_id in selected_lists:
+    #             list_obj = get_object_or_404(List, id=list_id, user=request.user)
+    #             list_obj.contacts.add(contact)
+
+    #         # Associate contact with selected campaigns
+    #         for campaign_id in selected_campaigns:
+    #             campaign_obj = get_object_or_404(Campaign, id=campaign_id, lists__user=request.user)
+    #             campaign_obj.individual_contacts.add(contact)
+
+    #         return redirect('contact:contact_list')  # Redirect to the contact list page
+    # else:
+    #     contact_form = ContactForm()
+    #     email_form = EmailForm()
+    #     phone_form = PhoneNumberForm()
+
+    # return render(request, 'new/add_contact.html', {
+    #     'contact_form': contact_form,
+    #     'email_form': email_form,
+    #     'phone_form': phone_form,
+    #     'all_lists': all_lists,
+    #     'all_campaigns': all_campaigns,
+    # })
 
 
 
