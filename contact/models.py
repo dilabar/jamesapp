@@ -12,8 +12,7 @@ class Contact(models.Model):
     last_name = models.CharField(max_length=100, blank=True, null=True)
     contact_type = models.CharField(max_length=50, choices=[('Customer', 'Customer'), ('Vendor', 'Vendor')])
     time_zone = models.CharField(max_length=50, blank=True, null=True)
-    email = models.JSONField(default=dict, blank=True)  # Store additional fields as JSON.
-    phone = models.JSONField(default=dict, blank=True)
+    custom_fields = models.JSONField(default=dict, blank=True)  # Store additional fields as JSON.
     last_activity = models.DateTimeField(blank=True, null=True)
     # Removed dnd_preferences for now
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,6 +40,7 @@ class Email(models.Model):
 class PhoneNumber(models.Model):
     contact = models.ForeignKey(Contact, related_name='phone_numbers', on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15)
+    country_code = models.CharField(max_length=15, blank=True, null=True)
     is_primary = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="phone_numbers")
 
