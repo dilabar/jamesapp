@@ -45,7 +45,7 @@ def contact_list(request):
 
 
 
-@login_required
+# @login_required
 def add_contact(request):
     """Handles creating a new contact with associated email, phone, lists, and campaigns."""
     all_lists = List.objects.filter(user=request.user)  # Filter lists by logged-in user
@@ -65,7 +65,29 @@ def add_contact(request):
             contact_type = data.get('contactType', '')
             time_zone = data.get('timeZone', '')
 
-            contact = Contact.objects.create(user=request.user,first_name=first_name,last_name=last_name,email=emails,phone=phone_data,contact_type=contact_type,time_zone=time_zone,created_at=timezone.now())
+            contact = Contact.objects.create(user=request.user,first_name=first_name,last_name=last_name,contact_type=contact_type,time_zone=time_zone,created_at=timezone.now())
+            
+            for email, is_primary in emails.items():
+                Email.objects.create(
+                    contact=contact,
+                    user=request.user,
+                    email=email.strip(),
+                    is_primary=is_primary == 1  # Mark active if primary
+                )
+            sample = []
+            print("email", emails)
+            print("sample1",sample,phone_data)
+            for phone_id, phone_info in phone_data.items():
+                # sample.append(contact,request.user,phone_id.strip(),phone_info.get('country_code', '').strip(),phone_info.get('primary', 0) == 1)
+                print(contact,request.user,phone_id.strip(),phone_info.get('country_code', '').strip(),phone_info.get('primary', 0) == 1)
+                PhoneNumber.objects.create(
+                    contact=contact,
+                    user=request.user,
+                    phone_number=str(phone_id).strip(),
+                    country_code=phone_info.get('country_code', '').strip(),
+                    is_primary=phone_info.get('primary', 0) == 1,  # Mark active if primary
+                )
+            print("sample2",sample)
             contact.save()
 
             # Example response
@@ -239,6 +261,7 @@ def process_csv_rows(reader, headers):
     return processed_rows
 
 
+
 def create_bulk_contacts(request):
     if request.method == "POST":
         try:
@@ -248,50 +271,76 @@ def create_bulk_contacts(request):
             header_variables = data.get("header_variables", [])
             processed_data = data.get("data", {})
 
-            print("Headers:", headers)
-            print("Header Variables:", header_variables)
-            print("Processed Data:", processed_data)
+            # print("Headers:", headers)
+            # print("Header Variables:", header_variables)
+            # print("Processed Data:", processed_data)
 
-            # Ensure we don't process the same data multiple times
-            email_set = set()  # Keep track of processed emails to avoid duplication
+            email_set = set()  # Track processed emails to avoid duplication
 
             for variable, values in processed_data.items():
                 value_list = values.split(", ")  # Split the string of values into a list
 
                 for i, value in enumerate(value_list):
                     # Extract individual data for this contact
-                    first_name = processed_data.get("first_name", "").split(", ")[i] if "first_name" in processed_data else None
-                    last_name = processed_data.get("last_name", "").split(", ")[i] if "last_name" in processed_data else None
-                    email = processed_data.get("email", "").split(", ")[i] if "email" in processed_data else None
-                    phone = processed_data.get("phone_number", "").split(", ")[i] if "phone_number" in processed_data else None
+                    first_name = (
+                        processed_data.get("first_name", "").split(", ")[i]
+                        if "first_name" in processed_data else None
+                    )
+                    last_name = (
+                        processed_data.get("last_name", "").split(", ")[i]
+                        if "last_name" in processed_data else None
+                    )
+                    email = (
+                        processed_data.get("email", "").split(", ")[i]
+                        if "email" in processed_data else None
+                    )
+                    phone = (
+                        processed_data.get("phone_number", "").split(", ")[i]
+                        if "phone_number" in processed_data else None
+                    )
 
                     if email and email not in email_set:  # Check if email is provided and not processed yet
-                        email_set.add(email)  # Add to the set of processed emails
+                        email_set.add(email)  # Add email to the processed set
 
                         # Check if a contact with this email already exists
-                        contact = Contact.objects.filter(email=email).first()
+                        contact = Contact.objects.filter(emails__email=email).first()
 
                         if contact:
                             # Update existing contact
                             contact.first_name = first_name or contact.first_name
                             contact.last_name = last_name or contact.last_name
-                            contact.phone = phone or contact.phone
                             contact.updated_at = timezone.now()  # Update timestamp
                             contact.save()
                             print(f"Updated contact: {email}")
                         else:
                             # Create a new contact
-                            Contact.objects.create(
+                            contact = Contact.objects.create(
                                 user=request.user,
                                 first_name=first_name,
                                 last_name=last_name,
-                                email=email,
-                                phone=phone,
                                 contact_type="bulk_import",
                                 time_zone="UTC",
                                 created_at=timezone.now(),
                             )
-                            print(f"Created contact: {email}")
+
+                        # Ensure the email object is created or updated
+                        Email.objects.update_or_create(
+                            contact=contact,
+                            email=email,
+                            defaults={"user": request.user, "is_primary": True},
+                        )
+
+                        # Ensure the phone number object is created or updated
+                        if phone:
+                            PhoneNumber.objects.update_or_create(
+                                contact=contact,
+                                user=request.user,
+                                phone_number=phone,
+                                defaults={
+                                    "is_primary": True,
+                                    "country_code": None,  # Adjust as needed
+                                },
+                            )
 
             return JsonResponse({"message": "Contacts processed successfully!"}, status=201)
 
