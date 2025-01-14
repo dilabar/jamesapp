@@ -516,3 +516,12 @@ def start_campaign(request, campaign_id):
 
     # GET request handling (in case no agent is selected or campaign is in draft)
     return render(request, 'new/campaign_detail.html', {'campaign': campaign})
+
+
+
+
+
+def contact_details(request):
+    
+    
+    return render(request, 'new/details.html')
