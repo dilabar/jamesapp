@@ -40,6 +40,7 @@ class Email(models.Model):
 class PhoneNumber(models.Model):
     contact = models.ForeignKey(Contact, related_name='phone_numbers', on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15)
+    country_code = models.CharField(max_length=15, blank=True, null=True)
     is_primary = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="phone_numbers")
 

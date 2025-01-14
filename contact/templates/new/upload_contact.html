@@ -77,9 +77,17 @@
                                           <label class="form-label" for="exampleFormControlTextarea1">Remarks</label>
                                           <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
                                         </div>
+                                        <div id="response-container">
+                                          <h2>Uploaded Contact Details</h2>
+                                          <table id="contacts-table" border="1">
+                                            <tbody>
+                                              <!-- Dynamic rows will be added here -->
+                                            </tbody>
+                                          </table>
+                                        </div>
                     
                                         <div class="mb-3 mt-3">
-                                          <input class="btn btn-primary" id="exampleFormControltwo" type="submit" value="submite" >
+                                          <input class="btn btn-primary" id="bulkAdd"  value="submit">
                                         </div>
                                     </div>    
                                 </div>
@@ -101,7 +109,157 @@
 
 
 {% block js %}
+    <script>
+      document.getElementById("file_upload").addEventListener("change", function (event) {
+        const fileInput = event.target;
+        const file = fileInput.files[0]; // Get the selected file
     
+        if (file) {
+            // Get the file extension
+            const fileName = file.name;
+            const fileExtension = fileName.split(".").pop().toLowerCase();
+            const fileSizeMB = file.size / (1024 * 1024); // Convert size to MB
+    
+            // Validate the file extension
+            if (fileExtension !== "csv") {
+                alert(`Invalid file type: .${fileExtension}. Please upload a valid CSV file.`);
+                fileInput.value = ""; // Clear the input field
+            }else if (fileSizeMB > 30) {
+              alert(`File size exceeds 30MB. Please upload a smaller file.`);
+              fileInput.value = ""; // Clear the input field
+            }  else {
+                const formData = new FormData();
+                formData.append("file_upload", file);
+                $.ajax({
+                  url: "/contact/extract/", // Replace with your server endpoint
+                  method: "POST",
+                  data: formData,
+                  processData: false, // Prevent jQuery from processing the data
+                  contentType: false,
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}',
+                  },
+                  success: function (response) {
+                      console.log(response);
+
+                      const headers = response.data.headers; // e.g., ['First Name', 'Last Name', ...]
+                      const processedRows = response.data.values; // e.g., {'First Name': [...], ...}
+                      const headerVariables = response.data.header_variables; // e.g., ['first_name', 'last_name', ...]
+
+                      // Get the table body element
+                      const tableBody = document.querySelector("#contacts-table tbody");
+
+                      // Clear existing rows (if any)
+                      tableBody.innerHTML = "";
+
+                      // Iterate through headers to create rows dynamically
+                      headers.forEach((header, headerIndex) => {
+                          // Create a new row
+                          const row = document.createElement("tr");
+
+                          // First column: Header
+                          const headerCell = document.createElement("td");
+                          headerCell.textContent = header; // Use the header name
+                          row.appendChild(headerCell);
+
+                          // Second column: Processed Rows (values)
+                          const valuesCell = document.createElement("td");
+                          const values = processedRows[header] || []; // Get all values for this header
+                          valuesCell.innerHTML = values.map(value => value || "-").join(", "); // Join values with a comma
+                          row.appendChild(valuesCell);
+
+                          // Third column: Dropdown
+                          const dropdownCell = document.createElement("td");
+                          const select = document.createElement("select");
+
+                          // Populate the dropdown options
+                          headerVariables.forEach(variable => {
+                              const option = document.createElement("option");
+                              option.value = variable;
+                              option.textContent = variable.replace(/_/g, " "); // Format the variable name
+                              if (headerVariables[headerIndex] === variable) {
+                                  option.selected = true; // Preselect the correct variable
+                              }
+                              select.appendChild(option);
+                          });
+
+                          dropdownCell.appendChild(select);
+                          row.appendChild(dropdownCell);
+
+                          // Append the row to the table body
+                          tableBody.appendChild(row);
+                      });
+
+
+                      alert("Table updated successfully!");
+                  },
+                  error: function (err) {
+                      alert("Error adding contact.");
+                      console.error(err);
+                  }
+              });
+            }
+        }
+      });
+    </script>
+    <script>
+      // Event listener for bulkAdd button
+      document.getElementById("bulkAdd").addEventListener("click", function () {
+        // Get all rows in the table
+        const rows = document.querySelectorAll("#contacts-table tbody tr");
+
+        // Prepare the data to send to the backend
+        const postData = {
+            headers: [],           // To store the headers
+            header_variables: [],  // To store the selected variables
+            data: {}               // To store the mapping of selected variables to processed row previews
+        };
+        
+        rows.forEach(row => {
+            // Get the header
+            const header = row.querySelector("td:nth-child(1)")?.textContent.trim();
+            
+            // Get the processed rows (preview values) as a string
+            const processedRowsPreview = row.querySelector("td:nth-child(2)")?.textContent.trim();
+            
+            // Get the selected dropdown value
+            const selectedVariable = row.querySelector("select")?.value;
+        
+            if (header && selectedVariable) {
+                // Add the header to the headers array
+                postData.headers.push(header);
+        
+                // Add the selected variable to the header_variables array
+                postData.header_variables.push(selectedVariable);
+        
+                // Map the selected variable to the processed row preview values
+                postData.data[selectedVariable] = processedRowsPreview;
+            }
+        });
+        console.log("Data to send:", postData);
+
+        // Send the data to the backend using an AJAX POST request
+        $.ajax({
+            url: "/contact/create-bulk/", // Replace with your backend endpoint for creating contacts
+            method: "POST",
+            contentType: "application/json",
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // Add CSRF token for security
+            },
+            data: JSON.stringify(postData), // Convert postData to JSON
+            success: function (response) {
+                alert("Contacts created successfully!");
+                console.log(response);
+                window.location.href = '/contact/';
+            },
+            error: function (err) {
+                alert("Error creating contacts.");
+                console.error(err);
+            }
+        });
+      });
+
+    </script>
 {% endblock js %}
     
 
