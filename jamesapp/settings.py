@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'scheduling',
     'agency',
     'contact',
-    'campaign',
+    # 'campaign',
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True
