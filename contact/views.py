@@ -11,7 +11,8 @@ from twilio.rest import Client
 from django.http import JsonResponse
 import json
 from django.utils import timezone
-
+import csv
+from django.db import transaction
 from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm, PhoneNumberForm
 from contact.models import *
 
@@ -143,8 +144,8 @@ def add_contact(request):
 
 
 def upload_excel(request):
-    if request.method == 'POST' and request.FILES['excel_file']:
-        excel_file = request.FILES['excel_file']
+    if request.method == 'POST' and request.FILES['file_upload']:
+        file = request.FILES['file_upload']
         
         # Open the Excel file
         workbook = openpyxl.load_workbook(excel_file)
@@ -152,13 +153,13 @@ def upload_excel(request):
         
         # Iterate through rows in the Excel file
         for row in sheet.iter_rows(min_row=2, values_only=True):  # Start from row 2 (skip headers)
+            print(f"Processing row: First Name: {row[0]}, Last Name: {row[1]}, Email: {row[2]}, Phone: {row[3]}, Type: {row[4]}, Time Zone: {row[5]}")
             first_name = row[0]  # Assuming first name is in column A
             last_name = row[1]   # Assuming last name is in column B
             email = row[2]       # Assuming email is in column C
             phone = row[3]       # Assuming phone number is in column D
             contact_type = row[4]  # Assuming contact type is in column E
-            time_zone = row[5]     # Assuming time zone is in column F
-            
+            time_zone = row[5]     # Assuming time zone is in column F            
             # Create a new contact
             contact = Contact.objects.create(
                 first_name=first_name,
@@ -183,8 +184,122 @@ def upload_excel(request):
     return render(request, 'new/upload_contact.html', {'form': ExcelUploadForm()})
 
 
+def extract_file(request):
+    if request.method == 'POST' and request.FILES['file_upload']:
+        csv_file = request.FILES['file_upload']
+        
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, 'Invalid file format. Please upload a CSV file.')
+            return redirect('agent:contact_list')
+
+        try:
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.reader(decoded_file)
+            headers = next(reader)
+            print(f"Headers: {headers}")
+            header_variables = [
+                header.strip().lower().replace(' ', '_') for header in headers
+            ]
+            print(f"Header variables: {header_variables}")
+            
+            processed_rows = process_csv_rows(reader, headers)
+            print("processed_rows",processed_rows)
+            
+            return JsonResponse({
+                'status': 'success',
+                'data': {
+                    'headers': headers,
+                    'header_variables': header_variables,
+                    'values': processed_rows,
+                }
+            })
+
+        except Exception as e:
+            messages.error(request, f"An error occurred while processing the file: {str(e)}")
+            return redirect('contact:contact_list')
+
+    return render(request, 'new/upload_contact.html', {'form': ExcelUploadForm()})
 
 
+def process_csv_rows(reader, headers):
+    # Initialize a dictionary with headers as keys and empty lists as values
+    processed_rows = {header: [] for header in headers}
+    
+    with transaction.atomic():
+        for row_idx, row in enumerate(reader, start=2):  # Start from the second row
+            try:
+                # Append each value in the row to the corresponding header key
+                for i, header in enumerate(headers):
+                    processed_rows[header].append(row[i].strip() if row[i] else None)
+            except Exception as e:
+                # Log a warning and skip the row if an error occurs
+                messages.warning(request, f"Row {row_idx}: Error processing row. Skipping. ({str(e)})")
+                continue
+    
+    return processed_rows
+
+
+def create_bulk_contacts(request):
+    if request.method == "POST":
+        try:
+            # Parse the incoming JSON data
+            data = json.loads(request.body)
+            headers = data.get("headers", [])
+            header_variables = data.get("header_variables", [])
+            processed_data = data.get("data", {})
+
+            print("Headers:", headers)
+            print("Header Variables:", header_variables)
+            print("Processed Data:", processed_data)
+
+            # Ensure we don't process the same data multiple times
+            email_set = set()  # Keep track of processed emails to avoid duplication
+
+            for variable, values in processed_data.items():
+                value_list = values.split(", ")  # Split the string of values into a list
+
+                for i, value in enumerate(value_list):
+                    # Extract individual data for this contact
+                    first_name = processed_data.get("first_name", "").split(", ")[i] if "first_name" in processed_data else None
+                    last_name = processed_data.get("last_name", "").split(", ")[i] if "last_name" in processed_data else None
+                    email = processed_data.get("email", "").split(", ")[i] if "email" in processed_data else None
+                    phone = processed_data.get("phone_number", "").split(", ")[i] if "phone_number" in processed_data else None
+
+                    if email and email not in email_set:  # Check if email is provided and not processed yet
+                        email_set.add(email)  # Add to the set of processed emails
+
+                        # Check if a contact with this email already exists
+                        contact = Contact.objects.filter(email=email).first()
+
+                        if contact:
+                            # Update existing contact
+                            contact.first_name = first_name or contact.first_name
+                            contact.last_name = last_name or contact.last_name
+                            contact.phone = phone or contact.phone
+                            contact.updated_at = timezone.now()  # Update timestamp
+                            contact.save()
+                            print(f"Updated contact: {email}")
+                        else:
+                            # Create a new contact
+                            Contact.objects.create(
+                                user=request.user,
+                                first_name=first_name,
+                                last_name=last_name,
+                                email=email,
+                                phone=phone,
+                                contact_type="bulk_import",
+                                time_zone="UTC",
+                                created_at=timezone.now(),
+                            )
+                            print(f"Created contact: {email}")
+
+            return JsonResponse({"message": "Contacts processed successfully!"}, status=201)
+
+        except Exception as e:
+            print("Error:", str(e))
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Invalid request method."}, status=405)
 
 
 def create_list(request):
