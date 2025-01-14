@@ -11,6 +11,13 @@
 
 {% block body %}
 <div class="page-body">
+    {% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
     <div class="container-fluid">
         <div class="page-title">
             <div class="row">
@@ -63,16 +70,16 @@
                                     {% for subaccount in page_obj %}
                                       <tr>
                                         <td>{{ forloop.counter }}</td>
-                                        <td>{{ subaccount.name }}</td>
+                                        <td>{{ subaccount.first_name}} {{ subaccount.last_name }}</td>
                                         <td>{{ subaccount.email }}</td>
-                                        <td>{{ subaccount.phone_number }}</td>
-                                        <td>{{ subaccount.city }}</td>
-                                        <td>{{ subaccount.timezone }}</td>
-                                        <td>{{ subaccount.created_at }}</td>
+                                        <td>{{ subaccount.subaccountprofile.phone_number }}</td>
+                                        <td>{{ subaccount.subaccountprofile.city }}</td>
+                                        <td>{{ subaccount.subaccountprofile.timezone }}</td>
+                                        <td>{{ subaccount.subaccountprofile.created_at }}</td>
                                         <td>
                                             <ul class="action"> 
-                                                <li class="edit"> <a href="{% url 'agency:configure_subaccount' subaccount_id=subaccount.id %}"><i class="icon-pencil-alt"></i></a></li>
-                                                <li class="delete"><a href="#"><span class=" badge badge-warning">Switch Account</span></a></li>
+                                                <li class="edit"> <a href=""><i class="icon-pencil-alt"></i></a></li>
+                                                <li class="delete"><a href="{% url 'agency:switch_account' subaccount.id %}" target="_blank"><span class=" badge badge-warning">Switch Account</span></a></li>
                                               </ul>
 
                                         </td>
@@ -83,8 +90,9 @@
                                       </tr>
                                       {% endfor %}
                                   </tbody>
-                                  <tfoot>
+                                  <!-- <tfoot>
                                       <tr>
+                                        <th>#</th>
                                           <th>Name</th>
                                           <th>Email</th>
                                           <th>Phone Number</th>
@@ -93,7 +101,7 @@
                                           <th>Created At</th>
                                           <th>Actions</th>
                                       </tr>
-                                  </tfoot>
+                                  </tfoot> -->
                               </table>
                           </div>
                       
@@ -127,4 +135,17 @@
 {% block js %}
 <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+<script>
+    // Auto-close messages after 5 seconds with fade-out animation and space removal
+    setTimeout(function () {
+        let alert = document.getElementById('messages');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s ease, height 0.5s ease'; // Smooth fade-out and height collapse
+            alert.style.opacity = '0'; // Start fade-out animation
+            alert.style.height = '0'; // Collapse height to remove space
+            alert.style.overflow = 'hidden'; // Prevent content overflow
+            setTimeout(() => alert.remove(), 500); // Remove element after animation
+        }
+    }, 5000); // Adjust the timeout as needed
+  </script>
 {% endblock js %}

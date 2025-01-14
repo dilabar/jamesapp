@@ -1,11 +1,154 @@
-<h1>{{ campaign.name }}</h1>
-<p>Status: {{ campaign.get_status_display }}</p>
-<p>Scheduled At: {{ campaign.scheduled_at }}</p>
-<p>{{ campaign.content }}</p>
+{% extends 'new/base.html' %}
+{% load static %}
 
-<h3>Contacts in this Campaign:</h3>
-<ul>
-    {% for contact in campaign.get_recipients %}
-        <li>{{ contact.first_name }} {{ contact.last_name }} - {{ contact.contact_type }}</li>
-    {% endfor %}
-</ul>
+{% block header %}
+<!-- Add any custom header elements if required -->
+{% endblock header %}
+
+{% block css %}
+<!-- Add custom CSS if required -->
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+    {% if messages %}
+    <div class="alert alert-warning" role="alert" id="messages">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <h4>Campaign Detail View</h4>
+                </div>
+                <div class="col-6">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Campaign</li>
+                        <li class="breadcrumb-item active">{{ campaign.name }}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campaign Details -->
+        <div class="card">
+            <div class="card-header">
+                <h5>{{ campaign.name }} - Campaign Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Subject:</strong> {{ campaign.subject }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Campaign Type:</strong> {{ campaign.get_campaign_type_display }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong> {{ campaign.get_status_display }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Scheduled At:</strong> {% if campaign.scheduled_at %}{{ campaign.scheduled_at }}{% else %}Not Scheduled{% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <strong>Content:</strong>
+                        <p>{{ campaign.content|linebreaks }}</p>
+                    </div>
+                    <div class="col-md-12">
+                        <strong>Triggers:</strong>
+                        <pre>{{ campaign.triggers|json_script:"triggers" }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recipients List -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Recipients</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for contact in campaign.get_recipients %}
+                    <li class="list-group-item">
+                        {{ contact.first_name }} {{ contact.last_name }} - 
+                        {% for email in contact.emails.all %}
+                            {{ email.email }}{% if email.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            No emails
+                        {% endfor %} - 
+                        {% for phone in contact.phone_numbers.all %}
+                            {{ phone.phone_number }}{% if phone.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            No phone numbers available
+                        {% endfor %}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item">No recipients found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Agent List as a Dropdown -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Agents</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'contact:start_campaign' campaign_id=campaign.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="agentSelect">Select an Agent</label>
+                        <select name="agent" id="agentSelect" class="form-control" required>
+                            <option value="" disabled selected>Select an Agent</option>
+                            {% for ag in agdetail %}
+                                <option value="{{ ag.id }}">{{ ag.display_name }}</option>
+                            {% empty %}
+                                <option value="" disabled>No agents available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Start Campaign</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div class="mt-4">
+            <a href="3" class="btn btn-primary">Edit Campaign</a>
+
+
+            {% if campaign.status == 'sent' %}
+            <button class="btn btn-danger" disabled>Campaign Already Sent</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+    // Auto-close messages after 5 seconds with fade-out animation and space removal
+    setTimeout(function () {
+        let alert = document.getElementById('messages');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s ease, height 0.5s ease'; // Smooth fade-out and height collapse
+            alert.style.opacity = '0'; // Start fade-out animation
+            alert.style.height = '0'; // Collapse height to remove space
+            alert.style.overflow = 'hidden'; // Prevent content overflow
+            setTimeout(() => alert.remove(), 500); // Remove element after animation
+        }
+    }, 5000); // Adjust the timeout as needed
+</script>
+{% endblock js %}

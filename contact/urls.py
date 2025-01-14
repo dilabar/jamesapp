@@ -13,4 +13,6 @@ urlpatterns = [
     path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
     path('create-list/', create_list, name='create_list'),
     path('create-campaign/', create_campaign, name='create_campaign'),
+    path('campaigns/', campaign_list, name='campaign_list'),
+    path('start_campaign/<int:campaign_id>/', start_campaign, name='start_campaign'),
 ]

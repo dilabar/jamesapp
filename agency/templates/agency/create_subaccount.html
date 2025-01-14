@@ -11,6 +11,13 @@
 
 {% block body %}
 <div class="page-body">
+    {% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
     <div class="container-fluid">
         <div class="page-title">
             <div class="row">
@@ -42,8 +49,24 @@
                         <form class="row g-3" method="POST">
                             {% csrf_token %}
                             <div class="col-12">
-                                <label class="form-label" for="id_name">Subaccount Name:</label>
-                                {{ form.name }}
+                                <label class="form-label" for="id_name">Username:</label>
+                                {{ form.username }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="id_name">First Name:</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="id_name">Last Name:</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="id_name">Password</label>
+                                {{ form.password1 }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="id_name">Confirm Password</label>
+                                {{ form.password2 }}
                             </div>
                             <div class="col-12">
                                 <label class="form-label" for="id_email">Email:</label>
@@ -81,4 +104,17 @@
 
 {% block js %}
 <!-- Add any necessary JS -->
+<script>
+    // Auto-close messages after 5 seconds with fade-out animation and space removal
+    setTimeout(function () {
+        let alert = document.getElementById('messages');
+        if (alert) {
+            alert.style.transition = 'opacity 0.5s ease, height 0.5s ease'; // Smooth fade-out and height collapse
+            alert.style.opacity = '0'; // Start fade-out animation
+            alert.style.height = '0'; // Collapse height to remove space
+            alert.style.overflow = 'hidden'; // Prevent content overflow
+            setTimeout(() => alert.remove(), 500); // Remove element after animation
+        }
+    }, 5000); // Adjust the timeout as needed
+  </script>
 {% endblock js %}

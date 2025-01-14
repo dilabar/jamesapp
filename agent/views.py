@@ -40,10 +40,18 @@ def call_play_ai_api(request, agent_id):
 
     except requests.exceptions.RequestException as e:
         return render(request, 'error.html', {'error': str(e)})
-@login_required   
+@login_required
 def agent_list(request):
-    agents = Agent.objects.all()  # Fetch all agents from the database
-    context={
+    # Check if the logged-in user is an agency
+    if request.user.is_agency():
+        # Show agents for the agency and all its sub-accounts
+        agents = Agent.objects.filter(user=request.user)
+    else:
+        # Show only the logged-in user's agents
+        agents = Agent.objects.filter(user=request.user.parent_agency)
+        
+    
+    context = {
         'agents': agents
     }
     return render(request, 'new/my_agent_list.html', context)
@@ -61,29 +69,24 @@ def dashboards(request):
 # Signup View
 def signup(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-
-        # Check if the username or email is already taken
-        if User.objects.filter(username=username).exists():
-            messages.error(request, "Username is already taken.")
-        elif User.objects.filter(email=email).exists():
-            messages.error(request, "Email is already registered.")
-        elif password1 != password2:
-            messages.error(request, "Passwords do not match.")
-        else:
+        form = RegisterForm(request.POST)
+        if form.is_valid():
             try:
-                user = User.objects.create_user(username=username, email=email, password=password1)
-                user.save()
+                user = form.save()  # Save the user and create the agency account
                 auth_login(request, user)  # Automatically log in the user after signup
-                messages.success(request, "Registration successful! Welcome!")
-                return redirect('agent:login')  # Redirect to a home or success page after signup
+                messages.success(request, 'Your agency account has been created successfully. You can now log in.')
+                return redirect('agent:login')  # Redirect to a home or login page after signup
             except Exception as e:
+                print(f"Error occurred: {e}")
                 messages.error(request, f"Error occurred: {e}")
-
-    return render(request, 'auth/register.html')
+        else:
+            # If the form is not valid, show errors
+            print(form.errors)
+            messages.error(request, "There was an error with the registration form.")
+    else:
+        form = RegisterForm()
+    
+    return render(request, 'auth/register.html', {'form': form})
 
 
 # Login View
@@ -168,6 +171,10 @@ def twilio_service_detail_view(request):
 @login_required
 def create_or_update_agent(request, id=None):
     # If agent_id is provided, try to fetch the agent for editing
+    if not request.user.is_authenticated or not request.user.is_agency:
+        messages.error(request, "You do not have permission to perform this action.")
+        return redirect('home')  # Redirect to a relevant page
+
     if id is not None:
         agent = Agent.objects.filter(id=id, user=request.user).first()
     else:
