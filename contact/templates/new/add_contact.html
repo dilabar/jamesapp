@@ -112,15 +112,18 @@
                         
                                
                         
-                                <!-- Lists and Campaigns -->
+                                <!-- Lists and Campaigns Section -->
+                                                                <!-- Lists and Campaigns Section -->
                                 <div class="row">
+                                    <!-- Lists Dropdown -->
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="lists">Lists</label>
+                                            {{all_lists}}
                                             {% if all_lists %}
                                                 <select class="form-select input-air-primary" id="lists" name="lists" multiple>
                                                     {% for list in all_lists %}
-                                                        <option value="{{ list.id }}" {% if list.id in form.lists.value %}selected{% endif %}>
+                                                        <option value="{{ list.id }}">
                                                             {{ list.name }}
                                                         </option>
                                                     {% endfor %}
@@ -130,13 +133,15 @@
                                             {% endif %}
                                         </div>
                                     </div>
+
+                                    <!-- Campaigns Dropdown -->
                                     <div class="col">
                                         <div class="mb-3">
                                             <label class="form-label" for="campaigns">Campaigns</label>
                                             {% if all_campaigns %}
                                                 <select class="form-select input-air-primary" id="campaigns" name="campaigns" multiple>
                                                     {% for campaign in all_campaigns %}
-                                                        <option value="{{ campaign.id }}" {% if campaign.id in form.campaigns.value %}selected{% endif %}>
+                                                        <option value="{{ campaign.id }}">
                                                             {{ campaign.name }}
                                                         </option>
                                                     {% endfor %}
@@ -147,6 +152,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+
                             </div>
                         
                             <div class="card-footer text-end">

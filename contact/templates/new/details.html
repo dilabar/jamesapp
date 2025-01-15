@@ -184,14 +184,100 @@
                     <div class="msg-img"></div>
                     <div class="msg-bubble">
                       <div class="msg-info">
-                        <div class="msg-info-name">{{i.type}}</div>
-                        <div class="msg-info-time">{{i.timestamp}}</div>
+
+                        <div class="msg-info-name">Agents Name</div>
+                        <div class="msg-info-time">01:14 PM</div>
                       </div>
-                      <div class="msg-text"> <a href="{% url 'agent:call_detail' id=i.object %}">{{i.title}}</a> 🔎</div>
+                      <!-- Recent Email Conversation Section -->
+                    <div class="email-item">
+                      <!-- Email Header -->
+                      <div class="msg-header d-flex justify-content-between align-items-center">
+                        <div class="msg-text">Campaign Name - Response to Your Recent Inquiry 🔎</div>
+                        <a href="#" class="btn btn-primary btn-sm get-details" data-bs-toggle="collapse" data-bs-target="#emailDetails1">
+                          Get Details
+                        </a>
+                      </div>
+
+                      <!-- Full Email Conversation (Initially Hidden) -->
+                      <div id="emailDetails1" class="collapse mt-3">
+                        <div class="card">
+                          <div class="card-header">
+                            Full Email Conversation
+                          </div>
+                          <div class="card-body">
+                            <p><strong>From:</strong> example@domain.com</p>
+                            <p><strong>To:</strong> you@yourdomain.com</p>
+                            <p><strong>Date:</strong> January 15, 2025</p>
+                            <hr>
+                            <p><strong>Subject:</strong> Response to Your Recent Inquiry</p>
+                            <p>
+                              Hello,<br><br>
+                              Thank you for reaching out! We have received your inquiry and will respond shortly. Let us know if there’s anything else we can assist you with.<br><br>
+                              Best regards,<br>
+                              The Team
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>{% endfor %}
-                  {% endif %}
-                
+
+                    </div>
+                  </div>
+                  <div class="msg right-msg">
+                    <div class="msg-img"></div>
+                    <div class="msg-bubble">
+                      <div class="msg-info">
+                        <div class="msg-info-name">Clint name</div>
+                        <div class="msg-info-time">12:14 PM</div>
+                      </div>
+                      <div class="msg-text"> 🔕 DND enabled by customer
+                        DnD enabled by customer for SMS</div>
+                    </div>
+                  </div>
+
+                  <div class="msg left-msg">
+                    <div class="msg-img"></div>
+                    <div class="msg-bubble">
+                      <div class="msg-info">
+                        <div class="msg-info-name">Inbound Call</div>
+                        <div class="msg-info-time">2.50 PM</div>
+                      </div>
+                      <div class="msg-text">
+                        ☎ Manual call - Response to Your Recent Inquiry 
+                      </div>
+                      <!-- Call Recording Bar -->
+                      <div class="call-recording mt-3">
+                        <div class="d-flex align-items-center">
+                          <!-- Audio Player -->
+                          <audio controls class="flex-grow-1 me-3">
+                            <source src="call-recording.mp3" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                          </audio>
+                          <!-- Download Button -->
+                          <a href="call-recording.mp3" download class="btn btn-outline-primary btn-sm">
+                            <i class="ri-download-line"></i> Download
+                          </a>
+                        </div>
+                      </div>
+
+                      
+                    </div>
+                  </div>
+
+                  <div class="msg right-msg">
+                    <div class="msg-img"></div>
+                    <div class="msg-bubble">
+                      <div class="msg-info">
+                        <div class="msg-info-name">Client Name</div>
+                        <div class="msg-info-time">12:16 PM</div>
+                      </div>
+                      <div class="msg-text">
+                        💬 Hi, this is a test message in SMS format. Please let us know if you received it.
+                      </div>
+                    </div>
+                  </div>
+                  
+
                  
                 </div>
                 <form class="msger-inputarea">

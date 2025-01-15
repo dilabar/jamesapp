@@ -209,6 +209,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        
                                         </div>
                                         <div class="card-footer text-end">
                                           <button class="btn btn-primary me-3" type="submit" id="submitBtn">Submit</button>
@@ -400,7 +401,8 @@
           // Contact type and time zone
           const contactType = $("#contact_type").val();
           const timeZone = $("#time_zone").val();
-
+          const lists = $("#lists").val();
+          console.log('#lists', lists)
           // Construct data object
           const data = {
               firstName,
@@ -408,7 +410,8 @@
               emails,
               phoneData,
               contactType,
-              timeZone
+              timeZone,
+              lists
           };
           console.log("data", data)
           // AJAX request

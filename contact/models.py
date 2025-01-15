@@ -71,8 +71,8 @@ class ListContact(models.Model):
     list = models.ForeignKey(List, on_delete=models.CASCADE)
     subscribed_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('contact', 'list')
+    # class Meta:
+    #     unique_together = ('contact', 'list')
 
 
 # Campaign Model
