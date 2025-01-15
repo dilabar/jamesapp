@@ -4,6 +4,7 @@ from .views import *
 app_name='contact'
 urlpatterns = [
     path('', contact_list, name='contact_list'),
+    path('details/<int:id>/', contact_details, name='contact_details'),
     path('add/', add_contact, name='add_contact'),
     path('upload/', upload_excel, name='upload_excel'),
     path('extract/', extract_file, name='extract_file'),
@@ -17,5 +18,4 @@ urlpatterns = [
     path('create-campaign/', create_campaign, name='create_campaign'),
     path('campaigns/', campaign_list, name='campaign_list'),
     path('start_campaign/<int:campaign_id>/', start_campaign, name='start_campaign'),
-    path('contact_details/', contact_details, name='contact_details'),
 ]

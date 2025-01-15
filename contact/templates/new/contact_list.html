@@ -248,9 +248,20 @@
                                         {% for contact in page_obj %}
                                         <tr>
                                             
-                                            <td>{{ contact.first_name }} {{ contact.last_name }}</td>
-                                            <td>{{ contact.email }}</td>
-                                            <td>{{ contact.phone }}</td>
+                                            <td><a href="{% url 'contact:contact_details' contact.id %}">{{ contact.first_name }} {{ contact.last_name }}</a> </td>
+                                            <td>
+                                              {% for email in contact.emails.all %}
+                                                  {{ email.email }}{% if email.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                                              {% empty %}
+                                                  No emails
+                                              {% endfor %} 
+                                            
+                                            </td>
+                                            <td>  {% for phone in contact.phone_numbers.all %}
+                                              {{ phone.phone_number }}{% if phone.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                                          {% empty %}
+                                              No phone numbers available
+                                          {% endfor %}</td>
                                             <td>{{ contact.created_at|date:"F d, Y" }}</td>
                                             <td>{{ contact.contact_type }}</td>
                                             <td>{{ contact.time_zone }}</td>

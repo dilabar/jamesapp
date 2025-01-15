@@ -23,15 +23,21 @@
               <!-- Left Arrow Icon -->
               
           
-            <h4>Contact Details <a class="btn badge-light-primary f-w-500" href="#!">
-              <i class="fa fa-arrow-left"></i>  <!-- Left arrow icon -->
+            <h4>Contact Details 
+              <a 
+              href="{% if current_page.has_previous %}{% url 'contact:contact_details' current_page.previous_page_number %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not current_page.has_previous %}disabled{% endif %}">
+              &#8592;
           </a>
-      
-          1 of 200
-          <!-- Right Arrow Icon -->
-          <a class="btn badge-light-primary f-w-500" href="#!">
-              <i class="fa fa-arrow-right"></i>  <!-- Right arrow icon -->
-          </a></h4>
+          <span class="mx-3">
+              {{ current_page.number }} of {{ paginator.num_pages }}
+          </span>
+          <a 
+              href="{% if current_page.has_next %}{% url 'contact:contact_details' current_page.next_page_number %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not current_page.has_next %}disabled{% endif %}">
+              &#8594;
+          </a>
+        </h4>
           </div>
           <div class="col-6">
             <ol class="breadcrumb">
@@ -71,33 +77,71 @@
                   </div>
                   
                   <div class="contact-wrapper">
-                    <form>
-                      <div class="form-group">
-                        <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" name="firstName" class="form-control" placeholder="Enter First Name">
+                    <form method="POST">
+                      {% csrf_token %}
+                      
+                      <div class="form-group mb-3">
+                        <label for="first_name">First Name</label>
+                        <input 
+                          type="text" 
+                          id="first_name" 
+                          name="first_name" 
+                          class="form-control" 
+                          placeholder="Enter First Name" 
+                          value="{{ contact.first_name }}" 
+                          required
+                        >
                       </div>
-                      <div class="form-group">
-                        <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" class="form-control" placeholder="Enter Last Name">
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Last Name</label>
+                        <input 
+                          type="text" 
+                          id="last_name" 
+                          name="last_name" 
+                          class="form-control" 
+                          placeholder="Enter Last Name" 
+                          value="{{ contact.last_name }}" 
+                          required
+                        >
                       </div>
-                      <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter Email">
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Email</label>
+
+                        {% for email in emails %}
+                          <div class="form-check">
+                              <input type="radio" name="primary_email" id="email_{{ email.id }}" value="{{ email.id }}" class="form-check-input" {% if email.is_primary %}checked{% endif %}>
+                              <label for="email_{{ email.id }}" class="form-check-label">
+                                  {{ email.email }}
+                              </label>
+                          </div>
+                      {% endfor %}
                       </div>
-                      <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter Phone Number">
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Phone</label>
+
+                        {% for phone in phone_numbers %}
+                        <div class="form-check">
+                            <input type="radio" name="primary_phone" id="phone_{{ phone.id }}" value="{{ phone.id }}" class="form-check-input" {% if phone.is_primary %}checked{% endif %}>
+                            <label for="phone_{{ phone.id }}" class="form-check-label">
+                                {{ phone.phone_number }}
+                            </label>
+                        </div>
+                    {% endfor %}
                       </div>
-                      <div class="form-group">
-                        <label for="contactType">Contact Type</label>
-                        <select id="contactType" name="contactType" class="form-control">
-                          <option value="lead">Lead</option>
-                          <option value="customer">Customer</option>
-                          <option value="other">Other</option>
+                      
+                      <div class="form-group mb-3">
+                        <label for="contact_type">Contact Type</label>
+                        <select id="contact_type" name="contact_type" class="form-control" required>
+                          <option value="lead" {% if contact.contact_type == 'lead' %}selected{% endif %}>Lead</option>
+                          <option value="customer" {% if contact.contact_type == 'customer' %}selected{% endif %}>Customer</option>
+                          <option value="other" {% if contact.contact_type == 'other' %}selected{% endif %}>Other</option>
                         </select>
                       </div>
                       
-                      <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                      <button type="submit" class="btn btn-primary">Update Contact</button>
                     </form>
                   </div>
 
@@ -134,10 +178,13 @@
             <div class="right-sidebar-Chats"> 
               <div class="msger">
                 <div class="msger-chat">
+                  {% if interactions %}
+                  {% for i in interactions %}
                   <div class="msg left-msg">
                     <div class="msg-img"></div>
                     <div class="msg-bubble">
                       <div class="msg-info">
+
                         <div class="msg-info-name">Agents Name</div>
                         <div class="msg-info-time">01:14 PM</div>
                       </div>
@@ -230,6 +277,7 @@
                     </div>
                   </div>
                   
+
                  
                 </div>
                 <form class="msger-inputarea">

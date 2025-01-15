@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect ,  get_object_or_404
 from django.core.paginator import Paginator
+from django.urls import reverse
 from django.views.generic import ListView
 from requests import request
 from agent.forms import *
@@ -8,13 +9,14 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from twilio.rest import Client
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 import json
 from django.utils import timezone
 import csv
 from django.db import transaction
 from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm, PhoneNumberForm
 from contact.models import *
+from datetime import datetime
 
 
 
@@ -365,7 +367,10 @@ def create_campaign(request):
 
 def campaign_detail(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
-    agdetail=Agent.objects.filter(user=request.user.parent_agency)
+    if request.user.is_agency():
+        agdetail=Agent.objects.filter(user=request.user)
+    else:
+        agdetail=Agent.objects.filter(user=request.user.parent_agency)
     context={
         'campaign': campaign,
         'agdetail':agdetail
@@ -406,11 +411,14 @@ def start_campaign(request, campaign_id):
             return redirect('contact:campaign_detail', campaign_id=campaign.id)
 
         agent = get_object_or_404(Agent, id=agent_id, user=request.user)
-
+        print("hh")
         # Update campaign status to 'scheduled' and assign the selected agent
-        campaign.status = 'scheduled'
+        campaign.status = 'sent'
+        # campaign.triggers=datetime.now()
+        campaign.triggers = {
+        'sent_at': timezone.now().isoformat()
+        }
         # campaign.agent = agent  # Store the selected agent in the campaign
-        campaign.save()
 
         # Get Twilio service details
         twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
@@ -423,17 +431,21 @@ def start_campaign(request, campaign_id):
         try:
             # Loop through the recipients and initiate calls
             for contact in campaign.get_recipients():
-                phone_number = contact.phone_numbers.first()  # Assuming each contact has at least one phone number
+                phone_number = contact.phone_numbers.filter(is_primary=True).first()  # Assuming each contact has at least one phone number
+                print("ggg phobe conatc",phone_number)
                 if not phone_number:
                     continue
 
                 # Create PhoneCall object for each contact
+                country_code = phone_number.country_code or ''
+                phone_number_str = f"{country_code}{phone_number.phone_number}".strip()
                 phone_call = PhoneCall.objects.create(
-                    phone_number=phone_number.phone_number,
+                    phone_number=phone_number_str,
                     call_status='pending',
                     user=request.user,
                     agnt_id=agent.id,  # Using the selected agent
-                    campaign=campaign
+                    campaign=campaign,
+                    contact=contact
                 )
 
                 # Initiate the call via Twilio
@@ -456,6 +468,7 @@ def start_campaign(request, campaign_id):
                     phone_call.call_status = 'failed'
                     phone_call.save()
                     messages.error(request, f"Error initiating call to {phone_number.phone_number}: {str(e)}")
+            campaign.save()
 
             # If all calls are initiated
             messages.success(request, "All calls for the campaign have been successfully initiated.")
@@ -473,8 +486,85 @@ def start_campaign(request, campaign_id):
 
 
 
+# from django.core.paginator import Paginator
+# from django.shortcuts import render, get_object_or_404, redirect
+# from .models import Contact
 
-def contact_details(request):
+def contact_details(request, id=1):
+    # Fetch all contacts for pagination
+    contacts = Contact.objects.all().order_by('id')
+    paginator = Paginator(contacts, 1)  # Display 1 contact per page
+
+    try:
+        current_page = paginator.page(id)
+    except:
+        current_page = paginator.page(1)
+
+    contact = current_page.object_list[0]
+    # Retrieve all emails and phone numbers
+    emails = contact.emails.all()
+    phone_numbers = contact.phone_numbers.all()
+    # Initialize the interactions list
+    interactions = []
+     # Fetch interactions from different models
+    phone_calls = PhoneCall.objects.filter(contact=contact)
+      # Add phone calls to interactions list
+
+    for phone_call in phone_calls:
+        interactions.append({
+            'type': 'Agent call',
+            'title': f"Phone Call - {phone_call.phone_number} - {phone_call.campaign.name}",
+            'timestamp': phone_call.timestamp,
+            'object': phone_call.id,  # Or any related object
+           
+        })
+
+    # Handle contact update
+    if request.method == 'POST':
+           # Update primary email
+        selected_email_id = request.POST.get('primary_email')
+        if selected_email_id:
+            for email in emails:
+                email.is_primary = (str(email.id) == selected_email_id)
+                email.save()
+
+        # Update primary phone number
+        selected_phone_id = request.POST.get('primary_phone')
+        if selected_phone_id:
+            for phone in phone_numbers:
+                phone.is_primary = (str(phone.id) == selected_phone_id)
+                phone.save()
+        contact.first_name = request.POST.get('first_name')
+        contact.last_name = request.POST.get('last_name')
+        contact.email = request.POST.get('email')
+        contact.phone = request.POST.get('phone')
+        contact.contact_type = request.POST.get('contact_type')
+        contact.save()
+
+        # Redirect to the same page after update
+        return redirect('contact_details', page=current_page.number)
+
+    context = {
+        'contact': contact,
+        'emails': emails,
+        'phone_numbers': phone_numbers,
+        'interactions': interactions,
+        'paginator': paginator,
+        'current_page': current_page,
+    }
+    return render(request, 'new/details.html', context)
+
+
+def update_contact(request, id):
+    contact = get_object_or_404(Contact, id=id)
     
+    if request.method == 'POST':
+        contact.first_name = request.POST.get('first_name')
+        contact.last_name = request.POST.get('last_name')
+        contact.email = request.POST.get('email')
+        contact.phone = request.POST.get('phone')
+        contact.contact_type = request.POST.get('contact_type')
+        contact.save()
+        return redirect('contact_details', id=id)  # Redirect to the contact details page after updating
     
-    return render(request, 'new/details.html')
+    return HttpResponse("Invalid request", status=400)

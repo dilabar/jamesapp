@@ -61,7 +61,7 @@ def call_initiate(request, agnt_id):
                 call_status='pending',
                 user=request.user,
                 agnt_id=agnt_id,
-                campaign=selected_campaign
+                campaign=selected_campaign,
             )
             try:
                 call = client.calls.create(
