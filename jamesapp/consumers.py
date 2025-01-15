@@ -8,7 +8,7 @@ from django.conf import settings
 from agent.models import Agent, PhoneCall, ServiceDetail
 from jamesapp.utils import decrypt
 from channels.generic.websocket import WebsocketConsumer
-
+import ssl
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +43,6 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         if play_ai_service:
             try:
                 agobj=get_object_or_404(Agent, id=self.agnt_id)
-                print(agobj.decrypted_agent_id)
                 agent_id = agobj.decrypted_agent_id
                 play_ai_url = f"wss://api.play.ai/v1/talk/{agent_id}"
                 self.play_ai_ws = create_connection(play_ai_url)

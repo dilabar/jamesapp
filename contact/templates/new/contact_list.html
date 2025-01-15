@@ -247,7 +247,7 @@
                                         {% for contact in page_obj %}
                                         <tr>
                                             
-                                            <td>{{ contact.first_name }} {{ contact.last_name }}</td>
+                                            <td><a href="{% url 'contact:contact_details' contact.id %}">{{ contact.first_name }} {{ contact.last_name }}</a> </td>
                                             <td>
                                               {% for email in contact.emails.all %}
                                                   {{ email.email }}{% if email.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}

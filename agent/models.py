@@ -3,7 +3,7 @@ from django.db import models
 
 from django.core.validators import RegexValidator
 from agency.models import User
-from contact.models import Campaign
+from contact.models import Campaign, Contact
 from jamesapp import settings
 from jamesapp.utils import decrypt, encrypt
 
@@ -88,8 +88,8 @@ class PhoneCall(models.Model):
     from_city = models.CharField(max_length=100, null=True)  # Originating city
     to_city = models.CharField(max_length=100, null=True)  # Destination city
     # Add a ForeignKey to Campaign model to associate the call with a campaign
-    campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls')
-
+    campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls_for_campaign')
+    contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls_for_contact')
 
 
 class ServiceDetail(models.Model):
