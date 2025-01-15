@@ -15,6 +15,7 @@ import csv
 from django.db import transaction
 from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm, PhoneNumberForm
 from contact.models import *
+from datetime import datetime
 
 
 
@@ -412,7 +413,10 @@ def create_campaign(request):
 
 def campaign_detail(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
-    agdetail=Agent.objects.filter(user=request.user.parent_agency)
+    if request.user.is_agency():
+        agdetail=Agent.objects.filter(user=request.user)
+    else:
+        agdetail=Agent.objects.filter(user=request.user.parent_agency)
     context={
         'campaign': campaign,
         'agdetail':agdetail
@@ -453,11 +457,11 @@ def start_campaign(request, campaign_id):
             return redirect('contact:campaign_detail', campaign_id=campaign.id)
 
         agent = get_object_or_404(Agent, id=agent_id, user=request.user)
-
+        print("hh")
         # Update campaign status to 'scheduled' and assign the selected agent
-        campaign.status = 'scheduled'
+        campaign.status = 'sent'
+        campaign.triggers=datetime.now()
         # campaign.agent = agent  # Store the selected agent in the campaign
-        campaign.save()
 
         # Get Twilio service details
         twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
@@ -503,6 +507,7 @@ def start_campaign(request, campaign_id):
                     phone_call.call_status = 'failed'
                     phone_call.save()
                     messages.error(request, f"Error initiating call to {phone_number.phone_number}: {str(e)}")
+            campaign.save()
 
             # If all calls are initiated
             messages.success(request, "All calls for the campaign have been successfully initiated.")
