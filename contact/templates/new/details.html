@@ -178,52 +178,53 @@
             <div class="right-sidebar-Chats"> 
               <div class="msger">
                 <div class="msger-chat">
-                  {% if interactions %}
-                  {% for i in interactions %}
-                  <div class="msg left-msg">
-                    <div class="msg-img"></div>
-                    <div class="msg-bubble">
-                      <div class="msg-info">
+                  
+                                {% if interactions %}
+                                  {% for i in interactions %}
+                                    <div class="msg left-msg">
+                                      <div class="msg-img"></div>
+                                      <div class="msg-bubble">
+                                        <div class="msg-info">
+                                          <div class="msg-info-name">{{ i.type }}</div>
+                                          <div class="msg-info-time">{{ i.timestamp }}</div>
+                                        </div>
+                                        <div class="email-item">
+                                          <div class="msg-header d-flex justify-content-between align-items-center">
+                                            <div class="msg-text">{{ i.title }} 🔎</div>
+                                            <a href="{% url 'agent:call_detail' id=i.object %}" class="btn btn-primary btn-sm get-details" data-bs-toggle="collapse" data-bs-target="#emailDetails{{ forloop.counter }}">
+                                              Get Details
+                                            </a>
+                                          </div>
+                                          <div id="emailDetails{{ forloop.counter }}" class="collapse mt-3">
+                                            <div class="card">
+                                              <div class="card-header">
+                                                Full Email Conversation
+                                              </div>
+                                              <div class="card-body">
+                                                <!-- Example static content, replace or extend as needed -->
+                                                <p><strong>From:</strong> example@domain.com</p>
+                                                <p><strong>To:</strong> you@yourdomain.com</p>
+                                                <p><strong>Date:</strong> {{ i.timestamp }}</p>
+                                                <hr>
+                                                <p><strong>Subject:</strong> {{ i.title }}</p>
+                                                <p>
+                                                  Hello,<br><br>
+                                                  Thank you for reaching out! We have received your inquiry and will respond shortly. Let us know if there’s anything else we can assist you with.<br><br>
+                                                  Best regards,<br>
+                                                  The Team
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  {% endfor %}
+                                {% else %}
+                                  <p>No interactions found.</p>
+                                {% endif %}
 
-                        <div class="msg-info-name">Agents Name</div>
-                        <div class="msg-info-time">01:14 PM</div>
-                      </div>
-                      <!-- Recent Email Conversation Section -->
-                    <div class="email-item">
-                      <!-- Email Header -->
-                      <div class="msg-header d-flex justify-content-between align-items-center">
-                        <div class="msg-text">Campaign Name - Response to Your Recent Inquiry 🔎</div>
-                        <a href="#" class="btn btn-primary btn-sm get-details" data-bs-toggle="collapse" data-bs-target="#emailDetails1">
-                          Get Details
-                        </a>
-                      </div>
-
-                      <!-- Full Email Conversation (Initially Hidden) -->
-                      <div id="emailDetails1" class="collapse mt-3">
-                        <div class="card">
-                          <div class="card-header">
-                            Full Email Conversation
-                          </div>
-                          <div class="card-body">
-                            <p><strong>From:</strong> example@domain.com</p>
-                            <p><strong>To:</strong> you@yourdomain.com</p>
-                            <p><strong>Date:</strong> January 15, 2025</p>
-                            <hr>
-                            <p><strong>Subject:</strong> Response to Your Recent Inquiry</p>
-                            <p>
-                              Hello,<br><br>
-                              Thank you for reaching out! We have received your inquiry and will respond shortly. Let us know if there’s anything else we can assist you with.<br><br>
-                              Best regards,<br>
-                              The Team
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    </div>
-                  </div>
-                  <div class="msg right-msg">
+                  {% comment %} <div class="msg right-msg">
                     <div class="msg-img"></div>
                     <div class="msg-bubble">
                       <div class="msg-info">
@@ -275,7 +276,7 @@
                         💬 Hi, this is a test message in SMS format. Please let us know if you received it.
                       </div>
                     </div>
-                  </div>
+                  </div> {% endcomment %}
                   
 
                  
