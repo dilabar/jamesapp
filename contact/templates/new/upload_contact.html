@@ -6,6 +6,11 @@
 {% endblock header %}
 
 {% block css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    
+    <!-- Load Themify Icons (Optional, if you're using Themify Icons) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/themify-icons/0.2.0/css/themify-icons.css" rel="stylesheet">
+
     
 {% endblock css %}
     
@@ -62,30 +67,49 @@
                       
                     </ul>
                     <div class="tab-pane fade show active" id="bottom-inbox" role="tabpanel" aria-labelledby="bottom-inbox-tab">
-                        <form action="" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <input type="radio" id="file" name="input_method" value="file" hidden >
-                        
-                            <div class="card-body pb-0">
-                                <div class="form"> 
-                                    <div class="form"> 
-                                        <div class="mb-3">
-                                          <label class="form-label" for="file_upload">CSV List</label>
-                                          <input class="form-control" id="file_upload" name="file_upload" type="file" >
-                                        </div>
-                                        <div class="mb-0">
-                                          <label class="form-label" for="exampleFormControlTextarea1">Remarks</label>
-                                          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-                                        </div>
-                    
-                                        <div class="mb-3 mt-3">
-                                          <input class="btn btn-primary" id="exampleFormControltwo" type="submit" value="submite" >
-                                        </div>
-                                    </div>    
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                      <form action="" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                          {% csrf_token %}
+                          <input type="radio" id="file" name="input_method" value="file" hidden>
+                          <div class="card-body pb-0">
+                              <div class="form">
+                                  <div class="mb-3">
+                                      <label class="form-label" for="file_upload">CSV List</label>
+                                      <input class="form-control" id="file_upload" name="file_upload" type="file" required>
+                                      <div class="invalid-feedback">
+                                          Please upload a valid CSV file.
+                                      </div>
+                                  </div>
+                                  <div class="mb-5">
+                                      <label class="form-label" for="exampleFormControlTextarea1">Remarks</label>
+                                      <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+                                      <div class="invalid-feedback">
+                                          Please provide some remarks.
+                                      </div>
+                                  </div>
+                                  <div id="response-container">
+                                      <h2 class="mb-2">Uploaded Contact Details</h2>
+                                      <table id="contacts-table" class="table table-responsive mt-1" border="1">
+                                        <thead>
+                                          <tr>
+                                              <th>Column header in file</th>
+                                              <th>Preview information</th>
+                                              <th>Status</th>
+                                              <th>Fields</th>
+                                          </tr>
+                                      </thead>
+                                          <tbody>
+                                              <!-- Dynamic rows will be added here -->
+                                          </tbody>
+                                      </table>
+                                  </div>
+                                  <div class="mb-3 mt-3">
+                                      <input class="btn btn-primary" id="bulkAdd" type="submit" value="Submit">
+                                  </div>
+                              </div>
+                          </div>
+                      </form>
+                  </div>
+                  
                     
                   </div>
                 </div>
@@ -101,7 +125,156 @@
 
 
 {% block js %}
-    
+<script>
+  // Validate file input
+document.getElementById("file_upload").addEventListener("change", function (event) {
+  const fileInput = event.target;
+  const file = fileInput.files[0]; // Get the selected file
+
+  if (file) {
+      const fileName = file.name;
+      const fileExtension = fileName.split(".").pop().toLowerCase();
+      const fileSizeMB = file.size / (1024 * 1024); // Convert size to MB
+
+      if (fileExtension !== "csv") {
+          fileInput.classList.add("is-invalid");
+          alert(`Invalid file type: .${fileExtension}. Please upload a valid CSV file.`);
+          fileInput.value = ""; // Clear the input field
+      } else if (fileSizeMB > 30) {
+          fileInput.classList.add("is-invalid");
+          alert(`File size exceeds 30MB. Please upload a smaller file.`);
+          fileInput.value = ""; // Clear the input field
+      } else {
+          fileInput.classList.remove("is-invalid");
+          const formData = new FormData();
+          formData.append("file_upload", file);
+          $.ajax({
+              url: "/contact/extract/",
+              method: "POST",
+              data: formData,
+              processData: false,
+              contentType: false,
+              headers: {
+                  'X-CSRFToken': '{{ csrf_token }}',
+              },
+              success: function (response) {
+                  console.log(response);
+                  updateTable(response);
+                  alert("Table updated successfully!");
+              },
+              error: function (err) {
+                  alert("Error adding contact.");
+                  console.error(err);
+              }
+          });
+      }
+  }
+});
+
+// Update table dynamically
+function updateTable(response) {
+  const headers = response.data.headers;
+  const processedRows = response.data.values;
+  const headerVariables = response.data.header_variables;
+  const expectedFields = ['First Name', 'Last Name', 'Email', 'Phone', 'Contact Type']; // Expected fields to match
+  const tableBody = document.querySelector("#contacts-table tbody");
+
+  tableBody.innerHTML = "";
+
+  headers.forEach((header, headerIndex) => {
+      const row = document.createElement("tr");
+
+      // Column header in file
+      const headerCell = document.createElement("td");
+      headerCell.textContent = header;
+      row.appendChild(headerCell);
+
+      // Preview information
+      const valuesCell = document.createElement("td");
+      const values = processedRows[header] || [];
+      valuesCell.innerHTML = values.map(value => value || "-").join(", ");
+      row.appendChild(valuesCell);
+
+      // Status (Mapped/Not Mapped)
+      const statusCell = document.createElement("td");
+      if (expectedFields.includes(header)) {
+          statusCell.innerHTML = '<span class="ti-check-box badge badge-light-success">Mapped</span>';
+      } else {
+          statusCell.innerHTML = '<span class="icon-close badge badge-light-danger">Not Mapped</span>';
+      }
+      row.appendChild(statusCell);
+
+      // Dropdown for fields
+      const dropdownCell = document.createElement("td");
+      const select = document.createElement("select");
+      select.classList.add("form-select");
+
+      headerVariables.forEach(variable => {
+          const option = document.createElement("option");
+          option.value = variable;
+          option.textContent = variable.replace(/_/g, " ");
+          if (headerVariables[headerIndex] === variable) {
+              option.selected = true;
+          }
+          select.appendChild(option);
+      });
+
+      dropdownCell.appendChild(select);
+      row.appendChild(dropdownCell);
+
+      tableBody.appendChild(row);
+  });
+}
+
+// Event listener for bulkAdd button
+document.getElementById("bulkAdd").addEventListener("click", function (event) {
+  event.preventDefault(); // Prevent default form submission
+  const form = document.querySelector(".needs-validation");
+  
+  if (!form.checkValidity()) {
+      form.classList.add("was-validated");
+      return;
+  }
+
+  const rows = document.querySelectorAll("#contacts-table tbody tr");
+  const postData = {
+      headers: [],
+      header_variables: [],
+      data: {}
+  };
+
+  rows.forEach(row => {
+      const header = row.querySelector("td:nth-child(1)")?.textContent.trim();
+      const processedRowsPreview = row.querySelector("td:nth-child(2)")?.textContent.trim();
+      const selectedVariable = row.querySelector("select")?.value;
+
+      if (header && selectedVariable) {
+          postData.headers.push(header);
+          postData.header_variables.push(selectedVariable);
+          postData.data[selectedVariable] = processedRowsPreview;
+      }
+  });
+
+  $.ajax({
+      url: "/contact/create-bulk/",
+      method: "POST",
+      contentType: "application/json",
+      headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+      },
+      data: JSON.stringify(postData),
+      success: function (response) {
+          alert("Contacts created successfully!");
+          window.location.href = '/contact/';
+      },
+      error: function (err) {
+          alert("Error creating contacts.");
+          console.error(err);
+      }
+  });
+});
+
+</script>
 {% endblock js %}
     
 

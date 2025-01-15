@@ -36,6 +36,7 @@
                             <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-home"></use>
                         </svg><span class="">Dashboard</span></a>
                 </li>
+                {% if user.is_agency %}
                 <li class="sidebar-main-title">
                     <div>
                         <h6 class="">User Management</h6> </div>
@@ -57,8 +58,9 @@
                             </svg><span>View Sub Account</span></a>
 
                 </li>
+            {% endif %}
 
-
+                
                 <li class="sidebar-main-title">
                     <div>
                         <h6 class="javascript:void(0);">Agents</h6> </div>
@@ -73,7 +75,7 @@
                         </svg><span>View Agents           </span></a>
 
                 </li>
-
+                {% if user.is_agency %}
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:create_agent' %}">
                         <svg class="stroke-icon">
@@ -84,11 +86,13 @@
                         </svg><span>Create Agents           </span></a>
 
                 </li>
+                {% endif %}
 
                 <li class="sidebar-main-title">
                     <div>
                         <h6 class="javascript:void(0);">Call Management</h6> </div>
                 </li>
+                {% if user.is_sub_account %}
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'callapp:start_card' %}">
                         <svg class="stroke-icon">
@@ -99,7 +103,7 @@
                         </svg><span>Start Calling</span></a>
 
                 </li>
-
+                {% endif %}
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:call_history' %}">
                         <svg class="stroke-icon">
@@ -177,9 +181,22 @@
                         </svg>
                         <svg class="fill-icon ">
                             <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
-                        </svg><span>Campaign</span></a>
+                        </svg><span> Create Campaign</span></a>
 
                 </li>
+
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:campaign_list' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        </svg>
+                        <svg class="fill-icon ">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        </svg><span>Campaign list</span></a>
+
+                </li>
+
+                
 
 
                 <li class="sidebar-main-title">
@@ -210,6 +227,7 @@
 
                 </li>
 
+                {% if user.is_agency %}
 
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:play_ai_service' %}">
@@ -231,7 +249,7 @@
                         </svg><span>Twilio</span></a>
 
                 </li>
-
+                {% endif %}
 
                 <li class="sidebar-main-title">
                     <div>

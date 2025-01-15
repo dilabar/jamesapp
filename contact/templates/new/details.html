@@ -1,0 +1,250 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+
+
+
+{% block body %}
+
+
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+           
+              <!-- Left Arrow Icon -->
+              
+          
+            <h4>Contact Details 
+              <a 
+              href="{% if current_page.has_previous %}{% url 'contact:contact_details' current_page.previous_page_number %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not current_page.has_previous %}disabled{% endif %}">
+              &#8592;
+          </a>
+          <span class="mx-3">
+              {{ current_page.number }} of {{ paginator.num_pages }}
+          </span>
+          <a 
+              href="{% if current_page.has_next %}{% url 'contact:contact_details' current_page.next_page_number %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not current_page.has_next %}disabled{% endif %}">
+              &#8594;
+          </a>
+        </h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="index.html">                                       
+                  <svg class="stroke-icon">
+                    <use href="../assets/svg/icon-sprite.svg#stroke-home"></use>
+                  </svg></a></li>
+              <li class="breadcrumb-item">Chat</li>
+              <li class="breadcrumb-item active"> Contact Details</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+      <div class="row g-0">
+        <div class="col-xxl-3 col-xl-4 col-md-5 box-col-5">
+          <div class="left-sidebar-wrapper card" style="height: 759px;">
+
+            <div class="left-sidebar-chat">
+              <div class="input-group"><span class="input-group-text"><i class="search-icon text-gray" data-feather="search"></i></span>
+                <input class="form-control" type="text" placeholder="Search here..">
+              </div>
+            </div>
+            <div class="advance-options"> 
+              <ul class="nav border-tab" id="chat-options-tab" role="tablist">
+                <li class="nav-item"><a class="nav-link active f-w-600" id="chats-tab" data-bs-toggle="tab" href="#chats" role="tab" aria-controls="chats" aria-selected="true">Contacts</a></li>
+               
+              </ul>
+              <div class="tab-content" id="chat-options-tabContent"> 
+                
+                <div class="tab-pane fade show active" id="contacts" role="tabpanel" aria-labelledby="contacts-tab">
+                  <div class="common-space"> 
+                    <p></p>
+                    
+                  </div>
+                  
+                  <div class="contact-wrapper">
+                    <form method="POST">
+                      {% csrf_token %}
+                      
+                      <div class="form-group mb-3">
+                        <label for="first_name">First Name</label>
+                        <input 
+                          type="text" 
+                          id="first_name" 
+                          name="first_name" 
+                          class="form-control" 
+                          placeholder="Enter First Name" 
+                          value="{{ contact.first_name }}" 
+                          required
+                        >
+                      </div>
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Last Name</label>
+                        <input 
+                          type="text" 
+                          id="last_name" 
+                          name="last_name" 
+                          class="form-control" 
+                          placeholder="Enter Last Name" 
+                          value="{{ contact.last_name }}" 
+                          required
+                        >
+                      </div>
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Email</label>
+
+                        {% for email in emails %}
+                          <div class="form-check">
+                              <input type="radio" name="primary_email" id="email_{{ email.id }}" value="{{ email.id }}" class="form-check-input" {% if email.is_primary %}checked{% endif %}>
+                              <label for="email_{{ email.id }}" class="form-check-label">
+                                  {{ email.email }}
+                              </label>
+                          </div>
+                      {% endfor %}
+                      </div>
+                      
+                      <div class="form-group mb-3">
+                        <label for="last_name">Phone</label>
+
+                        {% for phone in phone_numbers %}
+                        <div class="form-check">
+                            <input type="radio" name="primary_phone" id="phone_{{ phone.id }}" value="{{ phone.id }}" class="form-check-input" {% if phone.is_primary %}checked{% endif %}>
+                            <label for="phone_{{ phone.id }}" class="form-check-label">
+                                {{ phone.phone_number }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                      </div>
+                      
+                      <div class="form-group mb-3">
+                        <label for="contact_type">Contact Type</label>
+                        <select id="contact_type" name="contact_type" class="form-control" required>
+                          <option value="lead" {% if contact.contact_type == 'lead' %}selected{% endif %}>Lead</option>
+                          <option value="customer" {% if contact.contact_type == 'customer' %}selected{% endif %}>Customer</option>
+                          <option value="other" {% if contact.contact_type == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary">Update Contact</button>
+                    </form>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xxl-9 col-xl-8 col-md-7 box-col-7">
+          <div class="card right-sidebar-chat" style="margin-left: 20px;">
+            <div class="right-sidebar-title">
+              <div class="common-space"> 
+                <div class="chat-time">
+                  <div class="active-profile"><img class="img-fluid rounded-circle" src="../assets/images/blog/comment.jpg" alt="user">
+                    <div class="status bg-success"></div>
+                  </div>
+                  <div><span class="f-w-500">Bishtu Das</span>
+                    <p>Online</p>
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <div class="contact-edit chat-alert"><i class="icon-info-alt"></i></div>
+                  <div class="contact-edit chat-alert">
+                    <svg class="dropdown-toggle" role="menu" data-bs-toggle="dropdown" aria-expanded="false">
+                      <use href="../assets/svg/icon-sprite.svg#menubar"></use>
+                    </svg>
+                    <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#!">call</a><a class="dropdown-item" href="#!">
+                         Send messages</a><a class="dropdown-item" href="#!">
+                         Add to favorites</a></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="right-sidebar-Chats">
+              <div class="msger">
+                <div class="msger-chat">
+                  {% if interactions %}
+                    {% for i in interactions %}
+                      <div class="msg left-msg">
+                        <div class="msg-img"></div>
+                        <div class="msg-bubble">
+                          <div class="msg-info">
+                            <div class="msg-info-name">{{ i.type }}</div>
+                            <div class="msg-info-time">{{ i.timestamp }}</div>
+                          </div>
+                          <div class="email-item">
+                            <div class="msg-header d-flex justify-content-between align-items-center">
+                              <div class="msg-text">{{ i.title }} 🔎</div>
+                              <a href="{% url 'agent:call_detail' id=i.object %}" 
+                                 class="btn btn-primary btn-sm get-details" 
+                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                Details
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <p>No interactions found.</p>
+                  {% endif %}
+                </div>
+                <form class="msger-inputarea">
+                  <div class="dropdown-form dropdown-toggle" role="main" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="icon-plus"></i>
+                    <div class="chat-icon dropdown-menu dropdown-menu-start">
+                      <div class="dropdown-item mb-2">
+                        <svg>
+                          <use href="../assets/svg/icon-sprite.svg#camera"></use>
+                        </svg>
+                      </div>
+                      <div class="dropdown-item">
+                        <svg>
+                          <use href="../assets/svg/icon-sprite.svg#attchment"></use>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <input class="msger-input two uk-textarea" type="text" placeholder="Type Message here..">
+                  <div class="open-emoji">
+                    <div class="second-btn uk-button"></div>
+                  </div>
+                  <button class="msger-send-btn" type="submit">
+                    <i class="fa fa-location-arrow"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Container-fluid Ends-->
+  </div>
+
+
+    
+{% endblock body %}
+    
+
+
+{% block js %}
+    
+{% endblock js %}
+    

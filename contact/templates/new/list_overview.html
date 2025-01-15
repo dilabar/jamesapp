@@ -17,6 +17,13 @@
     {% block body %}
     
     <div class="page-body">
+        {% if messages %}
+        <div class="alert alert-warning" role="alert" id="messages">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
         <div class="container-fluid">
             <div class="page-title">
                 <div class="row">
@@ -111,6 +118,19 @@
     {% block js %}
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    <script>
+        // Auto-close messages after 5 seconds with fade-out animation and space removal
+        setTimeout(function () {
+            let alert = document.getElementById('messages');
+            if (alert) {
+                alert.style.transition = 'opacity 0.5s ease, height 0.5s ease'; // Smooth fade-out and height collapse
+                alert.style.opacity = '0'; // Start fade-out animation
+                alert.style.height = '0'; // Collapse height to remove space
+                alert.style.overflow = 'hidden'; // Prevent content overflow
+                setTimeout(() => alert.remove(), 500); // Remove element after animation
+            }
+        }, 5000); // Adjust the timeout as needed
+    </script>
     {% endblock js %}
         
     

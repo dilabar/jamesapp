@@ -1,9 +1,10 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Agency, Subaccount, Role, Configuration
+from .models import *
 
-admin.site.register(Agency)
-admin.site.register(Subaccount)
+admin.site.register(AgencyAccount)
+admin.site.register(SubAccountProfile)
+admin.site.register(AccountSwitchLog)
+admin.site.register(User)
 admin.site.register(Role)
-admin.site.register(Configuration)

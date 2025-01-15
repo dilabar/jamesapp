@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
-ALLOWED_HOSTS = ["127.0.0.1","localhost","secretvoiceagent.net","e135-202-142-78-177.ngrok-free.app"]
+ALLOWED_HOSTS = ["127.0.0.1","localhost","secretvoiceagent.net","4f96-2409-40e1-1149-40b9-2599-4415-9c40-5094.ngrok-free.app"]
 CSRF_TRUSTED_ORIGINS=['https://*.ngrok-free.app','https://secretvoiceagent.net','http://secretvoiceagent.net']
 # Application definition
 
@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'scheduling',
     'agency',
     'contact',
-    'campaign',
+    # 'campaign',
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -140,7 +140,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"  # Destination for collected static files
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'auth.User'
+# AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'agency.User'
 ACOUNT_SID=os.getenv('ACOUNT_SID')
 AUTH_TOKEN=os.getenv('AUTH_TOKEN')
 LOGIN_URL = '/login/'

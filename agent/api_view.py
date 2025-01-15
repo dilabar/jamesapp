@@ -58,8 +58,15 @@ def call_history(request):
     #     PhoneCall.objects.filter(user=request.user)
     #     .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'date' descending
     # )
+    # Determine whether the user is an agency or a sub-account
+    if request.user.is_agency:
+        # Get the agency's sub-accounts and include the agency itself
+        user_queryset = request.user.get_all_subaccounts()
+    else:
+        # For sub-account users, only fetch their own calls
+        user_queryset = [request.user]
     phone_calls = (
-        PhoneCall.objects.filter(user=request.user)
+        PhoneCall.objects.filter(user__in=user_queryset)
         .select_related('agnt')  # Include related Agent data (join with Agent model)
         .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'timestamp' descending
     )
