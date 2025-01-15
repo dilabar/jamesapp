@@ -568,3 +568,5 @@ def update_contact(request, id):
         return redirect('contact_details', id=id)  # Redirect to the contact details page after updating
     
     return HttpResponse("Invalid request", status=400)
+
+

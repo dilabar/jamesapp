@@ -175,122 +175,46 @@
                 </div>
               </div>
             </div>
-            <div class="right-sidebar-Chats"> 
+            <div class="right-sidebar-Chats">
               <div class="msger">
                 <div class="msger-chat">
-                  
-                                {% if interactions %}
-                                  {% for i in interactions %}
-                                    <div class="msg left-msg">
-                                      <div class="msg-img"></div>
-                                      <div class="msg-bubble">
-                                        <div class="msg-info">
-                                          <div class="msg-info-name">{{ i.type }}</div>
-                                          <div class="msg-info-time">{{ i.timestamp }}</div>
-                                        </div>
-                                        <div class="email-item">
-                                          <div class="msg-header d-flex justify-content-between align-items-center">
-                                            <div class="msg-text">{{ i.title }} 🔎</div>
-                                            <a href="{% url 'agent:call_detail' id=i.object %}" class="btn btn-primary btn-sm get-details" data-bs-toggle="collapse" data-bs-target="#emailDetails{{ forloop.counter }}">
-                                              Get Details
-                                            </a>
-                                          </div>
-                                          <div id="emailDetails{{ forloop.counter }}" class="collapse mt-3">
-                                            <div class="card">
-                                              <div class="card-header">
-                                                Full Email Conversation
-                                              </div>
-                                              <div class="card-body">
-                                                <!-- Example static content, replace or extend as needed -->
-                                                <p><strong>From:</strong> example@domain.com</p>
-                                                <p><strong>To:</strong> you@yourdomain.com</p>
-                                                <p><strong>Date:</strong> {{ i.timestamp }}</p>
-                                                <hr>
-                                                <p><strong>Subject:</strong> {{ i.title }}</p>
-                                                <p>
-                                                  Hello,<br><br>
-                                                  Thank you for reaching out! We have received your inquiry and will respond shortly. Let us know if there’s anything else we can assist you with.<br><br>
-                                                  Best regards,<br>
-                                                  The Team
-                                                </p>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  {% endfor %}
-                                {% else %}
-                                  <p>No interactions found.</p>
-                                {% endif %}
-
-                  {% comment %} <div class="msg right-msg">
-                    <div class="msg-img"></div>
-                    <div class="msg-bubble">
-                      <div class="msg-info">
-                        <div class="msg-info-name">Clint name</div>
-                        <div class="msg-info-time">12:14 PM</div>
-                      </div>
-                      <div class="msg-text"> 🔕 DND enabled by customer
-                        DnD enabled by customer for SMS</div>
-                    </div>
-                  </div>
-
-                  <div class="msg left-msg">
-                    <div class="msg-img"></div>
-                    <div class="msg-bubble">
-                      <div class="msg-info">
-                        <div class="msg-info-name">Inbound Call</div>
-                        <div class="msg-info-time">2.50 PM</div>
-                      </div>
-                      <div class="msg-text">
-                        ☎ Manual call - Response to Your Recent Inquiry 
-                      </div>
-                      <!-- Call Recording Bar -->
-                      <div class="call-recording mt-3">
-                        <div class="d-flex align-items-center">
-                          <!-- Audio Player -->
-                          <audio controls class="flex-grow-1 me-3">
-                            <source src="call-recording.mp3" type="audio/mpeg">
-                            Your browser does not support the audio element.
-                          </audio>
-                          <!-- Download Button -->
-                          <a href="call-recording.mp3" download class="btn btn-outline-primary btn-sm">
-                            <i class="ri-download-line"></i> Download
-                          </a>
+                  {% if interactions %}
+                    {% for i in interactions %}
+                      <div class="msg left-msg">
+                        <div class="msg-img"></div>
+                        <div class="msg-bubble">
+                          <div class="msg-info">
+                            <div class="msg-info-name">{{ i.type }}</div>
+                            <div class="msg-info-time">{{ i.timestamp }}</div>
+                          </div>
+                          <div class="email-item">
+                            <div class="msg-header d-flex justify-content-between align-items-center">
+                              <div class="msg-text">{{ i.title }} 🔎</div>
+                              <a href="{% url 'agent:call_detail' id=i.object %}" 
+                                 class="btn btn-primary btn-sm get-details" 
+                                 style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                Details
+                              </a>
+                            </div>
+                          </div>
                         </div>
                       </div>
-
-                      
-                    </div>
-                  </div>
-
-                  <div class="msg right-msg">
-                    <div class="msg-img"></div>
-                    <div class="msg-bubble">
-                      <div class="msg-info">
-                        <div class="msg-info-name">Client Name</div>
-                        <div class="msg-info-time">12:16 PM</div>
-                      </div>
-                      <div class="msg-text">
-                        💬 Hi, this is a test message in SMS format. Please let us know if you received it.
-                      </div>
-                    </div>
-                  </div> {% endcomment %}
-                  
-
-                 
+                    {% endfor %}
+                  {% else %}
+                    <p>No interactions found.</p>
+                  {% endif %}
                 </div>
                 <form class="msger-inputarea">
-                  <div class="dropdown-form dropdown-toggle" role="main" data-bs-toggle="dropdown" aria-expanded="false"><i class="icon-plus"></i>
+                  <div class="dropdown-form dropdown-toggle" role="main" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="icon-plus"></i>
                     <div class="chat-icon dropdown-menu dropdown-menu-start">
                       <div class="dropdown-item mb-2">
-                        <svg> 
+                        <svg>
                           <use href="../assets/svg/icon-sprite.svg#camera"></use>
                         </svg>
                       </div>
                       <div class="dropdown-item">
-                        <svg> 
+                        <svg>
                           <use href="../assets/svg/icon-sprite.svg#attchment"></use>
                         </svg>
                       </div>
@@ -300,10 +224,13 @@
                   <div class="open-emoji">
                     <div class="second-btn uk-button"></div>
                   </div>
-                  <button class="msger-send-btn" type="submit"><i class="fa fa-location-arrow"></i></button>
+                  <button class="msger-send-btn" type="submit">
+                    <i class="fa fa-location-arrow"></i>
+                  </button>
                 </form>
               </div>
             </div>
+            
           </div>
         </div>
       </div>
