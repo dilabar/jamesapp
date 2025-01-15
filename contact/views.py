@@ -19,6 +19,9 @@ from contact.models import *
 
 
 def contact_list(request):
+    all_lists = List.objects.filter(user = request.user)
+    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
+
     if request.user.is_agency():
 
         contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts())
@@ -36,7 +39,9 @@ def contact_list(request):
         'page_obj': page_obj,
         'contacts': contacts,  # You can also pass the full list if needed elsewhere
         'page_range': paginator.page_range,  # The range of page numbers
-        'page_number': page_obj.number,  # Current page number
+        'page_number': page_obj.number, 
+        'all_lists': all_lists,
+        'all_campaigns': all_campaigns, # Current page number
     }
     
     return render(request, 'new/contact_list.html', context)
@@ -45,7 +50,8 @@ def contact_list(request):
 
 
 
-# @login_required
+
+@login_required
 def add_contact(request):
     """Handles creating a new contact with associated email, phone, lists, and campaigns."""
     all_lists = List.objects.filter(user=request.user)  # Filter lists by logged-in user
@@ -64,9 +70,19 @@ def add_contact(request):
             phone_data = data.get('phoneData', {})
             contact_type = data.get('contactType', '')
             time_zone = data.get('timeZone', '')
+            lists = data.get('lists', [])  # Get the list of selected lists
 
-            contact = Contact.objects.create(user=request.user,first_name=first_name,last_name=last_name,contact_type=contact_type,time_zone=time_zone,created_at=timezone.now())
-            
+            # Create the contact instance
+            contact = Contact.objects.create(
+                user=request.user,
+                first_name=first_name,
+                last_name=last_name,
+                contact_type=contact_type,
+                time_zone=time_zone,
+                created_at=timezone.now()
+            )
+
+            # Process emails and save
             for email, is_primary in emails.items():
                 Email.objects.create(
                     contact=contact,
@@ -74,12 +90,9 @@ def add_contact(request):
                     email=email.strip(),
                     is_primary=is_primary == 1  # Mark active if primary
                 )
-            sample = []
-            print("email", emails)
-            print("sample1",sample,phone_data)
+
+            # Process phone numbers and save
             for phone_id, phone_info in phone_data.items():
-                # sample.append(contact,request.user,phone_id.strip(),phone_info.get('country_code', '').strip(),phone_info.get('primary', 0) == 1)
-                print(contact,request.user,phone_id.strip(),phone_info.get('country_code', '').strip(),phone_info.get('primary', 0) == 1)
                 PhoneNumber.objects.create(
                     contact=contact,
                     user=request.user,
@@ -87,8 +100,13 @@ def add_contact(request):
                     country_code=phone_info.get('country_code', '').strip(),
                     is_primary=phone_info.get('primary', 0) == 1,  # Mark active if primary
                 )
-            print("sample2",sample)
-            contact.save()
+
+            # Associate contact with selected lists
+            for list_id in lists:
+                list_obj = get_object_or_404(List, id=list_id, user=request.user)
+                list_obj.contacts.add(contact)  # Add the contact to the list
+
+            contact.save()  # Save contact after associating lists
 
             # Example response
             return JsonResponse({'status': 'success', 'message': 'Contact added successfully!'})
@@ -99,71 +117,6 @@ def add_contact(request):
             return JsonResponse({'error': str(e)}, status=500)
     else:
         return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
-    #     contact_form = ContactForm(request.POST, request.FILES)  # Include files for handling uploaded photos
-    #     email_form = EmailForm(request.POST)
-    #     phone_form = PhoneNumberForm(request.POST)
-    #     selected_lists = request.POST.getlist('lists')
-    #     selected_campaigns = request.POST.getlist('campaigns')
-
-    #     if contact_form.is_valid() and email_form.is_valid() and phone_form.is_valid():
-    #         # Save the contact
-    #         contact = contact_form.save(commit=False)
-    #         contact.user = request.user  # Assign the logged-in user
-    #         contact.save()
-
-    #         # Save the associated email
-    #         email = email_form.save(commit=False)
-    #         email.contact = contact
-    #         email.user = request.user  # Assign the logged-in user
-    #         email.save()
-
-    #         # Handle phone number uniqueness
-    #         phone_number = phone_form.save(commit=False)
-    #         phone_number.contact = contact
-    #         phone_number.user = request.user  # Assign the logged-in user
-
-    #         try:
-    #             # Check if this phone number already exists for the user
-    #             existing_phone_number = PhoneNumber.objects.filter(user=request.user, phone_number=phone_number.phone_number).first()
-    #             if existing_phone_number:
-    #                 # If it exists, display an error message
-    #                 messages.error(request, f"The phone number {phone_number.phone_number} is already associated with your account.")
-    #                 return redirect('contact:add_contact')
-
-    #             # If the phone number is unique, save it
-    #             phone_number.save()
-
-    #         except IntegrityError:
-    #             # Handle IntegrityError if any happens (to be extra cautious)
-    #             messages.error(request, "There was an error saving the phone number. Please try again.")
-    #             return redirect('contact:add_contact')
-
-    #         # Associate contact with selected lists
-    #         for list_id in selected_lists:
-    #             list_obj = get_object_or_404(List, id=list_id, user=request.user)
-    #             list_obj.contacts.add(contact)
-
-    #         # Associate contact with selected campaigns
-    #         for campaign_id in selected_campaigns:
-    #             campaign_obj = get_object_or_404(Campaign, id=campaign_id, lists__user=request.user)
-    #             campaign_obj.individual_contacts.add(contact)
-
-    #         return redirect('contact:contact_list')  # Redirect to the contact list page
-    # else:
-    #     contact_form = ContactForm()
-    #     email_form = EmailForm()
-    #     phone_form = PhoneNumberForm()
-
-    # return render(request, 'new/add_contact.html', {
-    #     'contact_form': contact_form,
-    #     'email_form': email_form,
-    #     'phone_form': phone_form,
-    #     'all_lists': all_lists,
-    #     'all_campaigns': all_campaigns,
-    # })
-
-
-
 
 def upload_excel(request):
     if request.method == 'POST' and request.FILES['file_upload']:
