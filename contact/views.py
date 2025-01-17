@@ -17,6 +17,8 @@ from django.db import transaction
 from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm, PhoneNumberForm
 from contact.models import *
 from datetime import datetime
+import pandas as pd
+from .forms import ExcelUploadForm
 
 
 
@@ -162,26 +164,44 @@ def upload_excel(request):
 
 
 def extract_file(request):
-    if request.method == 'POST' and request.FILES['file_upload']:
-        csv_file = request.FILES['file_upload']
-        
-        if not csv_file.name.endswith('.csv'):
-            messages.error(request, 'Invalid file format. Please upload a CSV file.')
-            return redirect('agent:contact_list')
+    if request.method == 'POST' and request.FILES.get('file_upload'):
+        uploaded_file = request.FILES['file_upload']
+        # print("uploaded_file", uploaded_file)
+        # Check file format
+        file_name = uploaded_file.name
+        if not (file_name.endswith('.csv') or file_name.endswith('.xlsx') or file_name.endswith('.xls')):
+            messages.error(request, 'Invalid file format. Please upload a CSV or Excel file.')
+            return redirect('contact:contact_list')
 
         try:
-            decoded_file = csv_file.read().decode('utf-8').splitlines()
-            reader = csv.reader(decoded_file)
-            headers = next(reader)
-            print(f"Headers: {headers}")
-            header_variables = [
-                header.strip().lower().replace(' ', '_') for header in headers
-            ]
-            print(f"Header variables: {header_variables}")
+            # Process CSV file
+            if file_name.endswith('.csv'):
+                decoded_file = uploaded_file.read().decode('utf-8').splitlines()
+                reader = csv.reader(decoded_file)
+                headers = next(reader)  # Extract headers
+                header_variables = [
+                    header.strip().lower().replace(' ', '_') for header in headers
+                ]
+                processed_rows = process_csv_rows(reader, headers)
+                # check = "csg"
             
-            processed_rows = process_csv_rows(reader, headers)
-            print("processed_rows",processed_rows)
-            
+            # Process Excel file
+            elif file_name.endswith('.xlsx') or file_name.endswith('.xls'):
+                excel_data = pd.read_excel(uploaded_file)  # Read Excel file using pandas
+                print("excel_data", excel_data)
+                headers = list(excel_data.columns)  # Extract headers
+                header_variables = [
+                    header.strip().lower().replace(' ', '_') for header in headers
+                ]
+                processed_rows = process_excel_rows(excel_data)
+                # check = "excel"
+            # print({
+            #         'check': check,
+            #         'headers': headers,
+            #         'header_variables': header_variables,
+            #         'values': processed_rows,
+            #     })
+            # Return response with extracted data
             return JsonResponse({
                 'status': 'success',
                 'data': {
@@ -193,9 +213,19 @@ def extract_file(request):
 
         except Exception as e:
             messages.error(request, f"An error occurred while processing the file: {str(e)}")
-            return redirect('contact:contact_list')
+            return redirect('agent:contact_list')
 
     return render(request, 'new/upload_contact.html', {'form': ExcelUploadForm()})
+
+
+def process_excel_rows(excel_data):
+    return {
+        header: [
+            str(value) if header.lower().strip() == "phone number" and pd.notna(value) else (None if pd.isna(value) else value)
+            for value in excel_data[header]
+        ]
+        for header in excel_data.columns
+    }
 
 
 def process_csv_rows(reader, headers):

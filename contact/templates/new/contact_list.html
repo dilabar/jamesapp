@@ -442,7 +442,7 @@
               const fileExtension = fileName.split(".").pop().toLowerCase();
               const fileSizeMB = file.size / (1024 * 1024);
   
-              if (fileExtension !== "csv") {
+              if (fileExtension !== "csv" && fileExtension !== "xlsx" && fileExtension !== "xls") {
                   alert("Invalid file type. Please upload a valid CSV file.");
                   fileInput.value = "";
                   return;
@@ -467,10 +467,10 @@
                       "X-CSRFToken": "{{ csrf_token }}",
                   },
                   success: function (response) {
-                      mappingData = response.data;
-                      populateMappingTable(response.data);
-                      currentStep++;
-                      updateStepVisibility();
+                    mappingData = response.data;
+                    populateMappingTable(response.data);
+                    currentStep++;
+                    updateStepVisibility();
                   },
                   error: function () {
                       alert("Error processing the file.");
