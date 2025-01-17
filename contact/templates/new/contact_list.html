@@ -44,7 +44,76 @@
                         <div class="card-header pb-0 card-no-border">
                             {% comment %} <a href="{% url 'contact:add_contact' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add Contact</a> {% endcomment %}
                             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">Add Contact</button> 
-                            <a href="{% url 'contact:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a>
+                            {% comment %} <a href="{% url 'contact:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a> {% endcomment %}
+                            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">Bulk Add</button>
+                            <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModal" aria-hidden="true">
+                              <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h4 class="modal-title" id="myExtraLargeModal">Add Bulk Contact</h4>
+                                    <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+                                  <div class="modal-body dark-modal"> 
+                                    <form id="multiStepForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                                      {% csrf_token %}
+                                      <div class="step step-1">
+                                          <h5 class="mb-3">Step 1: Upload CSV File</h5>
+                                          <div class="mb-3">
+                                              <label class="form-label" for="file_upload">CSV List</label>
+                                              <input class="form-control" id="file_upload" name="file_upload" type="file" required>
+                                              <div class="invalid-feedback">Please upload a valid CSV file.</div>
+                                          </div>
+                                      </div>
+                  
+                                      <div class="step step-2 d-none">
+                                          <h5 class="mb-3">Step 2: Map Columns</h5>
+                                          <div id="mapping-container">
+                                              <table class="table table-bordered">
+                                                  <thead>
+                                                      <tr>
+                                                          <th>Column Header in File</th>
+                                                          <th>Mapped Field</th>
+                                                      </tr>
+                                                  </thead>
+                                                  <tbody id="mapping-table">
+                                                      <!-- Dynamic mapping rows will be generated here -->
+                                                  </tbody>
+                                              </table>
+                                          </div>
+                                      </div>
+                  
+                                      <div class="step step-3 d-none">
+                                          <h5 class="mb-3">Step 3: Select Action</h5>
+                                          <div class="mb-4">
+                                              <label class="form-label d-block">Select an Option</label>
+                                              <div class="d-flex align-items-center">
+                                                  <div class="form-check me-3">
+                                                      <input class="form-check-input" type="radio" name="options" id="create" value="create" required>
+                                                      <label class="form-check-label" for="create">Create Contacts</label>
+                                                  </div>
+                                                  <div class="form-check me-3">
+                                                      <input class="form-check-input" type="radio" name="options" id="create_update" value="create_update" required>
+                                                      <label class="form-check-label" for="create_update">Create and Update Contacts</label>
+                                                  </div>
+                                                  <div class="form-check">
+                                                      <input class="form-check-input" type="radio" name="options" id="update" value="update" required>
+                                                      <label class="form-check-label" for="update">Update Contacts</label>
+                                                  </div>
+                                              </div>
+                                              <div class="invalid-feedback">Please select an option.</div>
+                                          </div>
+                                      </div>
+                                    </form>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" id="prevStep" disabled>Previous</button>
+                                    <button type="button" class="btn btn-primary" id="nextStep">Next</button>
+                                    <button type="submit" class="btn btn-success d-none" id="submitForm">Submit</button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
 
                             <span>Easily manage your AI Agents by editing, deleting, or initiating a conversation directly from the table.</span>
                         </div>
@@ -344,6 +413,204 @@
     {% block js %}
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const steps = document.querySelectorAll(".step");
+      const prevStepBtn = document.getElementById("prevStep");
+      const nextStepBtn = document.getElementById("nextStep");
+      const submitFormBtn = document.getElementById("submitForm");
+      const fileInput = document.getElementById("file_upload");
+      const mappingTable = document.getElementById("mapping-table");
+      let currentStep = 0;
+      let mappingData = {}; // Store mapping data
+  
+      // Update step visibility
+      function updateStepVisibility() {
+          steps.forEach((step, index) => {
+              step.classList.toggle("d-none", index !== currentStep);
+          });
+          prevStepBtn.disabled = currentStep === 0;
+          nextStepBtn.classList.toggle("d-none", currentStep === steps.length - 1);
+          submitFormBtn.classList.toggle("d-none", currentStep !== steps.length - 1);
+      }
+  
+      // Handle file upload and proceed to step 2
+      fileInput.addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+              const fileName = file.name;
+              const fileExtension = fileName.split(".").pop().toLowerCase();
+              const fileSizeMB = file.size / (1024 * 1024);
+  
+              if (fileExtension !== "csv" && fileExtension !== "xlsx" && fileExtension !== "xls") {
+                  alert("Invalid file type. Please upload a valid CSV file.");
+                  fileInput.value = "";
+                  return;
+              }
+  
+              if (fileSizeMB > 30) {
+                  alert("File size exceeds 30MB. Please upload a smaller file.");
+                  fileInput.value = "";
+                  return;
+              }
+  
+              const formData = new FormData();
+              formData.append("file_upload", file);
+  
+              $.ajax({
+                  url: "/contact/extract/",
+                  method: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  headers: {
+                      "X-CSRFToken": "{{ csrf_token }}",
+                  },
+                  success: function (response) {
+                    mappingData = response.data;
+                    populateMappingTable(response.data);
+                    currentStep++;
+                    updateStepVisibility();
+                  },
+                  error: function () {
+                      alert("Error processing the file.");
+                  },
+              });
+          }
+      });
+  
+      // Populate mapping table
+      function populateMappingTable(data) {
+          mappingTable.innerHTML = "";
+          const processedRows = data.values;
+          const expectedFields = ['First Name', 'Last Name', 'Email', 'Phone', 'Contact Type']; // Expected fields to match
+
+          data.headers.forEach((header, index) => {
+              const row = document.createElement("tr");
+              const headerCell = document.createElement("td");
+              headerCell.textContent = header;
+              row.appendChild(headerCell);
+
+              const valuesCell = document.createElement("td");
+              const values = processedRows[header] || [];
+              valuesCell.innerHTML = values.slice(0, 3).map(value => value || "-").join("<br>");
+              row.appendChild(valuesCell);
+
+              const statusCell = document.createElement("td");
+                if (expectedFields.includes(header)) {
+                    statusCell.innerHTML = '<span class="ti-check-box badge badge-light-success">Mapped</span>';
+                } else {
+                    statusCell.innerHTML = '<span class="icon-close badge badge-light-danger">Not Mapped</span>';
+                }
+                row.appendChild(statusCell);
+  
+              const selectCell = document.createElement("td");
+              const select = document.createElement("select");
+              select.classList.add("form-select");
+              data.header_variables.forEach(variable => {
+                  const option = document.createElement("option");
+                  option.value = variable;
+                  option.textContent = variable.replace(/_/g, " ");
+                  if (data.header_variables[index] === variable) {
+                    option.selected = true;
+                }
+                  select.appendChild(option);
+              });
+              selectCell.appendChild(select);
+              row.appendChild(selectCell);
+  
+              mappingTable.appendChild(row);
+          });
+      }
+  
+      // Handle next and previous steps
+      nextStepBtn.addEventListener("click", function () {
+          if (currentStep === 1 && !validateMapping()) {
+              alert("Please complete the mapping.");
+              return;
+          }
+          currentStep++;
+          updateStepVisibility();
+      });
+  
+      prevStepBtn.addEventListener("click", function () {
+          currentStep--;
+          updateStepVisibility();
+      });
+  
+      // Validate mapping step
+      function validateMapping() {
+          let isValid = true;
+          const selects = mappingTable.querySelectorAll("select");
+          selects.forEach(select => {
+              if (!select.value) {
+                  isValid = false;
+                  select.classList.add("is-invalid");
+              } else {
+                  select.classList.remove("is-invalid");
+              }
+          });
+          return isValid;
+      }
+  
+      // Handle form submission
+      submitFormBtn.addEventListener("click", function () {
+          const selectedOption = document.querySelector('input[name="options"]:checked');
+          if (!selectedOption) {
+              alert("Please select an action.");
+              return;
+          }
+  
+              // Initialize postData
+            const postData = {
+                headers: [],
+                header_variables: [],
+                selected_option: selectedOption.value,
+                data: {},
+            };
+
+            // Process mapping table rows
+            const rows = mappingTable.querySelectorAll("tr");
+            rows.forEach(row => {
+                const headerCell = row.querySelector("td:nth-child(1)");
+                const select = row.querySelector("select");
+                const header = headerCell?.textContent.trim();
+                const selectedVariable = select?.value;
+
+                if (header && selectedVariable) {
+                    postData.headers.push(header);
+                    postData.header_variables.push(selectedVariable);
+
+                    // Map data values to the selected variable
+                    const dataValues = mappingData.values[header] || [];
+                    postData.data[selectedVariable] = dataValues;
+                }
+            });
+
+  
+          $.ajax({
+              url: "/contact/create-bulk/",
+              method: "POST",
+              contentType: "application/json",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+              },
+              data: JSON.stringify(postData),
+              success: function () {
+                  alert("Contacts created successfully!");
+                  window.location.href = "/contact/";
+              },
+              error: function () {
+                  alert("Error creating contacts.");
+              },
+          });
+      });
+  
+      // Initialize step visibility
+      updateStepVisibility();
+    });
+    
+    </script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const timeZoneSelect = document.getElementById("time_zone");
