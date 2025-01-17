@@ -489,7 +489,7 @@ def start_campaign(request, campaign_id):
 # from django.core.paginator import Paginator
 # from django.shortcuts import render, get_object_or_404, redirect
 # from .models import Contact
-
+@login_required
 def contact_details(request, id=1):
     # Fetch all contacts for pagination
     contacts = Contact.objects.all().order_by('id')
@@ -542,7 +542,7 @@ def contact_details(request, id=1):
         contact.save()
 
         # Redirect to the same page after update
-        return redirect('contact_details', page=current_page.number)
+        return redirect('contact:contact_details', id=current_page.number)
 
     context = {
         'contact': contact,
@@ -552,21 +552,10 @@ def contact_details(request, id=1):
         'paginator': paginator,
         'current_page': current_page,
     }
-    return render(request, 'new/details.html', context)
+    return render(request, 'contact/contact_detail.html', context)
 
 
-def update_contact(request, id):
-    contact = get_object_or_404(Contact, id=id)
-    
-    if request.method == 'POST':
-        contact.first_name = request.POST.get('first_name')
-        contact.last_name = request.POST.get('last_name')
-        contact.email = request.POST.get('email')
-        contact.phone = request.POST.get('phone')
-        contact.contact_type = request.POST.get('contact_type')
-        contact.save()
-        return redirect('contact_details', id=id)  # Redirect to the contact details page after updating
-    
-    return HttpResponse("Invalid request", status=400)
+
+
 
 
