@@ -523,74 +523,76 @@ def start_campaign(request, campaign_id):
 
 
 
-# from django.core.paginator import Paginator
-# from django.shortcuts import render, get_object_or_404, redirect
-# from .models import Contact
+
 @login_required
-def contact_details(request, id=1):
-    # Fetch all contacts for pagination
+def contact_details(request, id):
+    # Fetch the contact by ID
+    contact = get_object_or_404(Contact, id=id)
+
+    # Fetch all contacts ordered by ID
     contacts = Contact.objects.all().order_by('id')
-    paginator = Paginator(contacts, 1)  # Display 1 contact per page
+    total_contacts = contacts.count()
+    
+    # Get the current contact's position
+    current_position = list(contacts).index(contact) + 1  # Add 1 for 1-based indexing
 
-    try:
-        current_page = paginator.page(id)
-    except:
-        current_page = paginator.page(1)
-
-    contact = current_page.object_list[0]
-    # Retrieve all emails and phone numbers
+    # Fetch the previous and next contacts based on ID
+    previous_contact = Contact.objects.filter(id__lt=contact.id).order_by('-id').first()
+    next_contact = Contact.objects.filter(id__gt=contact.id).order_by('id').first()
+    
+    # Retrieve emails and phone numbers for the contact
     emails = contact.emails.all()
     phone_numbers = contact.phone_numbers.all()
-    # Initialize the interactions list
+    
+    # Prepare the interactions list
     interactions = []
-     # Fetch interactions from different models
     phone_calls = PhoneCall.objects.filter(contact=contact)
-      # Add phone calls to interactions list
-
     for phone_call in phone_calls:
         interactions.append({
             'type': 'Agent call',
             'title': f"Phone Call - {phone_call.phone_number} - {phone_call.campaign.name}",
             'timestamp': phone_call.timestamp,
-            'object': phone_call.id,  # Or any related object
-           
+            'object': phone_call.id,
         })
-
-    # Handle contact update
+    
+    # Handle POST request for updating the contact
     if request.method == 'POST':
-           # Update primary email
+        # Update primary email
         selected_email_id = request.POST.get('primary_email')
         if selected_email_id:
             for email in emails:
                 email.is_primary = (str(email.id) == selected_email_id)
                 email.save()
-
+        
         # Update primary phone number
         selected_phone_id = request.POST.get('primary_phone')
         if selected_phone_id:
             for phone in phone_numbers:
                 phone.is_primary = (str(phone.id) == selected_phone_id)
                 phone.save()
+        
+        # Update other contact fields
         contact.first_name = request.POST.get('first_name')
         contact.last_name = request.POST.get('last_name')
         contact.email = request.POST.get('email')
         contact.phone = request.POST.get('phone')
         contact.contact_type = request.POST.get('contact_type')
         contact.save()
-
+        
         # Redirect to the same page after update
-        return redirect('contact:contact_details', id=current_page.number)
-
+        return redirect('contact:contact_details', id=contact.id)
+    
     context = {
         'contact': contact,
         'emails': emails,
         'phone_numbers': phone_numbers,
         'interactions': interactions,
-        'paginator': paginator,
-        'current_page': current_page,
+        'previous_contact': previous_contact,
+        'next_contact': next_contact,
+        'current_position': current_position,
+        'total_contacts': total_contacts,
     }
     return render(request, 'contact/contact_detail.html', context)
-
 
 
 
