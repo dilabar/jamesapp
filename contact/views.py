@@ -225,6 +225,7 @@ def create_bulk_contacts(request):
             headers = data.get("headers", [])
             header_variables = data.get("header_variables", [])
             processed_data = data.get("data", {})
+            selected_option = data.get("selected_option")
 
             # print("Headers:", headers)
             # print("Header Variables:", header_variables)
@@ -233,24 +234,30 @@ def create_bulk_contacts(request):
             email_set = set()  # Track processed emails to avoid duplication
 
             for variable, values in processed_data.items():
-                value_list = values.split(", ")  # Split the string of values into a list
+                # Ensure values are a list
+                if isinstance(values, str):
+                    value_list = values.split(", ")
+                elif isinstance(values, list):
+                    value_list = values
+                else:
+                    raise ValueError(f"Unexpected data type for values: {type(values)}")
 
                 for i, value in enumerate(value_list):
                     # Extract individual data for this contact
                     first_name = (
-                        processed_data.get("first_name", "").split(", ")[i]
+                        processed_data.get("first_name", [None])[i]
                         if "first_name" in processed_data else None
                     )
                     last_name = (
-                        processed_data.get("last_name", "").split(", ")[i]
+                        processed_data.get("last_name", [None])[i]
                         if "last_name" in processed_data else None
                     )
                     email = (
-                        processed_data.get("email", "").split(", ")[i]
+                        processed_data.get("email", [None])[i]
                         if "email" in processed_data else None
                     )
                     phone = (
-                        processed_data.get("phone_number", "").split(", ")[i]
+                        processed_data.get("phone_number", [None])[i]
                         if "phone_number" in processed_data else None
                     )
 
