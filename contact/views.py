@@ -19,6 +19,8 @@ from contact.models import *
 from datetime import datetime
 import pandas as pd
 from .forms import ExcelUploadForm
+from django.utils.timezone import now
+
 
 
 
@@ -246,98 +248,132 @@ def process_csv_rows(reader, headers):
     return processed_rows
 
 
-
 def create_bulk_contacts(request):
     if request.method == "POST":
         try:
-            # Parse the incoming JSON data
+            # Parse incoming JSON data
             data = json.loads(request.body)
-            headers = data.get("headers", [])
-            header_variables = data.get("header_variables", [])
             processed_data = data.get("data", {})
-            selected_option = data.get("selected_option")
+            
+            # Define a CSV file path
+            csv_file_path = "/tmp/processed_data.csv"
 
-            # print("Headers:", headers)
-            # print("Header Variables:", header_variables)
-            # print("Processed Data:", processed_data)
+            # Write data to a CSV file
+            with open(csv_file_path, mode="w", newline="", encoding="utf-8") as csv_file:
+                csv_writer = csv.writer(csv_file)
+                
+                # Write headers
+                headers = processed_data.keys()
+                csv_writer.writerow(headers)
+                
+                # Write rows
+                rows = zip(*processed_data.values())
+                csv_writer.writerows(rows)
 
-            email_set = set()  # Track processed emails to avoid duplication
+            print(f"Data successfully written to {csv_file_path}")
 
-            for variable, values in processed_data.items():
-                # Ensure values are a list
-                if isinstance(values, str):
-                    value_list = values.split(", ")
-                elif isinstance(values, list):
-                    value_list = values
-                else:
-                    raise ValueError(f"Unexpected data type for values: {type(values)}")
+            # Process the data from the CSV file
+            with open(csv_file_path, mode="r", encoding="utf-8") as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                processed_emails = set()  # To track processed emails
+                processed_phones = set()  # To track processed phone numbers
 
-                for i, value in enumerate(value_list):
+                for row in csv_reader:
                     # Extract individual data for this contact
-                    first_name = (
-                        processed_data.get("first_name", [None])[i]
-                        if "first_name" in processed_data else None
-                    )
-                    last_name = (
-                        processed_data.get("last_name", [None])[i]
-                        if "last_name" in processed_data else None
-                    )
-                    email = (
-                        processed_data.get("email", [None])[i]
-                        if "email" in processed_data else None
-                    )
-                    phone = (
-                        processed_data.get("phone_number", [None])[i]
-                        if "phone_number" in processed_data else None
+                    first_name = row.get("first_name")
+                    last_name = row.get("last_name")
+                    email = row.get("email")
+                    phone = row.get("phone_number")
+                    contact_type = row.get("contact_type")
+                    time_zone = row.get("time_zone")
+
+                    # Skip if email and phone are both missing
+                    if not email and not phone:
+                        print("Skipping row: Missing email and phone number")
+                        continue
+
+                    # Skip processing if email or phone is already processed
+                    if email in processed_emails or phone in processed_phones:
+                        print(f"Skipping duplicate: {email or phone}")
+                        continue
+
+                    processed_emails.add(email)
+                    processed_phones.add(phone)
+
+                    # Check if contact exists by email or phone number
+                    contact = (
+                        Contact.objects.filter(emails__email=email)
+                        .union(Contact.objects.filter(phone_numbers__phone_number=phone))
+                        .first()
                     )
 
-                    if email and email not in email_set:  # Check if email is provided and not processed yet
-                        email_set.add(email)  # Add email to the processed set
+                    if contact:
+                        # Update existing contact
+                        contact.first_name = first_name or contact.first_name
+                        contact.last_name = last_name or contact.last_name
+                        contact.contact_type = contact_type or contact.contact_type
+                        contact.time_zone = time_zone or contact.time_zone
+                        contact.updated_at = timezone.now()
+                        contact.save()
+                        print(f"Updated contact: {email or phone}")
+                    else:
+                        # Create a new contact
+                        contact = Contact.objects.create(
+                            user=request.user,
+                            first_name=first_name,
+                            last_name=last_name,
+                            contact_type=contact_type or "bulk_import",
+                            time_zone=time_zone or "UTC",
+                            created_at=timezone.now(),
+                        )
+                        print(f"Created contact: {email or phone}")
 
-                        # Check if a contact with this email already exists
-                        contact = Contact.objects.filter(emails__email=email).first()
-
-                        if contact:
-                            # Update existing contact
-                            contact.first_name = first_name or contact.first_name
-                            contact.last_name = last_name or contact.last_name
-                            contact.updated_at = timezone.now()  # Update timestamp
-                            contact.save()
-                            print(f"Updated contact: {email}")
-                        else:
-                            # Create a new contact
-                            contact = Contact.objects.create(
+                    # Handle email association
+                    if email:
+                        existing_email = Email.objects.filter(contact=contact, email=email).first()
+                        is_primary_email = not existing_email and not Email.objects.filter(contact=contact, is_primary=True).exists()
+                        if not existing_email:
+                            Email.objects.create(
+                                contact=contact,
+                                email=email,
                                 user=request.user,
-                                first_name=first_name,
-                                last_name=last_name,
-                                contact_type="bulk_import",
-                                time_zone="UTC",
-                                created_at=timezone.now(),
+                                is_primary=is_primary_email,
                             )
 
-                        # Ensure the email object is created or updated
-                        Email.objects.update_or_create(
-                            contact=contact,
-                            email=email,
-                            defaults={"user": request.user, "is_primary": True},
-                        )
-
-                        # Ensure the phone number object is created or updated
-                        if phone:
-                            PhoneNumber.objects.update_or_create(
+                    # Handle phone association
+                    if phone:
+                        existing_phone = PhoneNumber.objects.filter(phone_number=phone).first()
+                        if existing_phone:
+                            if existing_phone.contact != contact:
+                                print(f"Phone number {phone} already exists for another contact.")
+                                # Associate the phone with this contact as non-primary, but avoid duplicate creation
+                                if not PhoneNumber.objects.filter(contact=contact, phone_number=phone).exists():
+                                    try:
+                                        PhoneNumber.objects.create(
+                                            contact=contact,
+                                            phone_number=phone,
+                                            user=request.user,
+                                            is_primary=False,
+                                        )
+                                        print(f"Phone number {phone} added as non-primary to contact {email}")
+                                    except Exception as e:
+                                        print(f"Error associating phone number {phone}: {e}")
+                            else:
+                                print(f"Phone number {phone} is already associated with this contact.")
+                        else:
+                            # Add the phone number to the current contact
+                            is_primary_phone = not PhoneNumber.objects.filter(contact=contact, is_primary=True).exists()
+                            PhoneNumber.objects.create(
                                 contact=contact,
-                                user=request.user,
                                 phone_number=phone,
-                                defaults={
-                                    "is_primary": True,
-                                    "country_code": None,  # Adjust as needed
-                                },
+                                user=request.user,
+                                is_primary=is_primary_phone,
                             )
 
             return JsonResponse({"message": "Contacts processed successfully!"}, status=201)
 
         except Exception as e:
-            print("Error:", str(e))
+            print(f"Error: {str(e)}")
             return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Invalid request method."}, status=405)
