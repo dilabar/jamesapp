@@ -11,6 +11,7 @@ urlpatterns = [
     path('create-bulk/', create_bulk_contacts, name='create_bulk'),
     path('lists/', list_overview, name='list_overview'),
     path('lists/create/', create_list, name='create_list'),
+    path('create-bulk-list/', create_bulk_contact_list, name='create_bulk_contact_list'),
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
     path('campaigns/create/', create_campaign, name='create_campaign'),
     path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
