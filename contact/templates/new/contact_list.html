@@ -414,7 +414,7 @@
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    {% comment %} document.addEventListener("DOMContentLoaded", function () {
       const steps = document.querySelectorAll(".step");
       const prevStepBtn = document.getElementById("prevStep");
       const nextStepBtn = document.getElementById("nextStep");
@@ -608,8 +608,238 @@
   
       // Initialize step visibility
       updateStepVisibility();
-    });
-    
+    }); {% endcomment %}
+    document.addEventListener("DOMContentLoaded", function () {
+      const steps = document.querySelectorAll(".step");
+      const prevStepBtn = document.getElementById("prevStep");
+      const nextStepBtn = document.getElementById("nextStep");
+      const submitFormBtn = document.getElementById("submitForm");
+      const fileInput = document.getElementById("file_upload");
+      const mappingTable = document.getElementById("mapping-table");
+      let currentStep = 0;
+      let mappingData = {}; // Store mapping data
+  
+      // Update step visibility
+      function updateStepVisibility() {
+          steps.forEach((step, index) => {
+              step.classList.toggle("d-none", index !== currentStep);
+          });
+          prevStepBtn.disabled = currentStep === 0;
+          nextStepBtn.classList.toggle("d-none", currentStep === steps.length - 1);
+          submitFormBtn.classList.toggle("d-none", currentStep !== steps.length - 1);
+      }
+  
+      // Handle file upload and proceed to step 2
+      fileInput.addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+              const fileName = file.name;
+              const fileExtension = fileName.split(".").pop().toLowerCase();
+              const fileSizeMB = file.size / (1024 * 1024);
+  
+              if (fileExtension !== "csv" && fileExtension !== "xlsx" && fileExtension !== "xls") {
+                  alert("Invalid file type. Please upload a valid CSV file.");
+                  fileInput.value = "";
+                  return;
+              }
+  
+              if (fileSizeMB > 30) {
+                  alert("File size exceeds 30MB. Please upload a smaller file.");
+                  fileInput.value = "";
+                  return;
+              }
+  
+              const formData = new FormData();
+              formData.append("file_upload", file);
+  
+              $.ajax({
+                  url: "/contact/extract/",
+                  method: "POST",
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  headers: {
+                      "X-CSRFToken": "{{ csrf_token }}",
+                  },
+                  success: function (response) {
+                      mappingData = response.data;
+                      populateMappingTable(response.data);
+                      validateMappingFields();
+                      currentStep++;
+                      updateStepVisibility();
+                  },
+                  error: function () {
+                      alert("Error processing the file.");
+                  },
+              });
+          }
+      });
+  
+      // Populate mapping table
+      function populateMappingTable(data) {
+          mappingTable.innerHTML = "";
+          const processedRows = data.values;
+          const expectedFields = ['First Name', 'Last Name', 'Email', 'Phone', 'Contact Type']; // Expected fields to match
+  
+          data.headers.forEach((header, index) => {
+              const row = document.createElement("tr");
+              const headerCell = document.createElement("td");
+              headerCell.textContent = header;
+              row.appendChild(headerCell);
+  
+              const valuesCell = document.createElement("td");
+              const values = processedRows[header] || [];
+              valuesCell.innerHTML = values.slice(0, 3).map(value => value || "-").join("<br>");
+              row.appendChild(valuesCell);
+  
+              const statusCell = document.createElement("td");
+              if (expectedFields.includes(header)) {
+                  statusCell.innerHTML = '<span class="ti-check-box badge badge-light-success">Mapped</span>';
+              } else {
+                  statusCell.innerHTML = '<span class="icon-close badge badge-light-danger">Not Mapped</span>';
+              }
+              row.appendChild(statusCell);
+  
+              const selectCell = document.createElement("td");
+              const select = document.createElement("select");
+              select.classList.add("form-select");
+              data.header_variables.forEach(variable => {
+                  const option = document.createElement("option");
+                  option.value = variable;
+                  option.textContent = variable.replace(/_/g, " ");
+                  if (data.header_variables[index] === variable) {
+                      option.selected = true;
+                  }
+                  select.appendChild(option);
+              });
+              selectCell.appendChild(select);
+              row.appendChild(selectCell);
+  
+              mappingTable.appendChild(row);
+          });
+      }
+  
+      // Validate email and phone number formats dynamically
+      function validateMappingFields() {
+          const rows = mappingTable.querySelectorAll("tr");
+  
+          rows.forEach(row => {
+              const select = row.querySelector("select");
+              const statusCell = row.querySelector("td:nth-child(3)"); // Status column
+              const headerCell = row.querySelector("td:nth-child(1)");
+              const header = headerCell?.textContent.trim();
+  
+              if (select) {
+                  select.addEventListener("change", function () {
+                      const selectedVariable = select.value;
+                      const dataValues = mappingData.values[header] || [];
+                      let isValid = true;
+  
+                      if (selectedVariable === "email") {
+                          // Validate email format
+                          isValid = dataValues.every(value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+                      } else if (selectedVariable === "phone number") {
+                          // Validate phone number format
+                          isValid = dataValues.every(value => /^\d+$/.test(value));
+                      }
+  
+                      // Update status cell
+                      if (isValid) {
+                          statusCell.innerHTML = '<span class="ti-check-box badge badge-light-success">Mapped</span>';
+                      } else {
+                          statusCell.innerHTML = '<span class="icon-close badge badge-light-danger">Not Mapped</span>';
+                      }
+                  });
+              }
+          });
+      }
+  
+      // Handle next and previous steps
+      nextStepBtn.addEventListener("click", function () {
+          if (currentStep === 1 && !validateMapping()) {
+              alert("Please complete the mapping.");
+              return;
+          }
+          currentStep++;
+          updateStepVisibility();
+      });
+  
+      prevStepBtn.addEventListener("click", function () {
+          currentStep--;
+          updateStepVisibility();
+      });
+  
+      // Validate mapping step
+      function validateMapping() {
+          let isValid = true;
+          const selects = mappingTable.querySelectorAll("select");
+          selects.forEach(select => {
+              if (!select.value) {
+                  isValid = false;
+                  select.classList.add("is-invalid");
+              } else {
+                  select.classList.remove("is-invalid");
+              }
+          });
+          return isValid;
+      }
+  
+      // Handle form submission
+      submitFormBtn.addEventListener("click", function () {
+          const selectedOption = document.querySelector('input[name="options"]:checked');
+          if (!selectedOption) {
+              alert("Please select an action.");
+              return;
+          }
+  
+          // Initialize postData
+          const postData = {
+              headers: [],
+              header_variables: [],
+              selected_option: selectedOption.value,
+              data: {},
+          };
+  
+          // Process mapping table rows
+          const rows = mappingTable.querySelectorAll("tr");
+          rows.forEach(row => {
+              const headerCell = row.querySelector("td:nth-child(1)");
+              const select = row.querySelector("select");
+              const header = headerCell?.textContent.trim();
+              const selectedVariable = select?.value;
+  
+              if (header && selectedVariable) {
+                  postData.headers.push(header);
+                  postData.header_variables.push(selectedVariable);
+  
+                  // Map data values to the selected variable
+                  const dataValues = mappingData.values[header] || [];
+                  postData.data[selectedVariable] = dataValues;
+              }
+          });
+  
+          $.ajax({
+              url: "/contact/create-bulk/",
+              method: "POST",
+              contentType: "application/json",
+              headers: {
+                  "X-CSRFToken": "{{ csrf_token }}",
+              },
+              data: JSON.stringify(postData),
+              success: function () {
+                  alert("Contacts created successfully!");
+                  window.location.href = "/contact/";
+              },
+              error: function () {
+                  alert("Error creating contacts.");
+              },
+          });
+      });
+  
+      // Initialize step visibility
+      updateStepVisibility();
+  });
+  
     </script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

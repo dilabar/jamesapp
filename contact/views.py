@@ -292,13 +292,24 @@ def create_bulk_contacts(request):
                         print("Skipping row: Missing email and phone number")
                         continue
 
-                    # Skip processing if email or phone is already processed
+                    # Check for duplicate only if both email and phone are already processed
                     if email in processed_emails or phone in processed_phones:
-                        print(f"Skipping duplicate: {email or phone}")
-                        continue
+                        associated_contact_email = Email.objects.filter(email=email).first()
+                        associated_contact_phone = PhoneNumber.objects.filter(phone_number=phone).first()
 
-                    processed_emails.add(email)
-                    processed_phones.add(phone)
+                        if (
+                            associated_contact_email
+                            and associated_contact_phone
+                            and associated_contact_email.contact == associated_contact_phone.contact
+                        ):
+                            print(f"Skipping: Both email {email} and phone {phone} are already associated with the same contact.")
+                            continue
+
+                    # Mark the email and phone as processed
+                    if email:
+                        processed_emails.add(email)
+                    if phone:
+                        processed_phones.add(phone)
 
                     # Check if contact exists by email or phone number
                     contact = (
