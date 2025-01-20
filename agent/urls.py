@@ -14,7 +14,7 @@ urlpatterns = [
     path('dashboards/', dashboards, name='dashboards'),
     path('login/', login, name='login'),
     path('signup/', signup, name='signup'),
-    path('reset-password/', reset, name='reset'),
+    
     path('logout/', logout_user, name='logout'), 
     path('play-ai-service/', service_detail_view, name='play_ai_service'),
     path('twilio-service/', twilio_service_detail_view, name='twilio_service'),
@@ -24,6 +24,10 @@ urlpatterns = [
     path('agent/setup/', agent_setup, name='agent_setup'),
     path('onboard/', onboard, name='onboard'),
     path('api/playai/webhook/', playai_webhook, name='playai-webhook'),
+    path('password-reset/', password_reset, name='reset_password'),
+    path('send-otp/', send_otp, name='send_otp'),
+    path('verify-otp/', verify_otp, name='verify_otp'),
+    path('reset-password/', reset_password, name='reset_password'),
     
 
 ]

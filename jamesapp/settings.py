@@ -147,3 +147,15 @@ AUTH_TOKEN=os.getenv('AUTH_TOKEN')
 LOGIN_URL = '/login/'
 OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY',default="")
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY',default="")
+
+
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = '74033b001@smtp-brevo.com'  # Your SMTP Login (provided by Brevo)
+EMAIL_HOST_PASSWORD = 'mWS9rgvVRE6c4fq2'  # Your SMTP Key (provided by Brevo)
+DEFAULT_FROM_EMAIL = 'bistudas.das@gmail.com'  # Your Brevo login email

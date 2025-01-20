@@ -12,8 +12,13 @@ import openai
 from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
 from jamesapp.utils import decrypt, get_conversation_data, get_transcript_data
+from django.http import JsonResponse
 
+from django.core.mail import send_mail
+from django.contrib.auth.hashers import make_password
 
+import json
+from random import randint
 from .forms import *
 
 
@@ -112,9 +117,7 @@ def logout_user(request):
 
 
 
-def reset(request):
-    
-    return render(request, 'auth/forgot_password.html')
+
 @login_required
 def service_detail_view(request):
     # Get the user's existing service details for Twilio and Play.ai
@@ -271,3 +274,104 @@ def summarize_transcript(request, agent_id, cid):
 
 
 
+
+def password_reset(request):
+    return render(request, 'auth/forgot_password.html')
+
+
+
+def send_otp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            flag = data.get('flag', False)
+
+            if not email:
+                return JsonResponse({'success': False, 'message': 'Email is required.'})
+
+            # Case-insensitive email search
+            user = User.objects.filter(email__iexact=email).first()
+            
+            if not flag and not user:
+                return JsonResponse({'success': False, 'message': 'No user found with this email.'})
+
+            otp = randint(100000, 999999)  # Generate a random 6-digit OTP
+
+            # Save OTP and email in the session
+            request.session['reset_email'] = email
+            request.session['otp'] = otp
+
+            # Send OTP via email
+            send_mail(
+                'Password Reset OTP',
+                f'Your OTP for password reset is: {otp}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+            )
+
+            return JsonResponse({'success': True, 'message': 'OTP sent to your email.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON format.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+# Verify the OTP entered by the user
+def verify_otp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            otp = data.get('otp')
+
+            if not otp:
+                return JsonResponse({'success': False, 'message': 'OTP is required.'})
+
+            # Check OTP against session value
+            session_otp = request.session.get('otp')
+            if session_otp and int(otp) == session_otp:
+                request.session['otp_verified'] = True
+                return JsonResponse({'success': True, 'message': 'OTP verified successfully.'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Invalid OTP.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON format.'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+def reset_password(request):
+    if request.method == 'POST':
+        try:
+            # Handle both JSON and form data
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.POST
+
+            new_password = data.get('new_password')
+
+            if not new_password:
+                return JsonResponse({'success': False, 'message': 'Password is required.'})
+
+            # Ensure OTP was verified before allowing password reset
+            if request.session.get('otp_verified'):
+                email = request.session.get('reset_email')
+                try:
+                    user = User.objects.get(email=email)
+                    user.password = make_password(new_password)
+                    user.save()
+
+                    # Clear session data
+                    request.session.pop('reset_email', None)
+                    request.session.pop('otp', None)
+                    request.session.pop('otp_verified', None)
+
+                    return JsonResponse({'success': True, 'message': 'Password reset successfully.'})
+                except User.DoesNotExist:
+                    return JsonResponse({'success': False, 'message': 'User does not exist.'})
+            else:
+                return JsonResponse({'success': False, 'message': 'OTP verification required.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': 'An error occurred: ' + str(e)})
+    else:
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
