@@ -103,3 +103,25 @@ class Campaign(models.Model):
         contacts_from_lists = Contact.objects.filter(lists__in=self.lists.all()).distinct()
         direct_contacts = self.individual_contacts.all()
         return contacts_from_lists.union(direct_contacts)
+
+
+
+
+
+
+
+
+class Plan(models.Model):
+    PLAN_TYPES = [
+        ('personal', 'Personal Plan'),
+        ('business', 'Business Plan'),
+        ('agency', 'Agency Plan'),
+    ]
+
+    name = models.CharField(max_length=100, choices=PLAN_TYPES)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=3, default='usd')
+
+    def __str__(self):
+        return f"{self.name} - {self.currency} {self.price}"
+

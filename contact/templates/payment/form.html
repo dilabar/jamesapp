@@ -1,0 +1,227 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+
+<!-- form.html -->
+<div class="page-body">
+    <div class="col-xl-12">
+        <div class="card height-equal">
+            <div class="card-header">
+                <h4>Payment Form</h4>
+            </div>
+            <div class="card-body custom-input">
+                <form class="row g-3" method="POST" action="{% url 'contact:checkout' %}">
+                    {% csrf_token %}
+                
+                    <!-- Personal Information -->
+                    <div class="col-12">
+                        <label class="form-label" for="first-name">First name</label>
+                        <input 
+                            class="form-control" 
+                            id="first-name" 
+                            name="first_name" 
+                            type="text" 
+                            placeholder="First name" 
+                            aria-label="First name" 
+                            required>
+                    </div>
+                
+                    <div class="col-12">
+                        <label class="form-label" for="email">Email address</label>
+                        <input 
+                            class="form-control" 
+                            id="email" 
+                            name="email" 
+                            type="email" 
+                            placeholder="Email" 
+                            required>
+                    </div>
+                    
+                    <!-- Address Details -->
+                    <div class="col-12">
+                        <label class="form-label" for="address-line1">Address Line 1</label>
+                        <input 
+                            class="form-control" 
+                            id="address-line1" 
+                            name="address_line1" 
+                            type="text" 
+                            placeholder="Address Line 1" 
+                            required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label" for="address-city">City</label>
+                        <input 
+                            class="form-control" 
+                            id="address-city" 
+                            name="address_city" 
+                            type="text" 
+                            placeholder="City" 
+                            required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label" for="address-state">State</label>
+                        <input 
+                            class="form-control" 
+                            id="address-state" 
+                            name="address_state" 
+                            type="text" 
+                            placeholder="State" 
+                            required>
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="form-label" for="address-postal-code">Postal Code</label>
+                        <input 
+                            class="form-control" 
+                            id="address-postal-code" 
+                            name="address_postal_code" 
+                            type="text" 
+                            placeholder="Postal Code" 
+                            required>
+                    </div>
+                
+                    <!-- Subscription Plan Selection -->
+                    <div class="col-12">
+                        <label class="form-label">Select Subscription Plan</label>
+                        <div class="row">
+                            <!-- Personal Plan -->
+                            <div class="col-xxl-4 col-md-6 mb-4">
+                                <div class="card border-light shadow-lg rounded-3 hover-shadow">
+                                    <div class="card-header text-center bg-primary text-white">
+                                        <h4>Personal Plan</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="text-center">₹500.00/month</h5>
+                                        <ul class="list-group">
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> Basic Support</li>
+                                            <li class="list-group-item"><i class="fa fa-times-circle text-danger"></i> Limited Storage</li>
+                                            <li class="list-group-item"><i class="fa fa-times-circle text-danger"></i> Custom Domain</li>
+                                        </ul>
+                                        <div class="text-center mt-3">
+                                            <input 
+                                                type="radio" 
+                                                name="plan_type" 
+                                                value="personal" 
+                                                id="personal-plan" 
+                                                class="plan-radio" 
+                                                required>
+                                            <label 
+                                                for="personal-plan" 
+                                                class="btn btn-primary text-white mt-2 rounded-pill px-4">
+                                                Select
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Business Plan -->
+                            <div class="col-xxl-4 col-md-6 mb-4">
+                                <div class="card border-light shadow-lg rounded-3 hover-shadow">
+                                    <div class="card-header text-center bg-warning text-dark">
+                                        <h4>Business Plan</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="text-center">₹1000.00/month</h5>
+                                        <ul class="list-group">
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> Priority Support</li>
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> Unlimited Storage</li>
+                                            <li class="list-group-item"><i class="fa fa-times-circle text-danger"></i> Custom Domain</li>
+                                        </ul>
+                                        <div class="text-center mt-3">
+                                            <input 
+                                                type="radio" 
+                                                name="plan_type" 
+                                                value="business" 
+                                                id="business-plan" 
+                                                class="plan-radio" 
+                                                required>
+                                            <label 
+                                                for="business-plan" 
+                                                class="btn btn-warning text-dark mt-2 rounded-pill px-4">
+                                                Select
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Agency Plan -->
+                            <div class="col-xxl-4 col-12 mb-4">
+                                <div class="card border-light shadow-lg rounded-3 hover-shadow">
+                                    <div class="card-header text-center bg-secondary text-white">
+                                        <h4>Agency Plan</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="text-center">₹2000.00/month</h5>
+                                        <ul class="list-group">
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> 24/7 Support</li>
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> Unlimited Storage</li>
+                                            <li class="list-group-item"><i class="fa fa-check-circle text-success"></i> Custom Domain</li>
+                                        </ul>
+                                        <div class="text-center mt-3">
+                                            <input 
+                                                type="radio" 
+                                                name="plan_type" 
+                                                value="agency" 
+                                                id="agency-plan" 
+                                                class="plan-radio" 
+                                                required>
+                                            <label 
+                                                for="agency-plan" 
+                                                class="btn btn-secondary text-white mt-2 rounded-pill px-4">
+                                                Select
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button class="btn btn-primary" type="submit">Proceed to Payment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+{% endblock body %}
+    
+
+
+{% block js %}
+
+ <!-- JavaScript to Handle Plan Selection -->
+ <script>
+    document.querySelectorAll('.plan-radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+            document.getElementById('selected-plan').value = this.value;
+        });
+    });
+</script>
+    
+{% endblock js %}
+    
+
+
+
+

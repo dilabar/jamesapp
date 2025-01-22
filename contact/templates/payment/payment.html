@@ -1,0 +1,65 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+<div class="page-body">
+    <div class="col-xl-12">
+        <div class="card height-equal">
+            <div class="card-header">
+                <h4>Complete Your Payment</h4>
+            </div>
+            <div class="card-body custom-input">
+                <button id="rzp-button" class="btn btn-primary">Pay with Razorpay</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+{% endblock body %}
+    
+
+
+{% block js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ key_id }}",
+        "amount": "{{ payment.amount }}",  // Updated to dot notation
+        "currency": "{{ payment.currency }}",  // Updated to dot notation
+        "name": "Your Company Name",
+        "description": "Payment",
+        "image": "https://your-logo-url.com",
+        "order_id": "{{ payment.id }}",  // Updated to dot notation
+        "handler": function (response) {
+            window.location.href = '/payment-success/';
+        },
+        "prefill": {
+            "name": "",
+            "email": ""
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+
+    var rzp1 = new Razorpay(options);
+    document.getElementById('rzp-button').onclick = function(e) {
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+
+    
+{% endblock js %}
+    

@@ -18,5 +18,7 @@ urlpatterns = [
     path('create-campaign/', create_campaign, name='create_campaign'),
     path('campaigns/', campaign_list, name='campaign_list'),
     path('start_campaign/<int:campaign_id>/', start_campaign, name='start_campaign'),
-   
+    path('checkout/', checkout, name='checkout'),
+    path('success/', success, name='success'),
+    path('cancel/', cancel, name='cancel'),
 ]

@@ -159,3 +159,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '74033b001@smtp-brevo.com'  # Your SMTP Login (provided by Brevo)
 EMAIL_HOST_PASSWORD = 'mWS9rgvVRE6c4fq2'  # Your SMTP Key (provided by Brevo)
 DEFAULT_FROM_EMAIL = 'bistudas.das@gmail.com'  # Your Brevo login email
+
+
+STRIPE_PUBLISHABLE_KEY = 'pk_test_51QjSgHSI8Oahv7KuW0I5eOcUSjyvFig0zIZkh66gYYq9FNzfyyYPe3Fnls7JcUKu1hl74RzUjVV2enVsCKyjxHIL00eKhyoQZN'
+STRIPE_SECRET_KEY = 'sk_test_51QjSgHSI8Oahv7KujGUdwuEmPr1tCs94quYpH1cm22cl7HnGnkIzktQI4viwdklVZETgQ7dGKPsVk4kXyS2NbMT300miveKfgH'
+

@@ -19,6 +19,7 @@ from contact.models import *
 from datetime import datetime
 import pandas as pd
 from .forms import ExcelUploadForm
+import razorpay
 
 
 
@@ -595,4 +596,68 @@ def contact_details(request, id=1):
 
 
 
+
+
+import stripe
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+
+
+
+def checkout(request):
+    if request.method == "POST":
+        first_name = request.POST.get("first_name")
+        email = request.POST.get("email")
+        plan = request.POST.get("plan_type")
+
+        plan_details = {
+            "personal": {"price": 650, "name": "Personal Plan", "currency": "usd"},
+            "business": {"price": 1300, "name": "Business Plan", "currency": "usd"},
+            "agency": {"price": 2600, "name": "Agency Plan", "currency": "usd"},
+        }
+
+        selected_plan = plan_details.get(plan)
+
+        if not selected_plan:
+            return redirect("payments:cancel")
+
+        # Check if the currency should be USD based on the country
+        country = request.POST.get("country")
+        if country in ["US", "USA"]:
+            selected_plan["currency"] = "usd"
+            selected_plan["price"] = selected_plan["price"] * 0.012  # Adjust price conversion as needed
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": selected_plan["currency"],
+                    "product_data": {
+                        "name": selected_plan["name"],
+                    },
+                    "unit_amount": int(selected_plan["price"] * 100),  # Stripe expects amount in cents
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=request.build_absolute_uri("/contact"),
+            cancel_url=request.build_absolute_uri("/payments/cancel/"),
+            customer_email=email,
+            shipping_address_collection={
+                'allowed_countries': ['IN', 'US', 'DE', 'GB', 'CA', 'AU'],  # Add countries here
+            }
+        )
+
+        return redirect(session.url, code=303)
+
+    return render(request, "payment/form.html")
+
+def success(request):
+    return render(request, "success.html")
+
+def cancel(request):
+    return render(request, "cancel.html")
 
