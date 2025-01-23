@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.timezone import now
 from agency.models import User
 
 # Create your models here.
@@ -103,3 +103,23 @@ class Campaign(models.Model):
         contacts_from_lists = Contact.objects.filter(lists__in=self.lists.all()).distinct()
         direct_contacts = self.individual_contacts.all()
         return contacts_from_lists.union(direct_contacts)
+
+class BackgroundJob(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('RUNNING', 'Running'),
+        ('PAUSED', 'Paused'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+
+    job_id = models.CharField(max_length=255, unique=True)  # ID for the job in the scheduler
+    name = models.CharField(max_length=255)  # Human-readable name of the job
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_run_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(blank=True, null=True)  # For storing error details, if any
+
+    def __str__(self):
+        return self.name
