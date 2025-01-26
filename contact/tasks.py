@@ -87,7 +87,7 @@ def process_contacts(processed_data, user, job_id):
                         time_zone=time_zone or "UTC",
                         created_at=timezone.now(),
                     )
-                    print(f"Created contact: {email or phone}")
+                    # print(f"Created contact: {email or phone}")
 
                 if email:
                     existing_email = Email.objects.filter(contact=contact, email=email).first()

@@ -67,7 +67,16 @@
                                         <tr>
                                             <td>{{ job.job_id }}</td> <!-- Displaying List ID -->
                                             <td>{{ job.name }}</td>
-                                            <td>{{ job.status }}</td> <!-- Assuming `contacts` is the related name -->
+                                            {% if job.status == 'COMPLETED'%}
+                                            <td class="text-center"><button class="btn rounded-pill btn-success btn-sm" type="button" title="btn rounded-pill btn-success btn-sm">Success</button>
+                                            {% elif job.status == 'PENDING' %}
+                                            <td class="text-center"><button class="btn rounded-pill btn-info  btn-sm" type="button" title="btn rounded-pill btn-info  btn-sm">Pending</button>
+                                            {% elif job.status == 'PAUSED' %}
+                                            <td class="text-center"><button class="btn rounded-pill btn-warning btn-sm" type="button" title="btn rounded-pill btn-warning btn-sm">Paused</button>
+                                            {% elif job.status == 'STOPPED' %}
+                                            <td class="text-center"><button class="btn rounded-pill btn-danger btn-sm" type="button" title="btn rounded-pill btn-danger btn-sm">Stopped</button>
+                                            </td> <!-- Assuming `contacts` is the related name -->
+                                            {% endif%}
                                             <td>{{ job.created_at }}</td> <!-- Displaying Creation Date -->
                                             <td class="text-center">
                                                 <div class="dropdown">
@@ -142,6 +151,18 @@
                 }
             }
         });
+
+        function getCSRFToken() {
+            let csrfToken = null;
+            const cookies = document.cookie.split(';');
+            cookies.forEach(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    csrfToken = value;
+                }
+            });
+            return csrfToken;
+        }
         
         function controlJob(jobId, action) {
             // Prepare the data object
@@ -155,11 +176,11 @@
         
             // AJAX request
             $.ajax({
-                url: '/contact/control-jobs/', // URL for handling job control
+                url: '/contact/jobcontrol/', // URL for handling job control
                 type: 'POST', // HTTP method
                 contentType: "application/json", // JSON format
                 headers: {
-                    "X-CSRFToken": "{{ csrf_token }}", // CSRF token for security
+                    "X-CSRFToken": getCSRFToken(), // CSRF token for security
                 },
                 data: JSON.stringify(postData), // Convert the object to JSON string
                 success: function (response) {
@@ -174,6 +195,7 @@
                 error: function (xhr, errmsg, err) {
                     // Handle AJAX errors
                     console.error('Error occurred:', errmsg);
+                    console.error('Error occurred:', err);
                     alert('An error occurred: ' + errmsg);
                 }
             });

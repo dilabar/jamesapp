@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'scheduling',
     'agency',
     'contact',
+    'django_extensions',
+    'django_apscheduler'
     # 'campaign',
     
 ]

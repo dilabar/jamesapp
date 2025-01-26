@@ -23,12 +23,18 @@ from django.utils.timezone import now
 from apscheduler.schedulers.background import BackgroundScheduler
 from .tasks import process_contacts
 from apscheduler.jobstores.base import JobLookupError
-
+from apscheduler.triggers.date import DateTrigger
+from datetime import datetime, timedelta
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
+import logging
+logger = logging.getLogger(__name__)
 
 
 scheduler = BackgroundScheduler()
-scheduler.start()
+scheduler.add_jobstore(DjangoJobStore(), "default")  # Adding DjangoJobStore as default
 
+logging.basicConfig()
+logging.getLogger('apscheduler').setLevel(logging.DEBUG)
 
 def contact_list(request):
     all_lists = List.objects.filter(user = request.user)
@@ -268,7 +274,14 @@ def create_bulk_contacts(request):
             
             job_id = f"job_{job_name}_{int(now().timestamp())}"
             # Schedule background task
-            scheduler.add_job(process_contacts, args=[processed_data, request.user, job_id], id=job_id, replace_existing=True)
+            print("before",scheduler.get_jobs())
+            trigger = DateTrigger(run_date=datetime.now() + timedelta(seconds=5)) 
+            scheduler.add_job(process_contacts, trigger, args=[processed_data, request.user, job_id], id=job_id,replace_existing=True)
+            register_events(scheduler)
+            scheduler.start()
+            print("after",scheduler.get_jobs())
+            # logger.info("Scheduler started and job added.")
+
             BackgroundJob.objects.create(
                 job_id=job_id,
                 name=job_name,
@@ -292,35 +305,42 @@ def list_jobs(request):
 
     return JsonResponse({"error": "Invalid request method."}, status=405)
 
-
 def control_job(request):
     """Pause, resume, or remove a job."""
     if request.method == "POST":
         data = json.loads(request.body)
         action = data.get("action")
-        job_id = data.get("job_id")# "pause", "resume", "remove"
+        job_id = data.get("job_id")  # "pause", "resume", "remove"
         job = get_object_or_404(BackgroundJob, job_id=job_id)
-        print("akjfakljf",job_id, action)
-        print(scheduler.get_jobs())
         try:
+            job_instance = scheduler.get_job(job_id)
+            print("job_instance",job_instance)
+            if not job_instance:
+                return JsonResponse({"error": f"Job {job_id} not found in scheduler."}, status=404)
+
             if action == "pause":
-                scheduler.pause_job(job_id)
-                job.status = "PAUSED"
+                if job_instance.next_run_time:  # Job is not running
+                    scheduler.pause_job(job_id)
+                    job.status = "PAUSED"
+                else:
+                    return JsonResponse({"error": "Cannot pause a running job."}, status=400)
             elif action == "resume":
                 scheduler.resume_job(job_id)
                 job.status = "PENDING"
             elif action == "remove":
-                scheduler.remove_job(job_id)
-                job.delete()
-                return JsonResponse({"message": f"Job {job.job_id} removed successfully."}, status=200)
+                try:
+                    scheduler.remove_job(job_id)
+                    job.delete()
+                    return JsonResponse({"message": f"Job {job_id} removed successfully."}, status=200)
+                except Exception:
+                    return JsonResponse({"error": "Cannot remove a running job. Try again later."}, status=400)
             else:
                 return JsonResponse({"error": "Invalid action."}, status=400)
 
             job.save()
-            print("job save", job)
             return JsonResponse({"message": f"Job {job.name} {action}d successfully."}, status=200)
         except JobLookupError:
-            return JsonResponse({"error": f"Job {job.job_id} not found."}, status=404)
+            return JsonResponse({"error": f"Job {job_id} not found."}, status=404)
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=400)
 
