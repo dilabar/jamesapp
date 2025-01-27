@@ -147,3 +147,10 @@ AUTH_TOKEN=os.getenv('AUTH_TOKEN')
 LOGIN_URL = '/login/'
 OPEN_AI_API_KEY = os.getenv('OPEN_AI_API_KEY',default="")
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY',default="")
+
+# settings.py
+
+CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost//'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+

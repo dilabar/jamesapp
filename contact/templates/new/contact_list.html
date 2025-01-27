@@ -28,8 +28,8 @@
                         <svg class="stroke-icon">
                           <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                         </svg></a></li>
-                  <li class="breadcrumb-item">Agents</li>
-                  <li class="breadcrumb-item active">Call History</li>
+                  <li class="breadcrumb-item">Contact</li>
+                  <li class="breadcrumb-item active">View</li>
                 </ol>
               </div>
             </div>
@@ -45,253 +45,285 @@
                             {% comment %} <a href="{% url 'contact:add_contact' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add Contact</a> {% endcomment %}
                             <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">Add Contact</button> 
                             {% comment %} <a href="{% url 'contact:upload_excel' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Bulk Add">Bulk Add</a> {% endcomment %}
-                            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target=".bd-example-modal-lg">Bulk Add</button>
+                            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#bulkUploadModal">Bulk Add</button>
                             <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModal" aria-hidden="true">
-                              <div class="modal-dialog modal-lg modal-dialog-centered">
-                                <div class="modal-content">
-                                  <div class="modal-header">
-                                    <h4 class="modal-title" id="myExtraLargeModal">Add Bulk Contact</h4>
-                                    <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                  </div>
-                                  <div class="modal-body dark-modal"> 
-                                    <form id="multiStepForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                                      {% csrf_token %}
-                                      <div class="step step-1">
-                                          <h5 class="mb-3">Step 1: Upload CSV File</h5>
-                                          <div class="mb-3">
-                                              <label class="form-label" for="file_upload">CSV List</label>
-                                              <input class="form-control" id="file_upload" name="file_upload" type="file" required>
-                                              <div class="invalid-feedback">Please upload a valid CSV file.</div>
-                                          </div>
-                                      </div>
-                  
-                                      <div class="step step-2 d-none">
-                                          <h5 class="mb-3">Step 2: Map Columns</h5>
-                                          <div id="mapping-container">
-                                              <table class="table table-bordered">
-                                                  <thead>
-                                                      <tr>
-                                                          <th>Column Header in File</th>
-                                                          <th>Mapped Field</th>
-                                                      </tr>
-                                                  </thead>
-                                                  <tbody id="mapping-table">
-                                                      <!-- Dynamic mapping rows will be generated here -->
-                                                  </tbody>
-                                              </table>
-                                          </div>
-                                      </div>
-                  
-                                      <div class="step step-3 d-none">
-                                          <h5 class="mb-3">Step 3: Select Action</h5>
-                                          <div class="mb-4">
-                                              <label class="form-label d-block">Select an Option</label>
-                                              <div class="d-flex align-items-center">
-                                                  <div class="form-check me-3">
-                                                      <input class="form-check-input" type="radio" name="options" id="create" value="create" required>
-                                                      <label class="form-check-label" for="create">Create Contacts</label>
+                                <div class="modal-dialog modal-lg">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                      <h4 class="modal-title" id="myExtraLargeModal">Add Contact</h4>
+                                      <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body dark-modal"> 
+                                      <div class="col-md-12">
+                                          <div class="card">
+                                            {% comment %} <div class="card-header">
+                                              <h4>Raise input style</h4>
+                                              <p class="f-m-light mt-1">
+                                                 Use the <code>input-air-* </code>through defined bottom box-shadow.</p>
+                                            </div> {% endcomment %}
+                                            <form class="form theme-form dark-inputs">
+                                              {% csrf_token %}
+                                              <div class="card-body">
+                                                  <div class="row">
+                                                      <div class="col">
+                                                        <div class="mb-3">
+                                                          <label class="form-label" for="first_name">First Name</label>
+                                                          <input class="form-control input-air-primary" id="first_name" name="first_name" type="text">
+                                                        </div>
+                                                      </div>
+                                                      <div class="col">
+                                                          <div class="mb-3">
+                                                            <label class="form-label" for="last_name">Last Name</label>
+                                                            <input class="form-control input-air-primary" id="last_name" type="text">
+                                                          </div>
+                                                      </div>
                                                   </div>
-                                                  <div class="form-check me-3">
-                                                      <input class="form-check-input" type="radio" name="options" id="create_update" value="create_update" required>
-                                                      <label class="form-check-label" for="create_update">Create and Update Contacts</label>
+                                                {% comment %} <div class="row align-items-center">
+                                                  <label class="form-label" for="email">Email</label>
+                                                  <div class="col-auto d-flex align-items-center">
+                                                    <div class="form-check form-check-inline">
+                                                      <input class="form-check-input" id="email_radio" type="radio" name="email_radio" value="" checked="">
+                                                    </div>
                                                   </div>
-                                                  <div class="form-check">
-                                                      <input class="form-check-input" type="radio" name="options" id="update" value="update" required>
-                                                      <label class="form-check-label" for="update">Update Contacts</label>
+                                                  <div class="col-md-9">
+                                                    <div class="mb-3">
+                                                      <input class="form-control input-air-primary" id="email" name="email" type="email" placeholder="name@example.com">
+                                                    </div>
+                                                  </div>
+                                                  <div class="col-md-3">
+                                                    <button class="btn" type="button" title="btn" style="color:blue;"><span class="plus-symbol">+</span> Add Email</button>
+                                                  </div>
+                                                </div> {% endcomment %}
+                                                <div class="row align-items-center">
+                                                  <label class="form-label" for="email">Email</label>
+                                                  <div id="email-container">
+                                                      <!-- Initial email input -->
+                                                      {% comment %} <div class="email-item row align-items-center mb-2">
+                                                          <div class="col-auto d-flex align-items-center">
+                                                              <div class="form-check form-check-inline">
+                                                                  <input class="form-check-input" id="email_radio" type="radio" name="email_radio" value="" checked="">
+                                                              </div>
+                                                          </div>
+                                                          <div class="col-md-9">
+                                                              <div class="mb-3">
+                                                                  <input class="form-control input-air-primary" id="email" name="email" type="email" placeholder="name@example.com">
+                                                              </div>
+                                                          </div>
+                                                      </div> {% endcomment %}
+                                                  </div>
+                                                  <div class="col-md-3">
+                                                      <button class="btn" id="add-email-btn" type="button" style="color: blue;">
+                                                          <span class="plus-symbol">+</span> Add Email
+                                                      </button>
                                                   </div>
                                               </div>
-                                              <div class="invalid-feedback">Please select an option.</div>
+                                                {% comment %} <div class="row align-items-center">
+                                                  <label class="form-label" for="phone_number">Phone</label>
+                                                  <div class="col-auto">
+                                                    <div class="form-check form-check-inline">
+                                                      <input class="form-check-input me-2" id="phone_radio" type="radio" name="phone_radio" value="" checked="">
+                                                    </div>
+                                                  </div>
+                                                    <div class="col-md-3">
+                                                      <div class="mb-3">
+                                                        <select class="form-select input-air-primary digits" id="country_code">
+                                                          <option value="">Select</option>
+                                                        </select>
+                                                      </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                      <div class="mb-3">
+                                                        <input class="form-control input-air-primary" id="phone_number" name="phone_number"type="text">
+                                                      </div>
+                                                    </div> {% endcomment %}
+                                                  <div class="row align-items-center">
+                                                      <label class="form-label" for="phone">Phone</label>
+                                                      <div id="phone-container">
+                                                          <!-- Default input will be dynamically generated when the modal opens -->
+                                                      </div>
+                                                      <div class="col-md-3">
+                                                          <button class="btn" id="add-phone-btn" type="button" style="color: blue;">
+                                                              <span class="plus-symbol">+</span> Add Phone
+                                                          </button>
+                                                      </div>
+                                                  </div>
+                                                  {% comment %} <div class="col-md-3">
+                                                    <button class="btn" type="button" title="btn" style="color:blue;"><span class="plus-symbol">+</span> Add Phone</button>
+                                                  </div>
+                                                </div> {% endcomment %}
+                                                <div class="row">
+                                                  <div class="col">
+                                                    <div class="mb-3">
+                                                      <label class="form-label" for="contact_type">Contact Type</label>
+                                                      <select class="form-select input-air-primary digits" id="contact_type">
+                                                        <option value="">Select Contact Type</option>
+                                                        <option>Customer</option>
+                                                        <option>Lead</option>
+                                                      </select>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div class="row">
+                                                  <div class="col">
+                                                    <div class="mb-3">
+                                                      <label class="form-label" for="time_zone">Time Zone</label>
+                                                      <select class="form-select input-air-primary digits" id="time_zone">
+                                                          <option value="">Select TimeZone</option>
+                                                      </select>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div class="row">
+                                                  <div class="col">
+                                                      <div class="mb-3">
+                                                          <label class="form-label" for="lists">Lists</label>
+                                                          {% if all_lists %}
+                                                              <select class="form-select input-air-primary" id="lists" name="lists" multiple>
+                                                                  {% for list in all_lists %}
+                                                                      <option value="{{ list.id }}" {% if list.id in form.lists.value %}selected{% endif %}>
+                                                                          {{ list.name }}
+                                                                      </option>
+                                                                  {% endfor %}
+                                                              </select>
+                                                          {% else %}
+                                                              <p>No lists available. <a href="{% url 'contact:create_list' %}">Create a new list</a>.</p>
+                                                          {% endif %}
+                                                      </div>
+                                                  </div>
+                                                  <div class="col">
+                                                      <div class="mb-3">
+                                                          <label class="form-label" for="campaigns">Campaigns</label>
+                                                          {% if all_campaigns %}
+                                                              <select class="form-select input-air-primary" id="campaigns" name="campaigns" multiple>
+                                                                  {% for campaign in all_campaigns %}
+                                                                      <option value="{{ campaign.id }}" {% if campaign.id in form.campaigns.value %}selected{% endif %}>
+                                                                          {{ campaign.name }}
+                                                                      </option>
+                                                                  {% endfor %}
+                                                              </select>
+                                                          {% else %}
+                                                              <p>No campaigns available. <a href="{% url 'contact:create_campaign' %}">Create a new campaign</a>.</p>
+                                                          {% endif %}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                              
+                                              </div>
+                                              <div class="card-footer text-end">
+                                                <button class="btn btn-primary me-3" type="submit" id="submitBtn">Submit</button>
+                                                <input class="btn btn-light" type="reset" value="Cancel">
+                                              </div>
+                                            </form>
                                           </div>
+                                        </div>
                                       </div>
-                                    </form>
+                                    </div>
+                                    <!-- Container-fluid Ends-->
                                   </div>
-                                  <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary" id="prevStep" disabled>Previous</button>
-                                    <button type="button" class="btn btn-primary" id="nextStep">Next</button>
-                                    <button type="submit" class="btn btn-success d-none" id="submitForm">Submit</button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
+                                    </div>
+                            <a href="{% url 'contact:bulk_action_list' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="smart action list">Smart action</a>
                             <span>Easily manage your AI Agents by editing, deleting, or initiating a conversation directly from the table.</span>
                         </div>
-                        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModal" aria-hidden="true">
-                          <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h4 class="modal-title" id="myExtraLargeModal">Add Contact</h4>
-                                <button class="btn-close py-0" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body dark-modal"> 
-                                <div class="col-md-12">
-                                    <div class="card">
-                                      {% comment %} <div class="card-header">
-                                        <h4>Raise input style</h4>
-                                        <p class="f-m-light mt-1">
-                                           Use the <code>input-air-* </code>through defined bottom box-shadow.</p>
-                                      </div> {% endcomment %}
-                                      <form class="form theme-form dark-inputs">
-                                        {% csrf_token %}
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col">
-                                                  <div class="mb-3">
-                                                    <label class="form-label" for="first_name">First Name</label>
-                                                    <input class="form-control input-air-primary" id="first_name" name="first_name" type="text">
-                                                  </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="mb-3">
-                                                      <label class="form-label" for="last_name">Last Name</label>
-                                                      <input class="form-control input-air-primary" id="last_name" type="text">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                          {% comment %} <div class="row align-items-center">
-                                            <label class="form-label" for="email">Email</label>
-                                            <div class="col-auto d-flex align-items-center">
-                                              <div class="form-check form-check-inline">
-                                                <input class="form-check-input" id="email_radio" type="radio" name="email_radio" value="" checked="">
-                                              </div>
-                                            </div>
-                                            <div class="col-md-9">
-                                              <div class="mb-3">
-                                                <input class="form-control input-air-primary" id="email" name="email" type="email" placeholder="name@example.com">
-                                              </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                              <button class="btn" type="button" title="btn" style="color:blue;"><span class="plus-symbol">+</span> Add Email</button>
-                                            </div>
-                                          </div> {% endcomment %}
-                                          <div class="row align-items-center">
-                                            <label class="form-label" for="email">Email</label>
-                                            <div id="email-container">
-                                                <!-- Initial email input -->
-                                                {% comment %} <div class="email-item row align-items-center mb-2">
-                                                    <div class="col-auto d-flex align-items-center">
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" id="email_radio" type="radio" name="email_radio" value="" checked="">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-9">
-                                                        <div class="mb-3">
-                                                            <input class="form-control input-air-primary" id="email" name="email" type="email" placeholder="name@example.com">
-                                                        </div>
-                                                    </div>
-                                                </div> {% endcomment %}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <button class="btn" id="add-email-btn" type="button" style="color: blue;">
-                                                    <span class="plus-symbol">+</span> Add Email
-                                                </button>
-                                            </div>
-                                        </div>
-                                          {% comment %} <div class="row align-items-center">
-                                            <label class="form-label" for="phone_number">Phone</label>
-                                            <div class="col-auto">
-                                              <div class="form-check form-check-inline">
-                                                <input class="form-check-input me-2" id="phone_radio" type="radio" name="phone_radio" value="" checked="">
-                                              </div>
-                                            </div>
-                                              <div class="col-md-3">
-                                                <div class="mb-3">
-                                                  <select class="form-select input-air-primary digits" id="country_code">
-                                                    <option value="">Select</option>
-                                                  </select>
-                                                </div>
-                                              </div>
-                                              <div class="col-md-6">
-                                                <div class="mb-3">
-                                                  <input class="form-control input-air-primary" id="phone_number" name="phone_number"type="text">
-                                                </div>
-                                              </div> {% endcomment %}
-                                            <div class="row align-items-center">
-                                                <label class="form-label" for="phone">Phone</label>
-                                                <div id="phone-container">
-                                                    <!-- Default input will be dynamically generated when the modal opens -->
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <button class="btn" id="add-phone-btn" type="button" style="color: blue;">
-                                                        <span class="plus-symbol">+</span> Add Phone
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            {% comment %} <div class="col-md-3">
-                                              <button class="btn" type="button" title="btn" style="color:blue;"><span class="plus-symbol">+</span> Add Phone</button>
-                                            </div>
-                                          </div> {% endcomment %}
-                                          <div class="row">
-                                            <div class="col">
-                                              <div class="mb-3">
-                                                <label class="form-label" for="contact_type">Contact Type</label>
-                                                <select class="form-select input-air-primary digits" id="contact_type">
-                                                  <option value="">Select Contact Type</option>
-                                                  <option>Customer</option>
-                                                  <option>Lead</option>
-                                                </select>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div class="row">
-                                            <div class="col">
-                                              <div class="mb-3">
-                                                <label class="form-label" for="time_zone">Time Zone</label>
-                                                <select class="form-select input-air-primary digits" id="time_zone">
-                                                    <option value="">Select TimeZone</option>
-                                                </select>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <div class="row">
-                                            <div class="col">
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="lists">Lists</label>
-                                                    {% if all_lists %}
-                                                        <select class="form-select input-air-primary" id="lists" name="lists" multiple>
-                                                            {% for list in all_lists %}
-                                                                <option value="{{ list.id }}" {% if list.id in form.lists.value %}selected{% endif %}>
-                                                                    {{ list.name }}
-                                                                </option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    {% else %}
-                                                        <p>No lists available. <a href="{% url 'contact:create_list' %}">Create a new list</a>.</p>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="mb-3">
-                                                    <label class="form-label" for="campaigns">Campaigns</label>
-                                                    {% if all_campaigns %}
-                                                        <select class="form-select input-air-primary" id="campaigns" name="campaigns" multiple>
-                                                            {% for campaign in all_campaigns %}
-                                                                <option value="{{ campaign.id }}" {% if campaign.id in form.campaigns.value %}selected{% endif %}>
-                                                                    {{ campaign.name }}
-                                                                </option>
-                                                            {% endfor %}
-                                                        </select>
-                                                    {% else %}
-                                                        <p>No campaigns available. <a href="{% url 'contact:create_campaign' %}">Create a new campaign</a>.</p>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        </div>
-                                        <div class="card-footer text-end">
-                                          <button class="btn btn-primary me-3" type="submit" id="submitBtn">Submit</button>
-                                          <input class="btn btn-light" type="reset" value="Cancel">
-                                        </div>
-                                      </form>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                              <!-- Container-fluid Ends-->
-                            </div>
-                              </div>
+                        
+                    <!-- Modal for Bulk Upload -->
+<div class="modal fade" id="bulkUploadModal" tabindex="-1" aria-labelledby="bulkUploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="bulkUploadModalLabel">Bulk Upload Contacts</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="d-flex justify-content-between mb-3">
+              <button class="btn btn-primary btn-sm" id="step1-btn">Step 1: Upload CSV</button>
+              <button class="btn btn-secondary btn-sm" id="step2-btn" disabled>Step 2: Map Fields</button>
+              <button class="btn btn-secondary btn-sm" id="step3-btn" disabled>Step 3: Choose Action</button>
+          </div>
+            <!-- Step 1: Upload CSV -->
+            <div id="step1" class="step">
+              <h4>Step 2: Upload your file</h4>
+              <p>Before uploading files, make sure your file is ready to import.</p>
+              <a href="#" class="text-primary">Download sample file</a>
+
+              <!-- File Upload -->
+              <div class="form-group mt-4">
+                  <label for="csvFile">Click to upload or drag and drop your file (CSV, max size 30MB)</label>
+                  <input type="file" id="csvFile" class="form-control" accept=".csv">
+              </div>
+          
+             
+              <div class="mt-3">
+                <button class="btn btn-primary" id="nextStep1">Next</button>
+            </div>
+          </div>
+            <!-- Step 2: Map Fields -->
+            <div id="step2" class="step d-none">
+              <h5>Map Your CSV Columns to Contact Fields</h5>
+              <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Column Header in File</th>
+                        <th>Status</th>
+                        <th>Mapped Field</th>
+                    </tr>
+                </thead>
+                <tbody id="fieldMappingContainer">
+                    <!-- Dynamic mapping rows will be generated here -->
+                </tbody>
+            </table>
+             
+              <div class="mt-3">
+                  <button class="btn btn-secondary" id="prevStep2">Back</button>
+                  <button class="btn btn-primary" id="nextStep2">Next</button>
+              </div>
+          </div>
+           <!-- Step 3: Choose Action -->
+           <div id="step3" class="step d-none">
+              <!-- Import Option Selection -->
+              <div class="mt-4">
+                <label for="importOption">Choose how to import contacts</label>
+                <select id="importOption" class="form-select">
+                    <option value="create">Create Contacts</option>
+                    <option value="update">Update Existing Contacts</option>
+                    <option value="create_update">Create and Update Contacts</option>
+                </select>
+              </div>
+
+          <!-- Deduplication Preferences -->
+          <div class="mt-4">
+              <label for="deduplication">Find existing contacts based on</label>
+              <select id="deduplication" class="form-select">
+                  <option value="email,phone">Email, then Phone</option>
+                  <option value="phone,email">Phone, then Email</option>
+              </select>
+              <small class="form-text text-muted">
+                  Deduplication preferences can be changed in settings.
+              </small>
+          </div>
+            <!-- Deduplication Preferences -->
+            <div class="mt-4">
+                <label for="listId">List</label>
+                <select id="listId" class="form-select">
+                    {% for ls in all_lists %}
+                    <option value="{{ls.id}}">{{ls.name}}</option>
+                    {% endfor %}
+                </select>
+                <small class="form-text text-muted">
+                     <a href="{% url 'contact:create_list' %}">Create New List</a>
+                </small>
+               
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-secondary" id="prevStep3">Back</button>
+              <button class="btn btn-success" id="finishUpload">Finish</button>
+          </div>
+        </div>
+             
+          </div>
+      </div>
+  </div>
+</div>
+
                             </div>
                           </div>
                         </div>
@@ -413,204 +445,7 @@
     {% block js %}
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const steps = document.querySelectorAll(".step");
-      const prevStepBtn = document.getElementById("prevStep");
-      const nextStepBtn = document.getElementById("nextStep");
-      const submitFormBtn = document.getElementById("submitForm");
-      const fileInput = document.getElementById("file_upload");
-      const mappingTable = document.getElementById("mapping-table");
-      let currentStep = 0;
-      let mappingData = {}; // Store mapping data
-  
-      // Update step visibility
-      function updateStepVisibility() {
-          steps.forEach((step, index) => {
-              step.classList.toggle("d-none", index !== currentStep);
-          });
-          prevStepBtn.disabled = currentStep === 0;
-          nextStepBtn.classList.toggle("d-none", currentStep === steps.length - 1);
-          submitFormBtn.classList.toggle("d-none", currentStep !== steps.length - 1);
-      }
-  
-      // Handle file upload and proceed to step 2
-      fileInput.addEventListener("change", function (event) {
-          const file = event.target.files[0];
-          if (file) {
-              const fileName = file.name;
-              const fileExtension = fileName.split(".").pop().toLowerCase();
-              const fileSizeMB = file.size / (1024 * 1024);
-  
-              if (fileExtension !== "csv" && fileExtension !== "xlsx" && fileExtension !== "xls") {
-                  alert("Invalid file type. Please upload a valid CSV file.");
-                  fileInput.value = "";
-                  return;
-              }
-  
-              if (fileSizeMB > 30) {
-                  alert("File size exceeds 30MB. Please upload a smaller file.");
-                  fileInput.value = "";
-                  return;
-              }
-  
-              const formData = new FormData();
-              formData.append("file_upload", file);
-  
-              $.ajax({
-                  url: "/contact/extract/",
-                  method: "POST",
-                  data: formData,
-                  processData: false,
-                  contentType: false,
-                  headers: {
-                      "X-CSRFToken": "{{ csrf_token }}",
-                  },
-                  success: function (response) {
-                    mappingData = response.data;
-                    populateMappingTable(response.data);
-                    currentStep++;
-                    updateStepVisibility();
-                  },
-                  error: function () {
-                      alert("Error processing the file.");
-                  },
-              });
-          }
-      });
-  
-      // Populate mapping table
-      function populateMappingTable(data) {
-          mappingTable.innerHTML = "";
-          const processedRows = data.values;
-          const expectedFields = ['First Name', 'Last Name', 'Email', 'Phone', 'Contact Type']; // Expected fields to match
-
-          data.headers.forEach((header, index) => {
-              const row = document.createElement("tr");
-              const headerCell = document.createElement("td");
-              headerCell.textContent = header;
-              row.appendChild(headerCell);
-
-              const valuesCell = document.createElement("td");
-              const values = processedRows[header] || [];
-              valuesCell.innerHTML = values.slice(0, 3).map(value => value || "-").join("<br>");
-              row.appendChild(valuesCell);
-
-              const statusCell = document.createElement("td");
-                if (expectedFields.includes(header)) {
-                    statusCell.innerHTML = '<span class="ti-check-box badge badge-light-success">Mapped</span>';
-                } else {
-                    statusCell.innerHTML = '<span class="icon-close badge badge-light-danger">Not Mapped</span>';
-                }
-                row.appendChild(statusCell);
-  
-              const selectCell = document.createElement("td");
-              const select = document.createElement("select");
-              select.classList.add("form-select");
-              data.header_variables.forEach(variable => {
-                  const option = document.createElement("option");
-                  option.value = variable;
-                  option.textContent = variable.replace(/_/g, " ");
-                  if (data.header_variables[index] === variable) {
-                    option.selected = true;
-                }
-                  select.appendChild(option);
-              });
-              selectCell.appendChild(select);
-              row.appendChild(selectCell);
-  
-              mappingTable.appendChild(row);
-          });
-      }
-  
-      // Handle next and previous steps
-      nextStepBtn.addEventListener("click", function () {
-          if (currentStep === 1 && !validateMapping()) {
-              alert("Please complete the mapping.");
-              return;
-          }
-          currentStep++;
-          updateStepVisibility();
-      });
-  
-      prevStepBtn.addEventListener("click", function () {
-          currentStep--;
-          updateStepVisibility();
-      });
-  
-      // Validate mapping step
-      function validateMapping() {
-          let isValid = true;
-          const selects = mappingTable.querySelectorAll("select");
-          selects.forEach(select => {
-              if (!select.value) {
-                  isValid = false;
-                  select.classList.add("is-invalid");
-              } else {
-                  select.classList.remove("is-invalid");
-              }
-          });
-          return isValid;
-      }
-  
-      // Handle form submission
-      submitFormBtn.addEventListener("click", function () {
-          const selectedOption = document.querySelector('input[name="options"]:checked');
-          if (!selectedOption) {
-              alert("Please select an action.");
-              return;
-          }
-  
-              // Initialize postData
-            const postData = {
-                headers: [],
-                header_variables: [],
-                selected_option: selectedOption.value,
-                data: {},
-            };
-
-            // Process mapping table rows
-            const rows = mappingTable.querySelectorAll("tr");
-            rows.forEach(row => {
-                const headerCell = row.querySelector("td:nth-child(1)");
-                const select = row.querySelector("select");
-                const header = headerCell?.textContent.trim();
-                const selectedVariable = select?.value;
-
-                if (header && selectedVariable) {
-                    postData.headers.push(header);
-                    postData.header_variables.push(selectedVariable);
-
-                    // Map data values to the selected variable
-                    const dataValues = mappingData.values[header] || [];
-                    postData.data[selectedVariable] = dataValues;
-                }
-            });
-
-  
-          $.ajax({
-              url: "/contact/create-bulk/",
-              method: "POST",
-              contentType: "application/json",
-              headers: {
-                  "X-CSRFToken": "{{ csrf_token }}",
-              },
-              data: JSON.stringify(postData),
-              success: function () {
-                  alert("Contacts created successfully!");
-                  window.location.href = "/contact/";
-              },
-              error: function () {
-                  alert("Error creating contacts.");
-              },
-          });
-      });
-  
-      // Initialize step visibility
-      updateStepVisibility();
-    });
-    
-    </script>
+   
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const timeZoneSelect = document.getElementById("time_zone");
@@ -703,460 +538,196 @@
 
     });
     </script>
-    <script>
-      const emailContainer = document.getElementById("email-container");
-      const addEmailBtn = document.getElementById("add-email-btn");
-  
-      // Function to dynamically add default email input (without trash icon)
-      function addDefaultEmailInput() {
-          // Check if default input already exists
-          if (emailContainer.children.length === 0) {
-              const emailItem = document.createElement("div");
-              emailItem.className = "email-item row align-items-center mb-2";
-  
-              // Radio button container
-              const radioContainer = document.createElement("div");
-              radioContainer.className = "col-auto d-flex align-items-center";
-              const radioButton = document.createElement("input");
-              radioButton.className = "form-check-input";
-              radioButton.type = "radio";
-              radioButton.name = "email_radio";
-              radioButton.checked = true;
-              radioContainer.appendChild(radioButton);
-  
-              // Email input container
-              const emailInputContainer = document.createElement("div");
-              emailInputContainer.className = "col-md-10 d-flex align-items-center";
-              const emailInput = document.createElement("input");
-              emailInput.className = "form-control input-air-primary me-2";
-              emailInput.type = "email";
-              emailInput.placeholder = "name@example.com";
-  
-              // Append input to the container
-              emailInputContainer.appendChild(emailInput);
-  
-              // Append radio and input container to the email item
-              emailItem.appendChild(radioContainer);
-              emailItem.appendChild(emailInputContainer);
-  
-              // Append email item to the email container
-              emailContainer.appendChild(emailItem);
-          }
-      }
-  
-      // Function to add additional email input (with trash icon)
-      function addEmailInput() {
-          const emailItem = document.createElement("div");
-          emailItem.className = "email-item row align-items-center mb-2";
-  
-          // Radio button container
-          const radioContainer = document.createElement("div");
-          radioContainer.className = "col-auto d-flex align-items-center";
-          const radioButton = document.createElement("input");
-          radioButton.className = "form-check-input";
-          radioButton.type = "radio";
-          radioButton.name = "email_radio";
-          radioContainer.appendChild(radioButton);
-  
-          // Email input and delete button container
-          const emailInputContainer = document.createElement("div");
-          emailInputContainer.className = "col-md-10 d-flex align-items-center";
-          const emailInput = document.createElement("input");
-          emailInput.className = "form-control input-air-primary me-2";
-          emailInput.type = "email";
-          emailInput.placeholder = "name@example.com";
-  
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "btn btn-lg";
-          deleteButton.type = "button";
-          deleteButton.title = "Remove Email";
-          deleteButton.style.color = "red";
-          deleteButton.innerHTML = `<i class="icon-trash"></i>`;
-          deleteButton.addEventListener("click", () => {
-              emailContainer.removeChild(emailItem);
-          });
-  
-          // Append input and delete button to the container
-          emailInputContainer.appendChild(emailInput);
-          emailInputContainer.appendChild(deleteButton);
-  
-          // Append everything to the email item container
-          emailItem.appendChild(radioContainer);
-          emailItem.appendChild(emailInputContainer);
-  
-          // Append email item to the email container
-          emailContainer.appendChild(emailItem);
-      }
-  
-      // Event listener for Add Email button
-      addEmailBtn.addEventListener("click", addEmailInput);
-  
-      // Simulate modal open event
-      document.addEventListener("DOMContentLoaded", () => {
-          addDefaultEmailInput(); // Add default input when modal is loaded
-      });
-    </script>
-    <script>
-      const phoneContainer = document.getElementById("phone-container");
-      const addPhoneBtn = document.getElementById("add-phone-btn");
-    
-      // List of phone types for the dropdown
-      const phoneTypes = [
-      { code: "+93", name: "Afghanistan" },
-      { code: "+355", name: "Albania" },
-      { code: "+213", name: "Algeria" },
-      { code: "+1684", name: "American Samoa" },
-      { code: "+376", name: "Andorra" },
-      { code: "+244", name: "Angola" },
-      { code: "+1264", name: "Anguilla" },
-      { code: "+672", name: "Antarctica" },
-      { code: "+1268", name: "Antigua and Barbuda" },
-      { code: "+54", name: "Argentina" },
-      { code: "+374", name: "Armenia" },
-      { code: "+297", name: "Aruba" },
-      { code: "+61", name: "Australia" },
-      { code: "+43", name: "Austria" },
-      { code: "+994", name: "Azerbaijan" },
-      { code: "+1242", name: "Bahamas" },
-      { code: "+973", name: "Bahrain" },
-      { code: "+880", name: "Bangladesh" },
-      { code: "+1246", name: "Barbados" },
-      { code: "+375", name: "Belarus" },
-      { code: "+32", name: "Belgium" },
-      { code: "+501", name: "Belize" },
-      { code: "+229", name: "Benin" },
-      { code: "+1441", name: "Bermuda" },
-      { code: "+975", name: "Bhutan" },
-      { code: "+591", name: "Bolivia" },
-      { code: "+387", name: "Bosnia and Herzegovina" },
-      { code: "+267", name: "Botswana" },
-      { code: "+55", name: "Brazil" },
-      { code: "+1284", name: "British Virgin Islands" },
-      { code: "+673", name: "Brunei Darussalam" },
-      { code: "+359", name: "Bulgaria" },
-      { code: "+226", name: "Burkina Faso" },
-      { code: "+257", name: "Burundi" },
-      { code: "+855", name: "Cambodia" },
-      { code: "+237", name: "Cameroon" },
-      { code: "+1", name: "Canada" },
-      { code: "+238", name: "Cape Verde" },
-      { code: "+1345", name: "Cayman Islands" },
-      { code: "+236", name: "Central African Republic" },
-      { code: "+56", name: "Chile" },
-      { code: "+86", name: "China" },
-      { code: "+61", name: "Christmas Island" },
-      { code: "+57", name: "Colombia" },
-      { code: "+269", name: "Comoros" },
-      { code: "+242", name: "Congo (Congo-Brazzaville)" },
-      { code: "+243", name: "Congo (Congo-Kinshasa)" },
-      { code: "+682", name: "Cook Islands" },
-      { code: "+506", name: "Costa Rica" },
-      { code: "+225", name: "Côte d'Ivoire" },
-      { code: "+385", name: "Croatia" },
-      { code: "+53", name: "Cuba" },
-      { code: "+599", name: "Curaçao" },
-      { code: "+357", name: "Cyprus" },
-      { code: "+420", name: "Czech Republic" },
-      { code: "+45", name: "Denmark" },
-      { code: "+253", name: "Djibouti" },
-      { code: "+1", name: "Dominica" },
-      { code: "+1809", name: "Dominican Republic" },
-      { code: "+670", name: "East Timor" },
-      { code: "+593", name: "Ecuador" },
-      { code: "+20", name: "Egypt" },
-      { code: "+503", name: "El Salvador" },
-      { code: "+240", name: "Equatorial Guinea" },
-      { code: "+291", name: "Eritrea" },
-      { code: "+372", name: "Estonia" },
-      { code: "+251", name: "Ethiopia" },
-      { code: "+500", name: "Falkland Islands" },
-      { code: "+298", name: "Faroe Islands" },
-      { code: "+679", name: "Fiji" },
-      { code: "+358", name: "Finland" },
-      { code: "+33", name: "France" },
-      { code: "+594", name: "French Guiana" },
-      { code: "+689", name: "French Polynesia" },
-      { code: "+241", name: "Gabon" },
-      { code: "+220", name: "Gambia" },
-      { code: "+995", name: "Georgia" },
-      { code: "+49", name: "Germany" },
-      { code: "+233", name: "Ghana" },
-      { code: "+350", name: "Gibraltar" },
-      { code: "+30", name: "Greece" },
-      { code: "+299", name: "Greenland" },
-      { code: "+1473", name: "Grenada" },
-      { code: "+502", name: "Guatemala" },
-      { code: "+44", name: "Guernsey" },
-      { code: "+224", name: "Guinea" },
-      { code: "+245", name: "Guinea-Bissau" },
-      { code: "+595", name: "Guyana" },
-      { code: "+509", name: "Haiti" },
-      { code: "+504", name: "Honduras" },
-      { code: "+852", name: "Hong Kong" },
-      { code: "+36", name: "Hungary" },
-      { code: "+354", name: "Iceland" },
-      { code: "+91", name: "India" },
-      { code: "+62", name: "Indonesia" },
-      { code: "+98", name: "Iran" },
-      { code: "+964", name: "Iraq" },
-      { code: "+353", name: "Ireland" },
-      { code: "+972", name: "Israel" },
-      { code: "+39", name: "Italy" },
-      { code: "+1", name: "Jamaica" },
-      { code: "+81", name: "Japan" },
-      { code: "+44", name: "Jersey" },
-      { code: "+962", name: "Jordan" },
-      { code: "+7", name: "Kazakhstan" },
-      { code: "+254", name: "Kenya" },
-      { code: "+686", name: "Kiribati" },
-      { code: "+850", name: "North Korea" },
-      { code: "+82", name: "South Korea" },
-      { code: "+965", name: "Kuwait" },
-      { code: "+996", name: "Kyrgyzstan" },
-      { code: "+856", name: "Laos" },
-      { code: "+371", name: "Latvia" },
-      { code: "+961", name: "Lebanon" },
-      { code: "+266", name: "Lesotho" },
-      { code: "+231", name: "Liberia" },
-      { code: "+218", name: "Libya" },
-      { code: "+423", name: "Liechtenstein" },
-      { code: "+370", name: "Lithuania" },
-      { code: "+352", name: "Luxembourg" },
-      { code: "+853", name: "Macao" },
-      { code: "+389", name: "North Macedonia" },
-      { code: "+261", name: "Madagascar" },
-      { code: "+265", name: "Malawi" },
-      { code: "+60", name: "Malaysia" },
-      { code: "+960", name: "Maldives" },
-      { code: "+223", name: "Mali" },
-      { code: "+356", name: "Malta" },
-      { code: "+692", name: "Marshall Islands" },
-      { code: "+596", name: "Martinique" },
-      { code: "+222", name: "Mauritania" },
-      { code: "+230", name: "Mauritius" },
-      { code: "+262", name: "Mayotte" },
-      { code: "+52", name: "Mexico" },
-      { code: "+691", name: "Micronesia" },
-      { code: "+373", name: "Moldova" },
-      { code: "+377", name: "Monaco" },
-      { code: "+976", name: "Mongolia" },
-      { code: "+382", name: "Montenegro" },
-      { code: "+1664", name: "Montserrat" },
-      { code: "+212", name: "Morocco" },
-      { code: "+258", name: "Mozambique" },
-      { code: "+95", name: "Myanmar" },
-      { code: "+264", name: "Namibia" },
-      { code: "+674", name: "Nauru" },
-      { code: "+977", name: "Nepal" },
-      { code: "+31", name: "Netherlands" },
-      { code: "+599", name: "Netherlands Antilles" },
-      { code: "+64", name: "New Zealand" },
-      { code: "+505", name: "Nicaragua" },
-      { code: "+227", name: "Niger" },
-      { code: "+234", name: "Nigeria" },
-      { code: "+683", name: "Niue" },
-      { code: "+672", name: "Norfolk Island" },
-      { code: "+1", name: "Northern Mariana Islands" },
-      { code: "+47", name: "Norway" },
-      { code: "+968", name: "Oman" },
-      { code: "+92", name: "Pakistan" },
-      { code: "+680", name: "Palau" },
-      { code: "+970", name: "Palestine" },
-      { code: "+507", name: "Panama" },
-      { code: "+675", name: "Papua New Guinea" },
-      { code: "+595", name: "Paraguay" },
-      { code: "+51", name: "Peru" },
-      { code: "+63", name: "Philippines" },
-      { code: "+48", name: "Poland" },
-      { code: "+351", name: "Portugal" },
-      { code: "+1", name: "Puerto Rico" },
-      { code: "+974", name: "Qatar" },
-      { code: "+242", name: "Republic of the Congo" },
-      { code: "+40", name: "Romania" },
-      { code: "+7", name: "Russia" },
-      { code: "+250", name: "Rwanda" },
-      { code: "+290", name: "Saint Helena" },
-      { code: "+1869", name: "Saint Kitts and Nevis" },
-      { code: "+1758", name: "Saint Lucia" },
-      { code: "+590", name: "Saint Martin" },
-      { code: "+508", name: "Saint Pierre and Miquelon" },
-      { code: "+1784", name: "Saint Vincent and the Grenadines" },
-      { code: "+685", name: "Samoa" },
-      { code: "+378", name: "San Marino" },
-      { code: "+239", name: "São Tomé and Príncipe" },
-      { code: "+966", name: "Saudi Arabia" },
-      { code: "+221", name: "Senegal" },
-      { code: "+381", name: "Serbia" },
-      { code: "+248", name: "Seychelles" },
-      { code: "+232", name: "Sierra Leone" },
-      { code: "+65", name: "Singapore" },
-      { code: "+421", name: "Slovakia" },
-      { code: "+386", name: "Slovenia" },
-      { code: "+677", name: "Solomon Islands" },
-      { code: "+252", name: "Somalia" },
-      { code: "+27", name: "South Africa" },
-      { code: "+82", name: "South Korea" },
-      { code: "+34", name: "Spain" },
-      { code: "+94", name: "Sri Lanka" },
-      { code: "+249", name: "Sudan" },
-      { code: "+597", name: "Suriname" },
-      { code: "+268", name: "Swaziland" },
-      { code: "+46", name: "Sweden" },
-      { code: "+41", name: "Switzerland" },
-      { code: "+963", name: "Syria" },
-      { code: "+886", name: "Taiwan" },
-      { code: "+992", name: "Tajikistan" },
-      { code: "+255", name: "Tanzania" },
-      { code: "+66", name: "Thailand" },
-      { code: "+228", name: "Togo" },
-      { code: "+690", name: "Tokelau" },
-      { code: "+676", name: "Tonga" },
-      { code: "+1", name: "Trinidad and Tobago" },
-      { code: "+216", name: "Tunisia" },
-      { code: "+90", name: "Turkey" },
-      { code: "+993", name: "Turkmenistan" },
-      { code: "+1", name: "Turks and Caicos Islands" },
-      { code: "+688", name: "Tuvalu" },
-      { code: "+256", name: "Uganda" },
-      { code: "+380", name: "Ukraine" },
-      { code: "+971", name: "United Arab Emirates" },
-      { code: "+44", name: "United Kingdom" },
-      { code: "+1", name: "United States" },
-      { code: "+598", name: "Uruguay" },
-      { code: "+998", name: "Uzbekistan" },
-      { code: "+678", name: "Vanuatu" },
-      { code: "+379", name: "Vatican City" },
-      { code: "+58", name: "Venezuela" },
-      { code: "+84", name: "Vietnam" },
-      { code: "+1284", name: "Virgin Islands" },
-      { code: "+681", name: "Wallis and Futuna" },
-      { code: "+967", name: "Yemen" },
-      { code: "+260", name: "Zambia" },
-      { code: "+263", name: "Zimbabwe" }
-    ];
-    
-      // Function to create phone type dropdown dynamically
-      function createPhoneTypeDropdown() {
-          const phoneTypeDropdown = document.createElement("select");
-          phoneTypeDropdown.className = "form-select me-2";
-          
-          // Create the options dynamically based on the phoneTypes array
-          phoneTypes.forEach(option => {
-              const optionElement = document.createElement("option");
-              optionElement.value = option.code;
-              optionElement.textContent = `${option.name} (${option.code})`;
-              phoneTypeDropdown.appendChild(optionElement);
-          });
-    
-          return phoneTypeDropdown;
-      }
-    
-      // Function to dynamically add default phone input (without trash icon)
-      function addDefaultPhoneInput() {
-          // Check if default input already exists
-          if (phoneContainer.children.length === 0) {
-              const phoneItem = document.createElement("div");
-              phoneItem.className = "phone-item row align-items-center mb-2";
-    
-              // Radio button container
-              const radioContainer = document.createElement("div");
-              radioContainer.className = "col-auto d-flex align-items-center";
-              const radioButton = document.createElement("input");
-              radioButton.className = "form-check-input";
-              radioButton.type = "radio";
-              radioButton.name = "phone_radio";
-              radioButton.checked = true;
-              radioContainer.appendChild(radioButton);
-    
-              // Phone input container
-              const phoneInputContainer0 = document.createElement("div");
-              phoneInputContainer0.className = "col-md-3 d-flex align-items-center";
+ <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
 
-              const phoneInputContainer1 = document.createElement("div");
-              phoneInputContainer1.className = "col-md-6 d-flex align-items-center";
-    
-              // Add dynamically created phone type dropdown
-              const phoneTypeDropdown = createPhoneTypeDropdown();
-              
-              // Phone number input
-              const phoneInput = document.createElement("input");
-              phoneInput.className = "form-control input-air-primary me-2";
-              phoneInput.type = "text";
-              phoneInput.placeholder = "Enter phone number";
-    
-              // Append dropdown and input to the container
-              phoneInputContainer0.appendChild(phoneTypeDropdown);
-              phoneInputContainer1.appendChild(phoneInput);
-    
-              // Append radio and input container to the phone item
-              phoneItem.appendChild(radioContainer);
-              phoneItem.appendChild(phoneInputContainer0);
-              phoneItem.appendChild(phoneInputContainer1);
-    
-              // Append phone item to the phone container
-              phoneContainer.appendChild(phoneItem);
-          }
-      }
-    
-      // Function to add additional phone input (with trash icon)
-      function addPhoneInput() {
-          const phoneItem = document.createElement("div");
-          phoneItem.className = "phone-item row align-items-center mb-2";
-    
-          // Radio button container
-          const radioContainer = document.createElement("div");
-          radioContainer.className = "col-auto d-flex align-items-center";
-          const radioButton = document.createElement("input");
-          radioButton.className = "form-check-input";
-          radioButton.type = "radio";
-          radioButton.name = "phone_radio";
-          radioContainer.appendChild(radioButton);
-    
-          // Phone input and delete button container
-          const phoneInputContainer = document.createElement("div");
-          phoneInputContainer.className = "col-md-10 d-flex align-items-center";
-    
-          // Add dynamically created phone type dropdown
-          const phoneTypeDropdown = createPhoneTypeDropdown();
-    
-          // Phone number input
-          const phoneInput = document.createElement("input");
-          phoneInput.className = "form-control input-air-primary me-2";
-          phoneInput.type = "text";
-          phoneInput.placeholder = "Enter phone number";
-    
-          // Trash button to remove phone input
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "btn btn-lg";
-          deleteButton.type = "button";
-          deleteButton.title = "Remove Phone";
-          deleteButton.style.color = "red";
-          deleteButton.innerHTML = '<i class="icon-trash"></i>';
-          deleteButton.addEventListener("click", () => {
-              phoneContainer.removeChild(phoneItem);
-          });
-    
-          // Append dropdown, input, and delete button to the container
-          phoneInputContainer.appendChild(phoneTypeDropdown);
-          phoneInputContainer.appendChild(phoneInput);
-          phoneInputContainer.appendChild(deleteButton);
-    
-          // Append everything to the phone item container
-          phoneItem.appendChild(radioContainer);
-          phoneItem.appendChild(phoneInputContainer);
-    
-          // Append phone item to the phone container
-          phoneContainer.appendChild(phoneItem);
-      }
-    
-      // Event listener for Add Phone button
-      addPhoneBtn.addEventListener("click", addPhoneInput);
-    
-      // Simulate modal open event
-      document.addEventListener("DOMContentLoaded", () => {
-          addDefaultPhoneInput(); // Add default input when modal is loaded
-      });
-    </script>
+    const nextStep1 = document.getElementById('nextStep1');
+    const prevStep2 = document.getElementById('prevStep2');
+    const nextStep2 = document.getElementById('nextStep2');
+    const prevStep3 = document.getElementById('prevStep3');
+    const finishUpload = document.getElementById('finishUpload');
+
+    const step1Btn = document.getElementById('step1-btn');
+    const step2Btn = document.getElementById('step2-btn');
+    const step3Btn = document.getElementById('step3-btn');
+
+    // Navigation between steps
+    nextStep1.addEventListener('click', () => {
+        step1.classList.add('d-none');
+        step2.classList.remove('d-none');
+        step1Btn.classList.remove('btn-primary');
+        step1Btn.classList.add('btn-secondary');
+        step2Btn.classList.remove('btn-secondary');
+        step2Btn.classList.add('btn-primary');
+    });
+
+    prevStep2.addEventListener('click', () => {
+        step2.classList.add('d-none');
+        step1.classList.remove('d-none');
+        step2Btn.classList.remove('btn-primary');
+        step2Btn.classList.add('btn-secondary');
+        step1Btn.classList.remove('btn-secondary');
+        step1Btn.classList.add('btn-primary');
+    });
+
+    nextStep2.addEventListener('click', () => {
+        step2.classList.add('d-none');
+        step3.classList.remove('d-none');
+        step2Btn.classList.remove('btn-primary');
+        step2Btn.classList.add('btn-secondary');
+        step3Btn.classList.remove('btn-secondary');
+        step3Btn.classList.add('btn-primary');
+    });
+
+    prevStep3.addEventListener('click', () => {
+        step3.classList.add('d-none');
+        step2.classList.remove('d-none');
+        step3Btn.classList.remove('btn-primary');
+        step3Btn.classList.add('btn-secondary');
+        step2Btn.classList.remove('btn-secondary');
+        step2Btn.classList.add('btn-primary');
+    });
+
+    finishUpload.addEventListener('click', () => {
+        //   // Collect the field mappings
+        //   const fieldMappings = [];
+        // const mappingRows = document.querySelectorAll('#fieldMappingContainer tr');
+   
+        // mappingRows.forEach(row => {
+        //   console.log("row",row);
+          
+        //     const select = row.querySelector('select');
+        //     const selectedField = select.value;
+        //     if (selectedField) {
+        //         fieldMappings.push(selectedField);
+        //     }
+        // });
+        const fieldMappings = [];
+    const mappingRows = document.querySelectorAll('#fieldMappingContainer tr');
+
+    mappingRows.forEach(row => {
+        const csvHeader = row.querySelector('td:first-child').textContent.trim();
+        const fieldSelect = row.querySelector('select');
+        const fieldId = fieldSelect.value;
+
+        if (fieldId) {
+            fieldMappings.push({ csv_header: csvHeader, field_id: fieldId });
+        }
+    });
+
+   
+    if (fieldMappings.length === 0) {
+        alert('Please map at least one field.');
+        return;
+    }
+
+        // Collect the CSV file from the file input
+        const csvFileInput = document.getElementById('csvFile');
+        const csvFile = csvFileInput.files[0]; // Get the first file
+        // Collect the import option and deduplication preferences
+        const importOption = document.getElementById('importOption').value;
+        const deduplication = document.getElementById('deduplication').value;
+        const listId = document.getElementById('listId').value;
+        
+
+        // Create a FormData object to send the file and other data
+        const formData = new FormData();
+
+        // Append the file and other data to FormData
+        formData.append('csvFile', csvFile); // Attach the file
+        formData.append('fieldMappings', JSON.stringify(fieldMappings)); // Attach field mappings as a JSON string
+        formData.append('importOption', importOption); // Attach the import option
+        formData.append('deduplication', deduplication); // Attach the deduplication option
+        formData.append('listId', listId); // Attach the list option
+
+        console.log(JSON.stringify(fieldMappings));
+        
+        // Optionally, you can add other data, for example:
+        // formData.append('userId', userId);
+
+        // Send the request using AJAX
+        $.ajax({
+            url: "/contact/api/bulk-action/", // Replace with your backend endpoint
+            method: "POST",
+            data: formData,
+            processData: false, // Prevent jQuery from converting the data into a query string
+            contentType: false, // Prevent jQuery from setting content type header
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
+            },
+            success: function (response) {
+                // Handle the success response
+                alert('Bulk action has been completed!');
+                window.location.href = '/contact/'; // Redirect or update UI accordingly
+            },
+            error: function (err) {
+                // Handle the error response
+                alert("Error completing bulk action.");
+                console.error(err);
+            }
+        });
+    });
+});
+
+document.getElementById('csvFile').addEventListener('change', function (event) {
+    const formData = new FormData();
+    formData.append('csvFile', event.target.files[0]);
+
+    // CSRF token for Django
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Upload CSV and get headers
+    fetch('/contact/bulk_upload/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        body: formData,
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.headers) {
+                const mappingContainer = document.getElementById('fieldMappingContainer');
+                mappingContainer.innerHTML = ''; // Clear existing content
+
+                const fields = data.fields; // Predefined and custom fields from backend
+                data.headers.forEach((header, index) => {
+                    let options = `<option value="">-- Select Field --</option>`;
+                    fields.forEach(field => {
+                        options += `<option value="${field.id}">${field.name}</option>`;
+                    });
+
+                    const row = `
+                        <tr>
+                            <td>${header}</td>
+                            <td id="status_${index}"><span class="badge badge-light-danger">Not Mapped</span></td>
+                            <td>
+                                <select class="form-select" id="field_${index}" onchange="updateStatus(${index})">
+                                    ${options}
+                                </select>
+                            </td>
+                        </tr>`;
+                    mappingContainer.innerHTML += row;
+                });
+            }
+        })
+        .catch(error => console.error('Error uploading file:', error));
+});
+
+function updateStatus(index) {
+    const select = document.getElementById(`field_${index}`);
+    const status = document.getElementById(`status_${index}`);
+    if (select.value) {
+        status.innerHTML = '<span class="badge badge-light-success">Mapped</span>';
+    } else {
+        status.innerHTML = '<span class="badge badge-light-danger">Not Mapped</span>';
+    }
+}
+
+ </script>
 
     {% endblock js %}
         

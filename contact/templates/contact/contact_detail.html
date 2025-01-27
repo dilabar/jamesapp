@@ -25,16 +25,16 @@
           
             <h4>Contact Details 
               <a 
-              href="{% if current_page.has_previous %}{% url 'contact:contact_details' current_page.previous_page_number %}{% else %}#{% endif %}" 
-              class="btn btn-outline-secondary {% if not current_page.has_previous %}disabled{% endif %}">
+              href="{% if previous_contact %}{% url 'contact:contact_details' previous_contact.id %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not previous_contact %}disabled{% endif %}">
               &#8592;
           </a>
           <span class="mx-3">
-              {{ current_page.number }} of {{ paginator.num_pages }}
+             {{ current_position }} of {{ total_contacts }}
           </span>
           <a 
-              href="{% if current_page.has_next %}{% url 'contact:contact_details' current_page.next_page_number %}{% else %}#{% endif %}" 
-              class="btn btn-outline-secondary {% if not current_page.has_next %}disabled{% endif %}">
+              href="{% if next_contact%}{% url 'contact:contact_details' next_contact.id %}{% else %}#{% endif %}" 
+              class="btn btn-outline-secondary {% if not next_contact %}disabled{% endif %}">
               &#8594;
           </a>
         </h4>

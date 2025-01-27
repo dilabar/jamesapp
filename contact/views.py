@@ -1,3 +1,4 @@
+import threading
 from django.shortcuts import render, redirect ,  get_object_or_404
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -18,19 +19,24 @@ from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm,
 from contact.models import *
 from datetime import datetime
 import pandas as pd
-from .forms import ExcelUploadForm
+
+from .task import process_bulk_action
+from .forms import CustomFieldForm, ExcelUploadForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 
 
 def contact_list(request):
-    all_lists = List.objects.filter(user = request.user)
-    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
+    all_lists = List.objects.filter(user = request.user).order_by('created_at')
+    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct().order_by('created_at')
 
     if request.user.is_agency():
 
-        contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts())
+        contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts()).order_by('created_at')
     else:
-        contacts = Contact.objects.filter(user=request.user)
+        contacts = Contact.objects.filter(user=request.user).order_by('created_at')
 
     
     # Pagination setup
@@ -523,76 +529,133 @@ def start_campaign(request, campaign_id):
 
 
 
-# from django.core.paginator import Paginator
-# from django.shortcuts import render, get_object_or_404, redirect
-# from .models import Contact
+
 @login_required
-def contact_details(request, id=1):
-    # Fetch all contacts for pagination
+def contact_details(request, id):
+    # Fetch the contact by ID
+    contact = get_object_or_404(Contact, id=id)
+
+    # Fetch all contacts ordered by ID
     contacts = Contact.objects.all().order_by('id')
-    paginator = Paginator(contacts, 1)  # Display 1 contact per page
+    total_contacts = contacts.count()
+    
+    # Get the current contact's position
+    current_position = list(contacts).index(contact) + 1  # Add 1 for 1-based indexing
 
-    try:
-        current_page = paginator.page(id)
-    except:
-        current_page = paginator.page(1)
-
-    contact = current_page.object_list[0]
-    # Retrieve all emails and phone numbers
+    # Fetch the previous and next contacts based on ID
+    previous_contact = Contact.objects.filter(id__lt=contact.id).order_by('-id').first()
+    next_contact = Contact.objects.filter(id__gt=contact.id).order_by('id').first()
+    
+    # Retrieve emails and phone numbers for the contact
     emails = contact.emails.all()
     phone_numbers = contact.phone_numbers.all()
-    # Initialize the interactions list
+    
+    # Prepare the interactions list
     interactions = []
-     # Fetch interactions from different models
     phone_calls = PhoneCall.objects.filter(contact=contact)
-      # Add phone calls to interactions list
-
     for phone_call in phone_calls:
         interactions.append({
             'type': 'Agent call',
             'title': f"Phone Call - {phone_call.phone_number} - {phone_call.campaign.name}",
             'timestamp': phone_call.timestamp,
-            'object': phone_call.id,  # Or any related object
-           
+            'object': phone_call.id,
         })
-
-    # Handle contact update
+    
+    # Handle POST request for updating the contact
     if request.method == 'POST':
-           # Update primary email
+        # Update primary email
         selected_email_id = request.POST.get('primary_email')
         if selected_email_id:
             for email in emails:
                 email.is_primary = (str(email.id) == selected_email_id)
                 email.save()
-
+        
         # Update primary phone number
         selected_phone_id = request.POST.get('primary_phone')
         if selected_phone_id:
             for phone in phone_numbers:
                 phone.is_primary = (str(phone.id) == selected_phone_id)
                 phone.save()
+        
+        # Update other contact fields
         contact.first_name = request.POST.get('first_name')
         contact.last_name = request.POST.get('last_name')
         contact.email = request.POST.get('email')
         contact.phone = request.POST.get('phone')
         contact.contact_type = request.POST.get('contact_type')
         contact.save()
-
+        
         # Redirect to the same page after update
-        return redirect('contact:contact_details', id=current_page.number)
-
+        return redirect('contact:contact_details', id=contact.id)
+    
     context = {
         'contact': contact,
         'emails': emails,
         'phone_numbers': phone_numbers,
         'interactions': interactions,
-        'paginator': paginator,
-        'current_page': current_page,
+        'previous_contact': previous_contact,
+        'next_contact': next_contact,
+        'current_position': current_position,
+        'total_contacts': total_contacts,
     }
     return render(request, 'contact/contact_detail.html', context)
 
 
+@login_required
+def bulk_upload(request):
+    if request.method == 'POST' and request.FILES.get('csvFile'):
+        csv_file = request.FILES['csvFile']
+        headers = []
+        try:
+            # Read CSV headers
+            csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
+            headers = next(csv_reader)  # Get the first row as headers
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
+        # Get predefined and user custom fields
+        predefined_fields = CustomField.objects.filter(is_predefined=True)
+        user_custom_fields = CustomField.objects.filter(is_predefined=False, user=request.user)
+        # Merge the predefined and user-defined fields
+        custom_fields = list(predefined_fields) + list(user_custom_fields)
 
+        # Prepare data to send back to frontend
+        custom_field_data = [
+            {
+                'id': field.id,
+                'name': field.name,
+                'is_predefined': field.is_predefined
+            }
+            for field in custom_fields
+        ]
+        return JsonResponse({'headers': headers,'fields': custom_field_data})
 
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
+def add_custom_field(request):
+    if request.method == 'POST':
+        form = CustomFieldForm(request.POST)
+        if form.is_valid():
+            custom_field = form.save(commit=False)
+            custom_field.user = request.user  # Associate the field with the logged-in user
+            custom_field.save()
+            messages.success(request, 'Custom field added successfully.')
+            return redirect('contact:add_custom_field')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CustomFieldForm()
+
+    return render(request, 'custom/add_custom_field.html', {'form': form})
+
+@login_required
+def bulk_action_list(request):
+    # Fetch action list for the logged-in user
+    actionlist = BulkAction.objects.filter(user=request.user).order_by('-created_at')
+
+    # # Optional: Add filtering and sorting
+    # search_query = request.GET.get('q')
+    # if search_query:
+    #     campaigns = campaigns.filter(name__icontains=search_query)
+
+    return render(request, 'bulk_action/list.html', {'list': actionlist})

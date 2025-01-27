@@ -118,3 +118,60 @@ class CampaignForm(forms.ModelForm):
         if user:
             self.fields['lists'].queryset = List.objects.filter(user=user)
             self.fields['individual_contacts'].queryset = Contact.objects.filter(user=user)
+
+
+
+class CustomFieldForm(forms.ModelForm):
+    class Meta:
+        model = CustomField
+        fields = ['name', 'field_type', 'options','unique_key']
+        widgets = {
+            'options': forms.Textarea(attrs={
+                'rows': 3, 
+                'placeholder': 'Comma-separated options for select fields (e.g., Option1,Option2)'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Accept additional context (e.g., the current user) via kwargs
+        self.user = kwargs.pop('user', None)  # Example of passing the current user
+        super().__init__(*args, **kwargs)
+
+        # Dynamically modify field properties
+        self.fields['name'].widget.attrs.update({
+            'placeholder': 'Enter the name of the custom field','class': 'form-control input-air-primary',
+        })
+        self.fields['field_type'].widget.attrs.update({
+            'class': 'field-type-dropdown form-control input-air-primary', # Add CSS class for frontend customization
+        })
+        self.fields['options'].widget.attrs.update({
+            'class': 'options-textarea form-control input-air-primary',
+        })
+        self.fields['unique_key'].widget.attrs.update({
+            'class': 'form-control input-air-primary',
+        })
+
+      
+        # # Optionally, filter or modify field_type choices
+        # if self.user:
+        #     # Example: Limit available field types for non-superusers
+        #     allowed_types = ['text', 'number', 'date']  # Restrict available options
+        #     self.fields['field_type'].choices = [
+        #         (key, value) for key, value in self.fields['field_type'].choices if key in allowed_types
+        #     ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        field_type = cleaned_data.get('field_type')
+        options = cleaned_data.get('options')
+        unique_key = cleaned_data.get('unique_key')
+
+        print(options)
+        # Validate options for select fields
+        if field_type == 'select' and not options:
+            raise forms.ValidationError("Options are required for select fields.")
+        if options:
+            # Ensure options are stored as a JSON array
+            cleaned_data['options'] = [opt.strip() for opt in options.split(',') if opt.strip()]
+            print(cleaned_data)
+        return cleaned_data

@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .api_view import BulkActionTriggerView, BulkActionStatusView
 
 app_name='contact'
 urlpatterns = [
@@ -12,11 +13,20 @@ urlpatterns = [
     path('lists/', list_overview, name='list_overview'),
     path('lists/create/', create_list, name='create_list'),
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
-    path('campaigns/create/', create_campaign, name='create_campaign'),
+    # path('campaigns/create/', create_campaign, name='create_campaign'),
     path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
     path('create-list/', create_list, name='create_list'),
     path('create-campaign/', create_campaign, name='create_campaign'),
     path('campaigns/', campaign_list, name='campaign_list'),
     path('start_campaign/<int:campaign_id>/', start_campaign, name='start_campaign'),
+    path('custom-fields/add/', add_custom_field, name='add_custom_field'),
+    path('bulk_upload/',bulk_upload,name='bulk_upload'),
+    path('bulk_action_list/',bulk_action_list,name='bulk_action_list'),
+
+     # Trigger the bulk action (POST)
+    path('api/bulk-action/', BulkActionTriggerView.as_view(), name='bulk_action_trigger'),
+
+    # Check the status of a bulk action (GET)
+    path('api/bulk-action/<int:action_id>/status/', BulkActionStatusView.as_view(), name='bulk_action_status'),
    
 ]

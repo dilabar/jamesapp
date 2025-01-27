@@ -103,3 +103,53 @@ class Campaign(models.Model):
         contacts_from_lists = Contact.objects.filter(lists__in=self.lists.all()).distinct()
         direct_contacts = self.individual_contacts.all()
         return contacts_from_lists.union(direct_contacts)
+
+
+class CustomField(models.Model):
+    FIELD_TYPES = [
+        ('text', 'Text'),
+        ('number', 'Number'),
+        ('date', 'Date'),
+        ('boolean', 'Boolean'),
+        ('select', 'Select'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="custom_fields")
+    name = models.CharField(max_length=100)  # Field name
+    field_type = models.CharField(max_length=20, choices=FIELD_TYPES, default='text')  # Type of the field
+    options = models.JSONField(blank=True, null=True)  # For select fields, store options as JSON
+    is_predefined=models.BooleanField(blank=True,null=True,default=False)
+    unique_key = models.CharField(max_length=255, unique=True, null=False, blank=False) 
+    # unique_key = models.CharField(max_length=255, null=True, blank=True)  # Allow null initially
+    def __str__(self):
+        return self.name
+
+
+class BulkAction(models.Model):
+    ACTION_TYPES = [
+        ('IMPORT', 'Import'),
+        ('EXPORT', 'Export'),
+        ('DELETE', 'Delete'),
+        # add more types as needed
+    ]
+    
+    status_choices = [
+        ('PENDING', 'Pending'),
+        ('PROCESSING', 'Processing'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='bulk_actions'
+    )  # Associate the bulk action with a user
+    action_type = models.CharField(max_length=20, choices=ACTION_TYPES)
+    status = models.CharField(max_length=20, choices=status_choices, default='PENDING')
+    started_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(null=True, blank=True)  # For storing error messages if any
+    data = models.JSONField(default=dict)  # Store data required for the action
+    created_at = models.DateTimeField(auto_now_add=True)
+    csv_file = models.FileField(upload_to='bulk_uploads/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.action_type} - {self.status}"
