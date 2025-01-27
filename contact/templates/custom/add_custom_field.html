@@ -1,0 +1,123 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block css %}
+<link href="{% static 'css/custom.css' %}" rel="stylesheet">
+<style>
+    .form-label {
+        font-weight: bold;
+        font-size: 1rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 15px;
+    }
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 0;
+    }
+    .btn-primary {
+        background-color: #4caf50;
+        border-color: #4caf50;
+    }
+    .btn-primary:hover {
+        background-color: #45a049;
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+    {% if messages %}
+    <div class="alert alert-warning" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <h4 class="mb-3">Custom Field</h4>
+                </div>
+                <div class="col-6 text-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Contacts</li>
+                        <li class="breadcrumb-item active">Add Custom Field</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Starts -->
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title">Add Custom Field</h5>
+                        <!-- <p class="text-muted">Create your campaign by providing all the necessary details.</p> -->
+                    </div>
+                    <form class="form theme-form" method="POST">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="name">Name</label>
+                                    {{ form.name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="subject">field_type</label>
+                                    {{ form.field_type }}
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label" for="unique_key">Unique Key</label>
+                                    {{ form.unique_key }}
+                                </div>
+                                
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label" for="options">options</label>
+                                    <small class="form-text text-muted">
+                                        (e.g., Option1,Option2)
+                                    </small>
+                                    {{ form.options }}
+                                </div>
+                            </div>
+
+                           
+
+
+                        </div>
+
+                        <div class="card-footer text-end">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                           
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Form Ends -->
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+    // Optional: Add custom JavaScript if required for interactivity
+</script>
+{% endblock js %}

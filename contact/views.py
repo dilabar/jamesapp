@@ -1,3 +1,4 @@
+import threading
 from django.shortcuts import render, redirect ,  get_object_or_404
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -18,19 +19,24 @@ from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm,
 from contact.models import *
 from datetime import datetime
 import pandas as pd
-from .forms import ExcelUploadForm
+
+from .task import process_bulk_action
+from .forms import CustomFieldForm, ExcelUploadForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 
 
 def contact_list(request):
-    all_lists = List.objects.filter(user = request.user)
-    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
+    all_lists = List.objects.filter(user = request.user).order_by('created_at')
+    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct().order_by('created_at')
 
     if request.user.is_agency():
 
-        contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts())
+        contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts()).order_by('created_at')
     else:
-        contacts = Contact.objects.filter(user=request.user)
+        contacts = Contact.objects.filter(user=request.user).order_by('created_at')
 
     
     # Pagination setup
@@ -595,6 +601,61 @@ def contact_details(request, id):
     return render(request, 'contact/contact_detail.html', context)
 
 
+@login_required
+def bulk_upload(request):
+    if request.method == 'POST' and request.FILES.get('csvFile'):
+        csv_file = request.FILES['csvFile']
+        headers = []
+        try:
+            # Read CSV headers
+            csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
+            headers = next(csv_reader)  # Get the first row as headers
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
 
+        # Get predefined and user custom fields
+        predefined_fields = CustomField.objects.filter(is_predefined=True)
+        user_custom_fields = CustomField.objects.filter(is_predefined=False, user=request.user)
+        # Merge the predefined and user-defined fields
+        custom_fields = list(predefined_fields) + list(user_custom_fields)
 
+        # Prepare data to send back to frontend
+        custom_field_data = [
+            {
+                'id': field.id,
+                'name': field.name,
+                'is_predefined': field.is_predefined
+            }
+            for field in custom_fields
+        ]
+        return JsonResponse({'headers': headers,'fields': custom_field_data})
 
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def add_custom_field(request):
+    if request.method == 'POST':
+        form = CustomFieldForm(request.POST)
+        if form.is_valid():
+            custom_field = form.save(commit=False)
+            custom_field.user = request.user  # Associate the field with the logged-in user
+            custom_field.save()
+            messages.success(request, 'Custom field added successfully.')
+            return redirect('contact:add_custom_field')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CustomFieldForm()
+
+    return render(request, 'custom/add_custom_field.html', {'form': form})
+
+@login_required
+def bulk_action_list(request):
+    # Fetch action list for the logged-in user
+    actionlist = BulkAction.objects.filter(user=request.user).order_by('-created_at')
+
+    # # Optional: Add filtering and sorting
+    # search_query = request.GET.get('q')
+    # if search_query:
+    #     campaigns = campaigns.filter(name__icontains=search_query)
+
+    return render(request, 'bulk_action/list.html', {'list': actionlist})

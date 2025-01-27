@@ -1,0 +1,3 @@
+first_name,last_name,email,phone_number,contact_type,CustomField1,CustomField2
+John,Doe,john@example.com,+1234567890,Customer,Value1,Value2
+Jane,Smith,jane@example.com,+9876543210,Vendor,Data1,Data2

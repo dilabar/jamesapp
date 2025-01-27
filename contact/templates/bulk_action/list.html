@@ -29,8 +29,9 @@
                         <svg class="stroke-icon">
                           <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                         </svg></a></li>
-                  <li class="breadcrumb-item">Marketing</li>
-                  <li class="breadcrumb-item active">Campaign List</li>
+                  <li class="breadcrumb-item">Contact</li>
+                  <li class="breadcrumb-item">Smart Action</li>
+                  <li class="breadcrumb-item active">Bulk action list</li>
                 </ol>
               </div>
             </div>
@@ -42,10 +43,7 @@
                 <!-- Scroll - vertical dynamic Starts-->
                 <div class="col-sm-12">
                     <div class="card">
-                       <div class="card-header">
-                       <a href="{% url 'contact:create_campaign' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Create Campaign">Create Campaign</a> 
-                        
-                       </div>
+                       
         
                         <div class="card-body">
                             <!-- Table Section -->
@@ -55,24 +53,25 @@
                                         <tr>
                                             <th>Name</th>
                                             <th>Status</th>
-                                            <th>Scheduled At</th>
+                                            <th>started At</th>
+                                            <th>Completed At</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for campaign in campaigns %}
+                                        {% for l in list %}
                                         <tr>
-                                            <td>{{ campaign.name }}</td>
-                                            <td>{{ campaign.get_status_display }}</td>
-                                            <td>{{ campaign.scheduled_at|date:"M d, Y H:i" }}</td>
+                                            <td>{{ l.action_type }}</td>
+                                            <td>{{ l.status }}</td>
+                                            <td>{{ l.started_at|date:"M d, Y H:i" }}</td>
+                                            <td>{{ l.completed_at|date:"M d, Y H:i" }}</td>
                                             <td>
-                                                <a href="{% url 'contact:campaign_detail' campaign.id %}" class="btn btn-primary btn-sm">View</a>
-                                                <a href="#" class="btn btn-secondary btn-sm">Edit</a>
+                                            
                                             </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="4" class="text-center">No campaigns found.</td>
+                                            <td colspan="4" class="text-center">No Smart action found.</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
