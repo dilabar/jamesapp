@@ -659,3 +659,28 @@ def bulk_action_list(request):
     #     campaigns = campaigns.filter(name__icontains=search_query)
 
     return render(request, 'bulk_action/list.html', {'list': actionlist})
+
+
+
+
+
+
+def delete_contact(request, id):
+    contact = get_object_or_404(Contact, id=id)
+    
+    if request.method == 'POST':
+        contact.delete()
+        return redirect('contact:contact_list')  # Redirect to the contact list page after deletion
+
+    return redirect('contact:contact_list')  # Redirect if not POST
+
+
+
+
+def custom_fields(request):
+    # Get all custom fields from the database
+    custom_fields = CustomField.objects.all()
+
+   
+
+    return render(request, 'custom/custom_overview.html',)  # Adjust the template name as needed

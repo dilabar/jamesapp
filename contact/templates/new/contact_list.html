@@ -29,7 +29,7 @@
                           <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                         </svg></a></li>
                   <li class="breadcrumb-item">Contact</li>
-                  <li class="breadcrumb-item active">View</li>
+                  <li class="breadcrumb-item active">All Contact</li>
                 </ol>
               </div>
             </div>
@@ -334,35 +334,37 @@
                                 <table class="display" id="basic-10">
                                     <thead>
                                         <tr>
-                                             <!-- New column for Image -->
+                                            <!-- Existing columns -->
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone Number</th>
                                             <th>Created</th>
                                             <th>Contact Type</th>
                                             <th>Time Zone</th>
-                                            <th>Lists</th> <!-- New column for Lists -->
-                                            <th>Campaigns</th> <!-- New column for Campaigns -->
+                                            <th>Lists</th>
+                                            <th>Campaigns</th>
+                                            <!-- New Action column -->
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for contact in page_obj %}
                                         <tr>
-                                            
                                             <td><a href="{% url 'contact:contact_details' contact.id %}">{{ contact.first_name }} {{ contact.last_name }}</a> </td>
                                             <td>
-                                              {% for email in contact.emails.all %}
-                                                  {{ email.email }}{% if email.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
-                                              {% empty %}
-                                                  No emails
-                                              {% endfor %} 
-                                            
+                                                {% for email in contact.emails.all %}
+                                                    {{ email.email }}{% if email.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                                                {% empty %}
+                                                    No emails
+                                                {% endfor %}
                                             </td>
-                                            <td>  {% for phone in contact.phone_numbers.all %}
-                                              {{ phone.phone_number }}{% if phone.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
-                                          {% empty %}
-                                              No phone numbers available
-                                          {% endfor %}</td>
+                                            <td>  
+                                                {% for phone in contact.phone_numbers.all %}
+                                                    {{ phone.phone_number }}{% if phone.is_primary %} (Primary){% endif %}{% if not forloop.last %}, {% endif %}
+                                                {% empty %}
+                                                    No phone numbers available
+                                                {% endfor %}
+                                            </td>
                                             <td>{{ contact.created_at|date:"F d, Y" }}</td>
                                             <td>{{ contact.contact_type }}</td>
                                             <td>{{ contact.time_zone }}</td>
@@ -388,6 +390,13 @@
                                                     <a href="{% url 'contact:create_campaign' %}">Create a Campaign</a>
                                                 {% endif %}
                                             </td>
+                                            <!-- New Action column with delete button -->
+                                            <td>
+                                                <form method="POST" action="{% url 'contact:delete_contact' contact.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                </form>
+                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
@@ -397,37 +406,25 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                             <!-- New column for Image -->
+                                            <!-- Existing columns -->
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Phone Number</th>
                                             <th>Created</th>
                                             <th>Contact Type</th>
                                             <th>Time Zone</th>
-                                            <th>Lists</th> <!-- New column for Lists -->
-                                            <th>Campaigns</th> <!-- New column for Campaigns -->
+                                            <th>Lists</th>
+                                            <th>Campaigns</th>
+                                            <!-- New Action column -->
+                                            <th>Action</th>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
                         
-                            <!-- Pagination -->
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination">
-                                    {% for i in page_range %}
-                                        {% if i == page_number %}
-                                            <li class="page-item active" aria-current="page">
-                                                <span class="page-link">{{ i }}</span>
-                                            </li>
-                                        {% else %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </nav>
+                           
                         </div>
+                        
                         
                     </div>
                 </div>

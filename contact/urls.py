@@ -6,6 +6,7 @@ app_name='contact'
 urlpatterns = [
     path('', contact_list, name='contact_list'),
     path('details/<int:id>/', contact_details, name='contact_details'),
+    path('delete/<int:id>/', delete_contact, name='delete_contact'),
     path('add/', add_contact, name='add_contact'),
     path('upload/', upload_excel, name='upload_excel'),
     path('extract/', extract_file, name='extract_file'),
@@ -22,6 +23,9 @@ urlpatterns = [
     path('custom-fields/add/', add_custom_field, name='add_custom_field'),
     path('bulk_upload/',bulk_upload,name='bulk_upload'),
     path('bulk_action_list/',bulk_action_list,name='bulk_action_list'),
+
+
+    path('custom-fields/', custom_fields, name='custom_fields_view'),
 
      # Trigger the bulk action (POST)
     path('api/bulk-action/', BulkActionTriggerView.as_view(), name='bulk_action_trigger'),
