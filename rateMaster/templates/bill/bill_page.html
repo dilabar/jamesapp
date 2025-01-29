@@ -71,7 +71,7 @@
                                         <td>
                                           <form action="{% url 'create-checkout-session' %}" method="POST">
                                             {% csrf_token %}
-                                            <input type="hidden" name="amount" value="10">
+                                            <input type="hidden" name="amount" value="{{bill.total_amount}}">
                                             <button type="submit" class="btn btn-success btn-sm">Pay Now</button>
                                         </form>
                                         </td>
