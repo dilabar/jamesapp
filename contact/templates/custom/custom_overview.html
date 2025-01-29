@@ -1,0 +1,105 @@
+
+
+    
+    {% extends 'new/base.html' %}
+    {% load static %}
+    
+    {% block header %}
+    
+    {% endblock header %}
+    
+    {% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+    {% endblock css %}
+        
+    
+    
+    {% block body %}
+    
+    <div class="page-body">
+        <div class="container-fluid">
+            <div class="page-title">
+                <div class="row">
+                    <div class="col-6">
+                        <h4>{{ list.name }}</h4> <!-- Displaying the list name -->
+                    </div>
+                    <div class="col-6">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">                                       
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg></a></li>
+                            <li class="breadcrumb-item">List</li>
+                            <li class="breadcrumb-item active">custom fields</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Scroll - vertical dynamic Starts-->
+                <div class="col-sm-12">
+                    <div class="card">
+
+                        <div class="card-header pb-0 card-no-border">
+                            <a href="{% url 'contact:add_custom_field' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Add custom fields</a>
+                            
+    
+                            
+                        </div>
+                        
+    
+                        <div class="card-body">
+                            <!-- Table Section for Custom Fields -->
+                            <div class="table-responsive user-datatable custom-scrollbar">
+                                <table class="display" id="basic-10">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Field Type</th>
+                                            <th>Unique Key</th>
+                                            <th>Options</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for field in custom_fields %}
+                                        <tr>
+                                            <td>{{ field.name }}</td> <!-- Displaying Name -->
+                                            <td>{{ field.field_type }}</td> <!-- Displaying Field Type -->
+                                            <td>{{ field.unique_key }}</td> <!-- Displaying Unique Key -->
+                                            <td>{{ field.options }}</td> <!-- Displaying Options -->
+                                            <td>
+                                                <a href="{% url 'contact:edit_custom_field' field.id %}" class="btn btn-info btn-sm">Edit</a>
+                                                <a href="{% url 'contact:delete_custom_field' field.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        
+                            <!-- Pagination for Custom Fields -->
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                <!-- Scroll - vertical dynamic Ends-->
+            </div>
+        </div>
+    </div>
+                
+    
+    {% endblock body %}
+        
+    
+    
+    {% block js %}
+    <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    {% endblock js %}
+        
+    

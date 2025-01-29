@@ -136,5 +136,23 @@
   
  
     <script>new WOW().init();</script>
+    <script>
+      // Add event listener for keydown
+      document.addEventListener('keydown', function (event) {
+          // Check if Ctrl+C is pressed
+          if (event.ctrlKey && event.key === 'c') {
+              // Redirect to the "All Contact" page
+              window.location.href = "{% url 'contact:contact_list' %}";
+          }
+          // Check if Ctrl+D is pressed (example: redirect to the dashboard)
+          if (event.altKey && event.key === 'c') {
+              window.location.href = "{% url 'contact:campaign_list' %}"; // Replace 'dashboard' with your actual dashboard URL name
+          }
+          if (event.altKey && event.key === 'b') {
+              window.location.href = "{% url 'view_bill' %}"; // Replace 'dashboard' with your actual dashboard URL name
+          }
+          // Add more shortcuts if needed
+      });
+  </script>
   </body>
 </html> 

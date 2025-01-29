@@ -22,7 +22,7 @@ urlpatterns = [
     path('', include('agent.urls')),
     path('agency/', include('agency.urls')),
     path('scheduling/', include('scheduling.urls', namespace='scheduling')), 
-    path('scheduling/', include('scheduling.urls', namespace='scheduling')),
     path('contact/', include('contact.urls', namespace='contact')), 
     path('campaign/', include('campaign.urls', namespace='campaign')),
+    path('ratemaster/', include('rateMaster.urls')),
 ]

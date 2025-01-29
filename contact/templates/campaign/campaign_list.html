@@ -29,8 +29,8 @@
                         <svg class="stroke-icon">
                           <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                         </svg></a></li>
-                  <li class="breadcrumb-item">Agents</li>
-                  <li class="breadcrumb-item active">Call History</li>
+                  <li class="breadcrumb-item">Marketing</li>
+                  <li class="breadcrumb-item active">Campaign List</li>
                 </ol>
               </div>
             </div>
@@ -42,7 +42,10 @@
                 <!-- Scroll - vertical dynamic Starts-->
                 <div class="col-sm-12">
                     <div class="card">
-                       
+                       <div class="card-header">
+                       <a href="{% url 'contact:create_campaign' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Create Campaign">Create Campaign</a> 
+                        
+                       </div>
         
                         <div class="card-body">
                             <!-- Table Section -->
