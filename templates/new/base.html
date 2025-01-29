@@ -148,6 +148,9 @@
           if (event.altKey && event.key === 'c') {
               window.location.href = "{% url 'contact:campaign_list' %}"; // Replace 'dashboard' with your actual dashboard URL name
           }
+          if (event.altKey && event.key === 'b') {
+              window.location.href = "{% url 'view_bill' %}"; // Replace 'dashboard' with your actual dashboard URL name
+          }
           // Add more shortcuts if needed
       });
   </script>

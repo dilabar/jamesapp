@@ -55,13 +55,11 @@
     <!-- Container-fluid starts-->
     <div class="container-fluid">
       <div class="row g-0">
-        <div class="col-xxl-3 col-xl-4 col-md-5 box-col-5">
+        <div class="col-xxl-3 col-xl-4 col-md-4 box-col-4">
           <div class="left-sidebar-wrapper card" style="height: 759px;">
 
             <div class="left-sidebar-chat">
-              <div class="input-group"><span class="input-group-text"><i class="search-icon text-gray" data-feather="search"></i></span>
-                <input class="form-control" type="text" placeholder="Search here..">
-              </div>
+           
             </div>
             <div class="advance-options"> 
               <ul class="nav border-tab" id="chat-options-tab" role="tablist">
@@ -150,15 +148,16 @@
             </div>
           </div>
         </div>
-        <div class="col-xxl-9 col-xl-8 col-md-7 box-col-7">
+        <div class="col-xxl-6 col-xl-5 col-md-5 box-col-4">
           <div class="card right-sidebar-chat" style="margin-left: 20px;">
             <div class="right-sidebar-title">
               <div class="common-space"> 
                 <div class="chat-time">
-                  <div class="active-profile"><img class="img-fluid rounded-circle" src="../assets/images/blog/comment.jpg" alt="user">
+                  <div class="active-profile">
+                    <!-- <img class="img-fluid rounded-circle" src="../assets/images/blog/comment.jpg" alt="user"> -->
                     <div class="status bg-success"></div>
                   </div>
-                  <div><span class="f-w-500">Bishtu Das</span>
+                  <div><span class="f-w-500">{{contact.first_name}} {{contact.last_name}}</span>
                     <p>Online</p>
                   </div>
                 </div>
@@ -233,6 +232,28 @@
             
           </div>
         </div>
+        <div class="col-xxl-3 col-xl-3 col-md-3 box-col-4">
+          <div class="card">
+
+          <div class="card-body">
+
+          
+         
+          <input type="text" class="form-control" id="note-input" placeholder="Enter your note here">
+          <button id="add-note-btn" class="btn btn-sm btn-primary mt-1">Add Note</button> 
+          <div id="notes-container">
+
+          </div>
+
+          <div id="edit-note-container" style="display: none; margin-top: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9;">
+            <h3>Edit Note</h3>
+            <input id="edit-note-input" type="text" style="width: 100%; padding: 10px; margin-bottom: 10px;" placeholder="Edit your note here...">
+            <button id="save-edit-btn" style="background: #4CAF50; color: white; border: none; padding: 10px 20px; cursor: pointer;">Save Changes</button>
+            <button id="cancel-edit-btn" style="background: #f44336; color: white; border: none; padding: 10px 20px; cursor: pointer;">Cancel</button>
+        </div>
+      </div>
+      </div>
+          </div>
       </div>
     </div>
     <!-- Container-fluid Ends-->
@@ -245,6 +266,118 @@
 
 
 {% block js %}
+    <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log("Page loaded and script executed!");  // Add this line
+    const notesContainer = document.getElementById("notes-container");
+    const addNoteBtn = document.getElementById("add-note-btn");
+    const noteInput = document.getElementById("note-input");
+  
     
+
+    // API Base URL
+    const API_URL = "/contact/api/notes/{{ contact.id }}/"
+
+    // Function to Fetch and Display Notes
+    function fetchNotes() {
+      console.log("hhh");
+      fetch(API_URL)
+    .then(response => response.json())
+    .then(data => {
+        notesContainer.innerHTML = ""; // Clear existing notes
+        data.notes.forEach(note => {
+            notesContainer.innerHTML += `
+                 <div class="note" id="note-${note.id}" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 5px; background-color: #f9f9f9;">
+                    <p style="margin: 0; font-size: 14px;">${note.content}</p>
+                    <span style="font-size: 12px; color: gray;">By: ${note.created_by}</span>
+                    <div style="margin-top: 5px;">
+                        <button style="background: #4CAF50; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" onclick="editNote(${note.id}, '${note.content}')">Edit</button>
+                        <button style="background: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;" onclick="deleteNote(${note.id})">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    })
+    .catch(error => {
+        console.error("Error fetching notes:", error);
+    });
+
+    }
+
+    // Function to Add Note
+    addNoteBtn.addEventListener("click", function () {
+        const newNote = noteInput.value;
+        fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: newNote })
+        }).then(response => response.json())
+          .then(() => {
+              fetchNotes();
+              noteInput.value = "";
+          });
+    });
+
+    // // Function to Edit Note
+    // window.editNote = function (id, content) {
+    //     const updatedContent = prompt("Edit Note:", content);
+    //     if (updatedContent) {
+    //         fetch(`${API_URL}${id}/`, {
+    //             method: "PUT",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ content: updatedContent })
+    //         }).then(() => fetchNotes());
+    //     }
+    // };
+// Function to Edit Note
+window.editNote = function (id, content) {
+    // Display the edit form
+    const editContainer = document.getElementById('edit-note-container');
+    const editInput = document.getElementById('edit-note-input');
+    const saveBtn = document.getElementById('save-edit-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+
+    // Set the current content in the input field
+    editInput.value = content;
+    
+    // Show the edit container
+    editContainer.style.display = 'block';
+
+    // Save the edited note
+    saveBtn.onclick = function () {
+        const updatedContent = editInput.value;
+
+        if (updatedContent) {
+            fetch(`${API_URL}${id}/`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: updatedContent })
+            }).then(() => {
+                // Fetch and update notes after saving
+                fetchNotes();
+                editContainer.style.display = 'none'; // Hide the form after saving
+            });
+        }
+    };
+
+    // Cancel the editing
+    cancelBtn.onclick = function () {
+        editContainer.style.display = 'none'; // Hide the form without saving
+    };
+};
+
+    // Function to Delete Note
+    window.deleteNote = function (id) {
+        if (confirm("Are you sure you want to delete this note?")) {
+            fetch(`${API_URL}${id}/`, { method: "DELETE" })
+                .then(() => fetchNotes());
+        }
+    };
+
+    // Fetch Notes on Page Load
+    fetchNotes();
+});
+
+    </script>
 {% endblock js %}
     

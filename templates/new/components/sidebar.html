@@ -28,7 +28,7 @@
 
 
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
-                    <a class="sidebar-link sidebar-title link-nav" href="#">
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:dashboards' %}">
                         <svg class="stroke-icon">
                             <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
                         </svg>
@@ -37,21 +37,30 @@
                         </svg><span class="">Dashboard</span></a>
                 </li>
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
+                    <a class="sidebar-link sidebar-title link-nav" href="{% url 'view_bill' %}">
+                        <svg class="stroke-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-task"></use>
+                        </svg>
+                        <svg class="fill-icon">
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-task"></use>
+                        </svg><span class="">Billing</span></a>
+                </li>
+                <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                 <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:agent_list' %}">
                     <svg class="stroke-icon">
-                        <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                        <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-user"></use>
                     </svg>
                     <svg class="fill-icon ">
-                        <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                        <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-user"></use>
                     </svg><span>Manage Agents</span></a>
                     </li>
                     <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                         <a class="sidebar-link sidebar-title link-nav" href="{% url 'agent:call_history' %}">
                             <svg class="stroke-icon">
-                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-table"></use>
                             </svg>
                             <svg class="fill-icon ">
-                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-table"></use>
                             </svg><span>Call History </span></a>
     
                     </li>
@@ -125,10 +134,10 @@
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:contact_list' %}">
                         <svg class="stroke-icon">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-contact"></use>
                         </svg>
                         <svg class="fill-icon ">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-contact"></use>
                         </svg><span>All Contact</span></a>
 
                 </li>
@@ -140,10 +149,10 @@
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:list_overview' %}">
                         <svg class="stroke-icon">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-to-do"></use>
                         </svg>
                         <svg class="fill-icon ">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-to-do"></use>
                         </svg><span>list</span></a>
 
                 </li> 
@@ -154,10 +163,10 @@
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'contact:campaign_list' %}">
                         <svg class="stroke-icon">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-social"></use>
                         </svg>
                         <svg class="fill-icon ">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-social"></use>
                         </svg><span>Campaigns</span></a>
 
                 </li>
@@ -184,10 +193,10 @@
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'scheduling:integrations_view' %}">
                         <svg class="stroke-icon">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-calendar"></use>
                         </svg>
                         <svg class="fill-icon ">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-calendar"></use>
                         </svg><span>Google Calendar</span></a>
 
                 </li>
@@ -195,10 +204,10 @@
                 <li class="sidebar-list"><i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="{% url 'scheduling:event_list' %}">
                         <svg class="stroke-icon">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#new-order"></use>
                         </svg>
                         <svg class="fill-icon ">
-                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#fill-project"></use>
+                            <use href="{% static 'manish/svg/icon-sprite.svg' %}#new-order"></use>
                         </svg><span>Appointment Booking</span></a>
 
                 </li>
@@ -227,11 +236,12 @@
                 </li>
                 {% endif %}
 
+               
+
                 <li class="sidebar-main-title">
                     <div>
                         <h6>Customer Support</h6> </div>
                 </li>
-
                 <li class="sidebar-list"> <i class="fa fa-thumb-tack"></i>
                     <a class="sidebar-link sidebar-title link-nav" href="knowledgebase.html">
                         <svg class="stroke-icon">

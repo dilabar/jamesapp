@@ -6,7 +6,7 @@ import threading
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
-from .models import BulkAction, Contact, CustomField, Email, List, PhoneNumber
+from .models import BulkAction, Contact, CustomField, Email, List, Note, PhoneNumber
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,7 +14,8 @@ from django.db import transaction
 from django.db.models import Q 
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils import timezone
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 
 def process_in_thread(action_id):
@@ -314,4 +315,61 @@ class BulkActionStatusView(View):
             "status": action.status
         }, status=status.HTTP_202_ACCEPTED)
     
+@method_decorator(csrf_exempt, name='dispatch')
+class NoteAPI(View):
 
+    def get(self, request, contact_id,note_id=None):
+        if note_id:
+            note = get_object_or_404(Note, id=note_id)
+            data = {
+                'id': note.id,
+                'content': note.content,
+                'contact': note.contact.id,
+                'created_by': note.created_by.username,
+                'created_at': note.created_at,
+                'updated_at': note.updated_at
+            }
+        else:
+            notes = Note.objects.filter(contact_id=contact_id)
+            data = [
+                {
+                    'id': note.id,
+                    'content': note.content,
+                    'contact': note.contact.id,
+                    'created_by': note.created_by.username,
+                    'created_at': note.created_at,
+                    'updated_at': note.updated_at
+                } for note in notes
+            ]
+        return JsonResponse({'notes': data}, safe=False)
+
+    def post(self, request,contact_id):
+        try:
+            body = json.loads(request.body)
+            contact = get_object_or_404(Contact, id=contact_id)
+            note = Note.objects.create(
+                content=body['content'],
+                contact=contact,
+                created_by=request.user
+            )
+            return JsonResponse({'id': note.id, 'message': 'Note created successfully'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    def put(self, request, contact_id,note_id):
+        try:
+            note = get_object_or_404(Note, id=note_id,contact_id=contact_id)
+            body = json.loads(request.body)
+            note.content = body.get('content', note.content)
+            note.save()
+            return JsonResponse({'message': 'Note updated successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    def delete(self, request, contact_id,note_id):
+        try:
+            note = get_object_or_404(Note, id=note_id,contact_id=contact_id)
+            note.delete()
+            return JsonResponse({'message': 'Note deleted successfully'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)

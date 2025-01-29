@@ -1,3 +1,4 @@
+from datetime import timedelta
 import hashlib
 from django.db import models
 
@@ -5,6 +6,7 @@ from django.core.validators import RegexValidator
 from agency.models import User
 from contact.models import Campaign, Contact
 from jamesapp import settings
+from rateMaster.models import CallRate 
 from jamesapp.utils import decrypt, encrypt
 
 # Create your models here.
@@ -90,7 +92,9 @@ class PhoneCall(models.Model):
     # Add a ForeignKey to Campaign model to associate the call with a campaign
     campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls_for_campaign')
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='phone_calls_for_contact')
-
+    
+    
+    
 
 class ServiceDetail(models.Model):
     SERVICE_CHOICES = [

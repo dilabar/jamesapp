@@ -1,4 +1,4 @@
-from datetime import time, timedelta
+from datetime import datetime, time, timedelta
 from hashlib import sha256
 import hashlib
 import os
@@ -13,6 +13,7 @@ import urllib
 from django.core.paginator import Paginator
 from django.db.models import F
 
+from rateMaster.models import CallRate
 from scheduling.models import CalendarConnection
 from jamesapp.utils import decrypt, encrypt, get_transcript_data
 from .models import Agent, PhoneCall, ServiceDetail,GoogleCalendarEvent
@@ -23,6 +24,37 @@ from django.views import View
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import json
+
+def calculate_bill(call):
+    """
+    Calculate the total bill for a phone call, including forwarded calls if applicable.
+    """
+    rates = CallRate.objects.filter(is_active=True)  # Fetch only active rates
+    total_bill = 0
+
+    # Helper function to calculate the bill for a single call
+    def calculate_single_call(call):
+        call_start = call.timestamp  # Use `timestamp` as the start time
+        call_duration = call.call_duration or 0  # Default to 0 if missing
+        call_end = call_start + timedelta(seconds=call_duration)  # Derive end time
+
+        bill = 0
+        for rate in rates:
+            # Assuming rates are active 24/7 since no time intervals are defined
+            overlap_seconds = call_duration
+            bill += overlap_seconds * rate.price_per_second
+
+        return round(bill, 2)
+
+    # Calculate bill for the main call
+    total_bill += calculate_single_call(call)
+
+    # Include bills for forwarded calls (if any)
+    forwarded_calls = PhoneCall.objects.filter(from_call_id=call)
+    for forwarded_call in forwarded_calls:
+        total_bill += calculate_single_call(forwarded_call)
+
+    return total_bill
 
 @login_required
 def call_history(request):
@@ -75,6 +107,10 @@ def call_history(request):
     limit = 10  # Number of records per page
     offset = (int(page_number) - 1) * limit  # Calculate offset
     paginated_calls = phone_calls[offset:offset + limit]
+
+        # Add billing data for each call
+    for call in paginated_calls:
+        call.bill = calculate_bill(call)
     # Calculate the total number of pages
     total_records = phone_calls.count()
     total_pages = (total_records + limit - 1) // limit  # Ceil division
