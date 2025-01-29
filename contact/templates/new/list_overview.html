@@ -77,8 +77,8 @@
                                             <td>{{ list.contacts.count }}</td> <!-- Assuming `contacts` is the related name -->
                                             <td>{{ list.created_at|date:"F d, Y" }}</td> <!-- Displaying Creation Date -->
                                             <td>
-                                                <a href="{% url 'contact:list_detail' list.id %}">View Details</a>
                                                 
+                                                <a href="{% url 'contact:list_detail' list.id %}" class="btn btn-primary btn-sm">View Details</a>
                                                 <!-- Delete Button -->
                                                 <a href="{% url 'contact:delete_list' list.id %}" 
                                                    class="btn btn-danger btn-sm" 

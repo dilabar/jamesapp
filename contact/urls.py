@@ -29,7 +29,8 @@ urlpatterns = [
     path('bulk_action_list/',bulk_action_list,name='bulk_action_list'),
 
 
-    path('custom-fields/', custom_fields, name='custom_fields_view'),
+    path('custom-fields/', custom_fields, name='custom_fields'),
+    path('delete_custom_field/<int:field_id>/', delete_custom_field, name='delete_custom_field'),
 
      # Trigger the bulk action (POST)
     path('api/bulk-action/', BulkActionTriggerView.as_view(), name='bulk_action_trigger'),
