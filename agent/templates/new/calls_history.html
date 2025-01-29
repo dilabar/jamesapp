@@ -61,6 +61,7 @@
                                         <th>Call Forward</th>
                                         <th>Call Duration</th>
                                         <th>Date</th>
+                                        <th>Bill</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -98,6 +99,7 @@
                                         <td>{{ call.is_call_forwarded|yesno:"YES,NO" }}</td>
                                         <td>{{ call.call_duration|default:"0" }}</td>
                                         <td>{{ call.timestamp|date:"F d, H:i a" }}</td>
+                                        <td>{{call.bill}}</td>
                                         <td>
                                             <a href="{% url 'agent:call_detail' call.id %}" class="btn btn-warning mt-2">Details</a>
                                         </td>

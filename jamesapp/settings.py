@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'scheduling',
     'agency',
     'contact',
-    # 'campaign',
+    'rateMaster',
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -153,4 +153,8 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY',default="")
 CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost//'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+
 

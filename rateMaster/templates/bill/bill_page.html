@@ -1,0 +1,94 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'manish/css/custom.css' %}">
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4 class="mb-0">Billing Dashboard</h4>
+                </div>
+                <div class="col-md-6 text-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">
+                            <svg class="stroke-icon">
+                                <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                            </svg></a></li>
+                        <li class="breadcrumb-item active">Bill</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>View Bill for {{ user.username }}</h5>
+                        <a href="#" class="btn btn-secondary btn-sm">Download PDF</a>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="mb-4">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Month</label>
+                                    {{ form.month }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Year</label>
+                                    {{ form.year }}
+                                </div>
+                            </div>
+                            <div class="text-end mt-3">
+                                <button type="submit" class="btn btn-primary">Get Bill</button>
+                            </div>
+                        </form>
+                        {% if bill %}
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Year</th>
+                                        <th>Total Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ selected_month }}</td>
+                                        <td>{{ selected_year }}</td>
+                                        <td>$ {{ bill.total_amount }}</td>
+                                        <td>
+                                          <form action="{% url 'create-checkout-session' %}" method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="amount" value="10">
+                                            <button type="submit" class="btn btn-success btn-sm">Pay Now</button>
+                                        </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+{% endblock js %}

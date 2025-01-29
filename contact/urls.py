@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import *
-from .api_view import BulkActionTriggerView, BulkActionStatusView
+from .api_view import BulkActionTriggerView, BulkActionStatusView, NoteAPI
 
 app_name='contact'
 urlpatterns = [
@@ -28,5 +28,6 @@ urlpatterns = [
 
     # Check the status of a bulk action (GET)
     path('api/bulk-action/<int:action_id>/status/', BulkActionStatusView.as_view(), name='bulk_action_status'),
-   
+    path('api/notes/<int:contact_id>/', NoteAPI.as_view(), name='notes_api'),
+    path('api/notes/<int:contact_id>/<int:note_id>/', NoteAPI.as_view(), name='note_detail_api'),
 ]
