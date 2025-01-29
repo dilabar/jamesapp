@@ -14,8 +14,12 @@ urlpatterns = [
     path('lists/', list_overview, name='list_overview'),
     path('lists/create/', create_list, name='create_list'),
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
+
+    path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
     path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
+    
+    path('campaigns/delete/<int:campaign_id>/', delete_campaign, name='delete_campaign'),
     path('create-list/', create_list, name='create_list'),
     path('create-campaign/', create_campaign, name='create_campaign'),
     path('campaigns/', campaign_list, name='campaign_list'),

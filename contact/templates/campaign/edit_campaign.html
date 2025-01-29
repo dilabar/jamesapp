@@ -1,0 +1,58 @@
+
+
+
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+
+{% endblock header %}
+
+{% block css %}
+    
+{% endblock css %}
+    
+
+
+{% block body %}
+<div class="card-body">
+    <h5 class="card-title">Edit Campaign: {{ campaign.name }}</h5>
+
+    <!-- Form to edit the campaign -->
+    <form method="POST" class="theme-form">
+        {% csrf_token %}
+        
+        <!-- Campaign name field -->
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Campaign Name</label>
+            {{ form.name|add_class:"form-control" }}
+        </div>
+
+        <!-- Campaign status field -->
+        <div class="mb-3">
+            <label for="id_status" class="form-label">Status</label>
+            {{ form.status|add_class:"form-control" }}
+        </div>
+
+        <!-- Scheduled at field -->
+        <div class="mb-3">
+            <label for="id_scheduled_at" class="form-label">Scheduled At</label>
+            {{ form.scheduled_at|add_class:"form-control datetimepicker" }}
+        </div>
+
+        <!-- Save button -->
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'contact:campaign_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock body %}
+    
+
+
+{% block js %}
+    
+{% endblock js %}
+    

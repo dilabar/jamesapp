@@ -684,3 +684,35 @@ def custom_fields(request):
    
 
     return render(request, 'custom/custom_overview.html',)  # Adjust the template name as needed
+
+
+def delete_list(request, list_id):
+    # Get the list by ID or return a 404 if not found
+    list_to_delete = get_object_or_404(List, id=list_id, user=request.user)
+
+    # Delete the list
+    list_to_delete.delete()
+
+    # Show a success message
+    messages.success(request, 'List deleted successfully.')
+
+    # Redirect to the list overview page
+    return redirect('contact:list_overview')
+
+
+
+
+
+
+
+
+def delete_campaign(request, campaign_id):
+    # Get the campaign or return a 404 if not found
+    campaign = get_object_or_404(Campaign, id=campaign_id, lists__user=request.user)
+    
+    # Delete the campaign
+    campaign.delete()
+    
+    messages.success(request, 'Campaign deleted successfully.')
+    return redirect('contact:campaign_list')
+
