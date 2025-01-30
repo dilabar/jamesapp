@@ -15,38 +15,103 @@
 
 
 {% block body %}
-<div class="card-body">
-    <h5 class="card-title">Edit Campaign: {{ campaign.name }}</h5>
 
-    <!-- Form to edit the campaign -->
-    <form method="POST" class="theme-form">
-        {% csrf_token %}
-        
-        <!-- Campaign name field -->
-        <div class="mb-3">
-            <label for="id_name" class="form-label">Campaign Name</label>
-            {{ form.name|add_class:"form-control" }}
+
+
+<div class="page-body">
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <h4>Edit Campaign</h4>
+                </div>
+                <div class="col-6">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Campaign</li>
+                        <li class="breadcrumb-item active">Edit Campaign</li>
+                    </ol>
+                </div>
+            </div>
         </div>
 
-        <!-- Campaign status field -->
-        <div class="mb-3">
-            <label for="id_status" class="form-label">Status</label>
-            {{ form.status|add_class:"form-control" }}
-        </div>
+        <!-- Edit Campaign Form starts -->
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Edit Campaign</h4>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="card-body">
+                                <!-- Name Field -->
+                                <div class="mb-3">
+                                    <label for="id_name" class="form-label">Campaign Name</label>
+                                    {{ form.name }}
+                                </div>
+                                
+                                <!-- Subject Field -->
+                                <div class="mb-3">
+                                    <label for="id_subject" class="form-label">Campaign Subject</label>
+                                    {{ form.subject }}
+                                </div>
 
-        <!-- Scheduled at field -->
-        <div class="mb-3">
-            <label for="id_scheduled_at" class="form-label">Scheduled At</label>
-            {{ form.scheduled_at|add_class:"form-control datetimepicker" }}
-        </div>
+                                <!-- Content Field -->
+                                <div class="mb-3">
+                                    <label for="id_content" class="form-label">Content</label>
+                                    {{ form.content }}
+                                </div>
 
-        <!-- Save button -->
-        <div class="text-end">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="{% url 'contact:campaign_list' %}" class="btn btn-secondary">Cancel</a>
+                                <!-- Status Field -->
+                                <div class="mb-3">
+                                    <label for="id_status" class="form-label">Status</label>
+                                    {{ form.status }}
+                                </div>
+
+                                <!-- Scheduled At Field -->
+                                <div class="mb-3">
+                                    <label for="id_scheduled_at" class="form-label">Scheduled At</label>
+                                    {{ form.scheduled_at }}
+                                </div>
+
+                                <!-- Lists Field -->
+                                <div class="mb-3">
+                                    <label for="id_lists" class="form-label">Select Lists</label>
+                                    {{ form.lists }}
+                                </div>
+
+                                <!-- Individual Contacts Field -->
+                                <div class="mb-3">
+                                    <label for="id_individual_contacts" class="form-label">Select Individual Contacts</label>
+                                    {{ form.individual_contacts }}
+                                </div>
+                            </div>
+
+                            <div class="card-footer text-end">
+                                <button class="btn btn-primary me-3" type="submit">Save Changes</button>
+                                <a href="{% url 'contact:campaign_detail' campaign.id %}" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
-    </form>
+        <!-- Edit Campaign Form ends -->
+    </div>
 </div>
+
+
+
+
+
 
 {% endblock body %}
     

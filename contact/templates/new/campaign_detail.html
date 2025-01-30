@@ -101,11 +101,13 @@
         </div>
 
         <!-- Agent List as a Dropdown -->
+        
         <div class="card mt-4">
             <div class="card-header">
                 <h5>Agents</h5>
             </div>
             <div class="card-body">
+                {% if campaign.status != 'started' %}  {# Check if the campaign is not started #}
                 <form method="POST" action="{% url 'contact:start_campaign' campaign_id=campaign.id %}">
                     {% csrf_token %}
                     <div class="form-group">
@@ -121,10 +123,13 @@
                     </div>
                     <br>
                     <button type="submit" class="btn btn-primary">Start Campaign</button>
-                    
                 </form>
+                {% else %}
+                <p class="text-muted">Campaign already started.</p>
+                {% endif %}
             </div>
         </div>
+
         
 
         <!-- Actions Section -->
