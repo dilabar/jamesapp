@@ -175,3 +175,6 @@ class CustomFieldForm(forms.ModelForm):
             cleaned_data['options'] = [opt.strip() for opt in options.split(',') if opt.strip()]
             print(cleaned_data)
         return cleaned_data
+
+
+
