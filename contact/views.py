@@ -20,8 +20,10 @@ from contact.models import *
 from datetime import datetime
 import pandas as pd
 
+
+
 from .task import process_bulk_action
-from .forms import CustomFieldForm, ExcelUploadForm
+from .forms import CustomFieldForm, ExcelUploadForm,ListForm
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -727,3 +729,54 @@ def delete_custom_field(request, field_id):
     # Redirect back to the custom fields overview page using the correct URL name
     return redirect('contact:custom_fields')
 
+
+
+@login_required
+def edit_campaign(request, campaign_id):
+    campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)  # Ensure the user owns the campaign
+
+    if request.method == 'POST':
+        form = CampaignForm(request.POST, instance=campaign, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('contact:campaign_detail', campaign_id=campaign.id)  # Redirect to detail page after saving
+    else:
+        form = CampaignForm(instance=campaign, user=request.user)
+
+    return render(request, 'campaign/edit_campaign.html', {'form': form, 'campaign': campaign})
+
+
+
+
+# List Edit View
+@login_required
+def edit_list(request, list_id):
+    list_obj = get_object_or_404(List, id=list_id)
+
+    if request.method == 'POST':
+        form = ListForm(request.POST, instance=list_obj)
+        if form.is_valid():
+            form.save()  # Save the updated list
+            return redirect('contact:list_detail', list_id=list_id)  # Redirect to the list detail page
+    else:
+        form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
+
+    context = {'form': form, 'list': list_obj}
+    return render(request, 'new/edit_list.html', context)
+
+
+# List Edit View
+@login_required
+def edit_list(request, list_id):
+    list_obj = get_object_or_404(List, id=list_id)
+
+    if request.method == 'POST':
+        form = ListForm(request.POST, instance=list_obj)
+        if form.is_valid():
+            form.save()  # Save the updated list
+            return redirect('contact:list_detail', list_id=list_id)  # Redirect to the list detail page
+    else:
+        form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
+
+    context = {'form': form, 'list': list_obj}
+    return render(request, 'new/edit_list.html', context)

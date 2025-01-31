@@ -70,7 +70,7 @@
                                             <a href="{% url 'contact:campaign_detail' campaign.id %}" class="btn btn-primary btn-sm">View</a>
                                             
                                             <!-- Edit Button -->
-                                            <a href="#" class="btn btn-secondary btn-sm">Edit</a>
+                                            <a href="{% url 'contact:edit_campaign' campaign.id %}" class="btn btn-secondary btn-sm">Edit</a>
                                             
                                             <!-- Delete Button -->
                                             <a href="{% url 'contact:delete_campaign' campaign.id %}" 

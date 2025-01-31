@@ -14,6 +14,7 @@ urlpatterns = [
     path('lists/', list_overview, name='list_overview'),
     path('lists/create/', create_list, name='create_list'),
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
+    path('list/edit/<int:list_id>/', edit_list, name='edit_list'),
 
     path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
@@ -30,6 +31,7 @@ urlpatterns = [
 
 
     path('custom-fields/', custom_fields, name='custom_fields'),
+    path('campaign/<int:campaign_id>/edit/', edit_campaign, name='edit_campaign'),
     path('delete_custom_field/<int:field_id>/', delete_custom_field, name='delete_custom_field'),
 
      # Trigger the bulk action (POST)
