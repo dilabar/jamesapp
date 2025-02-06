@@ -45,8 +45,11 @@
             </div>
             <div class="col-6">
               <div class="d-flex justify-content-end gap-2">
-                  <button class="btn btn-pill btn-outline-info"> <i class="fa fa-refresh"></i> Refresh</button>
-                  <button class="btn btn-pill btn-primary"><i class="fa fa-pause-circle-o"></i> Pushed</button>
+                  <button class="btn btn-pill btn-outline-info" onclick="location.reload();"> <i class="fa fa-refresh"></i> Refresh</button>
+                  <button class="btn btn-pill btn-primary" 
+                  {% if campaign.status != "running" %}disabled{% endif %}>
+                    <i class="fa fa-pause-circle-o"></i> Pushed
+                  </button>
               </div>
           </div>
         </div>
