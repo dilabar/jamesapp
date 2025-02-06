@@ -18,7 +18,7 @@ urlpatterns = [
 
     path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
-    path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
+    path('campaigns/<int:campaign_id>/', campaign_detail_v1, name='campaign_detail'),
     
     path('campaigns/delete/<int:campaign_id>/', delete_campaign, name='delete_campaign'),
     path('create-list/', create_list, name='create_list'),

@@ -9,6 +9,7 @@ import openpyxl
 from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
+from jamesapp.tasks import pause_task, process_campaign_calls
 from twilio.rest import Client
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 import json
@@ -19,7 +20,8 @@ from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm,
 from contact.models import *
 from datetime import datetime
 import pandas as pd
-
+from django.db.models import Sum, Count, Q,Value,Case, When,F
+from django.db.models.functions import Coalesce
 
 
 from .task import process_bulk_action
@@ -406,7 +408,7 @@ def create_campaign(request):
     else:
         form = CampaignForm(user=request.user)
 
-    return render(request, 'new/create_campaign.html', {'form': form})
+    return render(request, 'campaign/create_campaign.html', {'form': form})
 
 
 
@@ -422,6 +424,64 @@ def campaign_detail(request, campaign_id):
 
     }
     return render(request, 'new/campaign_detail.html', context)
+def campaign_detail_v1(request, campaign_id):
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+    if request.user.is_agency():
+        agdetail=Agent.objects.filter(user=request.user)
+    else:
+        agdetail=Agent.objects.filter(user=request.user.parent_agency)
+    # phonecall = PhoneCall.objects.filter(campaign_id=campaign_id)
+        # Optimized query: Fetch phone calls and join with Contact model
+          # 🔹 **Start Campaign Asynchronously**
+    if campaign.status in ['draft', 'scheduled']:  # Only start if not already running
+                # Store call records in the database (bulk insert)
+        
+        process_campaign_calls.apply_async(args=[campaign.id, request.user.id, campaign.agent.id])
+    phonecall = (
+        PhoneCall.objects.filter(campaign_id=campaign_id)
+        .select_related('contact')  # Join with Contact model
+        .only('id', 'call_status', 'contact__first_name', 'contact__last_name', 'call_duration', 'phone_number')  # Fetch only required fields
+        .annotate(
+            call_duration_fixed=Coalesce(F('call_duration'), Value(0)),  # If NULL, replace with 0
+            is_call_answered=Case(
+                When(call_status__in=['in-progress', 'completed'], then=Value(True)),  # Mark True for answered calls
+                default=Value(False),
+            ),
+        )
+    )
+    # Call Analytics with total voice minutes computed correctly
+    call_analytics = phonecall.aggregate(
+         calls_placed=Count('id'),  # All calls made
+        calls_answered=Count('id', filter=Q(call_status__in=['in-progress', 'completed'])),  # Answered Calls
+        calls_failed=Count('id', filter=Q(call_status__in=['failed', 'no-answer', 'busy', 'canceled','initiated'])),  # Failed Calls
+        calls_completed=Count('id', filter=Q(call_status='completed')),  # Successfully Completed Calls
+        total_voice_minutes=Coalesce(Sum('call_duration'), Value(0))  # Sum of call durations
+    )
+       # Paginate PhoneCall records (10 per page)
+    paginator = Paginator(phonecall, 10)  # Adjust number per page as needed
+    page_number = request.GET.get('page')
+    phone_calls = paginator.get_page(page_number)
+    
+    context={
+        'campaign': campaign,
+        'agdetail':agdetail,
+        'call_analytics': call_analytics,
+        'phone_calls': phone_calls,  # Pass paginated phone calls
+
+    }
+    return render(request, 'campaign/campaign_detail.html', context)
+def revoke_campaign_task(request, campaign_id):
+    # Revoke the campaign's task
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+
+    task_id = campaign.triggers.get('task_id')
+    if not task_id:
+        messages.error(request, "No task found for this campaign.")
+        return redirect('contact:campaign_list')
+    pause_task(task_id)
+    messages.success(request, f"Task {task_id} has been successfully paushed.")
+    return redirect('contact:campaign_list')
+
 @login_required
 def campaign_list(request):
     # Fetch campaigns for the logged-in user
@@ -434,28 +494,28 @@ def campaign_list(request):
 
     return render(request, 'campaign/campaign_list.html', {'campaigns': campaigns})
 
-@login_required
-def start_campaign(request, campaign_id):
+
+def start_campaign(user, campaign_id):
     """
     Starts the campaign, initiates phone calls, and sends messages (if applicable).
     """
     # Get campaign object
-    campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
+    campaign = get_object_or_404(Campaign, id=campaign_id, user=user)
 
     # Check if the campaign is already started or sent
-    if campaign.status in ['sent', 'scheduled']:
+    if campaign.status in ['sent', 'scheduled','started']:
         messages.error(request, "This campaign has already been started or sent.")
         return redirect('contact:campaign_list')
 
     # Capture the agent ID from the POST request
     if request.method == 'POST':
-        agent_id = request.POST.get('agent')
+        # agent_id = request.POST.get('agent')
 
-        if not agent_id:
-            messages.error(request, "No agent selected.")
-            return redirect('contact:campaign_detail', campaign_id=campaign.id)
+        # if not agent_id:
+        #     messages.error(request, "No agent selected.")
+        #     return redirect('contact:campaign_detail', campaign_id=campaign.id)
 
-        agent = get_object_or_404(Agent, id=agent_id, user=request.user)
+        # agent = get_object_or_404(Agent, id=agent_id, user=request.user)
         print("hh")
         # Update campaign status to 'scheduled' and assign the selected agent
         campaign.status = 'sent'
@@ -466,7 +526,7 @@ def start_campaign(request, campaign_id):
         # campaign.agent = agent  # Store the selected agent in the campaign
 
         # Get Twilio service details
-        twilio = ServiceDetail.objects.filter(user=request.user, service_name='twilio').first()
+        twilio = ServiceDetail.objects.filter(user=user, service_name='twilio').first()
         if not twilio:
             messages.error(request, "Twilio service details not found.")
             return redirect('contact:campaign_list')
@@ -487,8 +547,8 @@ def start_campaign(request, campaign_id):
                 phone_call = PhoneCall.objects.create(
                     phone_number=phone_number_str,
                     call_status='pending',
-                    user=request.user,
-                    agnt_id=agent.id,  # Using the selected agent
+                    user=user,
+                    agnt_id=campaign.agent.id,  # Using the selected agent
                     campaign=campaign,
                     contact=contact
                 )
@@ -496,27 +556,27 @@ def start_campaign(request, campaign_id):
                 # Initiate the call via Twilio
                 try:
                     call = client.calls.create(
-                        url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{request.user.id}/{agent.id}/',
+                        url=f'https://{request.get_host()}/call/start_twilio_stream/{user.id}/{campaign.agent.id}/',
                         to=phone_call.phone_number,
                         from_=twilio.decrypted_twilio_phone,
                         record=True,
                         method='POST',
-                        status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
+                        status_callback=f'https://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
                         status_callback_method='POST',
                         status_callback_event=["initiated", "ringing", "answered", "completed"]
                     )
                     phone_call.call_status = 'initiated'
                     phone_call.twilio_call_id = call.sid
                     phone_call.save()
-                    messages.success(request, f"Call initiated successfully for {phone_number.phone_number}.")
+                    # messages.success(request, f"Call initiated successfully for {phone_number.phone_number}.")
                 except Exception as e:
                     phone_call.call_status = 'failed'
                     phone_call.save()
-                    messages.error(request, f"Error initiating call to {phone_number.phone_number}: {str(e)}")
+                    # messages.error(request, f"Error initiating call to {phone_number.phone_number}: {str(e)}")
             campaign.save()
 
             # If all calls are initiated
-            messages.success(request, "All calls for the campaign have been successfully initiated.")
+            # messages.success(request, "All calls for the campaign have been successfully initiated.")
         
         except Exception as e:
             campaign.status = 'draft'
@@ -527,7 +587,6 @@ def start_campaign(request, campaign_id):
 
     # GET request handling (in case no agent is selected or campaign is in draft)
     return render(request, 'new/campaign_detail.html', {'campaign': campaign})
-
 
 
 
@@ -558,7 +617,7 @@ def contact_details(request, id):
     for phone_call in phone_calls:
         interactions.append({
             'type': 'Agent call',
-            'title': f"Phone Call - {phone_call.phone_number} - {phone_call.campaign.name}",
+            'title': f"Phone Call - {phone_call.phone_number} - {phone_call.campaign}",
             'timestamp': phone_call.timestamp,
             'object': phone_call.id,
         })

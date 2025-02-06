@@ -3,33 +3,18 @@
 
 {% block css %}
 <link href="{% static 'css/custom.css' %}" rel="stylesheet">
-<style>
-    .form-label {
-        font-weight: bold;
-        font-size: 1rem;
-    }
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        padding: 15px;
-    }
-    .breadcrumb {
-        background: transparent;
-        padding: 0;
-        margin-bottom: 0;
-    }
-    .btn-primary {
-        background-color: #4caf50;
-        border-color: #4caf50;
-    }
-    .btn-primary:hover {
-        background-color: #45a049;
-    }
-</style>
+
 {% endblock css %}
 
 {% block body %}
 <div class="page-body">
+    {% if messages %}
+    <div class="alert alert-light-warning" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+{% endif %}
     <div class="container-fluid">
         <div class="page-title">
             <div class="row">
@@ -68,31 +53,41 @@
                         <div class="card-body">
                             <div class="row mb-4">
                                 <div class="col-md-6">
+                                    <label class="form-label" for="name">Campaign Type</label>
+                                    {{ form.campaign_type }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="subject">Voice Agent</label>
+                                    {{ form.agent }}
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-md-6">
                                     <label class="form-label" for="name">Campaign Name</label>
                                     {{ form.name }}
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label" for="scheduled_at">Scheduled Time</label>
+                                    {{ form.scheduled_at }}
+                                </div>
+                                <!-- <div class="col-md-6">
                                     <label class="form-label" for="subject">Subject</label>
                                     {{ form.subject }}
-                                </div>
+                                </div> -->
                             </div>
-
-                            <div class="row mb-4">
+                            <!-- <div class="row mb-4">
                                 <div class="col-md-12">
                                     <label class="form-label" for="content">Content</label>
                                     {{ form.content }}
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <label class="form-label" for="scheduled_at">Scheduled Time</label>
-                                    {{ form.scheduled_at }}
-                                </div>
-                                <div class="col-md-6">
+                              
+                                <!-- <div class="col-md-6">
                                     <label class="form-label" for="status">Status</label>
                                     {{ form.status }}
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class="row mb-4">

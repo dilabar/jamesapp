@@ -53,37 +53,47 @@
                             {% csrf_token %}
                             <div class="card-body">
                                 <!-- Name Field -->
-                                <div class="mb-3">
+                                 <div class="row">
+
+                                <div class="col-md-6">
+                                    <label class="form-label" for="name">Campaign Type</label>
+                                    {{ form.campaign_type }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="subject">Voice Agent</label>
+                                    {{ form.agent }}
+                                </div>
+                                <div class="col-md-6">
                                     <label for="id_name" class="form-label">Campaign Name</label>
                                     {{ form.name }}
                                 </div>
                                 
                                 <!-- Subject Field -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="id_subject" class="form-label">Campaign Subject</label>
                                     {{ form.subject }}
-                                </div>
+                                </div> -->
 
                                 <!-- Content Field -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="id_content" class="form-label">Content</label>
                                     {{ form.content }}
-                                </div>
+                                </div> -->
 
                                 <!-- Status Field -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="id_status" class="form-label">Status</label>
                                     {{ form.status }}
-                                </div>
+                                </div> -->
 
                                 <!-- Scheduled At Field -->
-                                <div class="mb-3">
+                                <div class="col-md-6">
                                     <label for="id_scheduled_at" class="form-label">Scheduled At</label>
                                     {{ form.scheduled_at }}
                                 </div>
 
                                 <!-- Lists Field -->
-                                <div class="mb-3">
+                                <div class="col-md-6">
                                     <label for="id_lists" class="form-label">Select Lists</label>
                                     {{ form.lists }}
                                 </div>
@@ -93,6 +103,8 @@
                                     <label for="id_individual_contacts" class="form-label">Select Individual Contacts</label>
                                     {{ form.individual_contacts }}
                                 </div>
+                            </div>
+
                             </div>
 
                             <div class="card-footer text-end">

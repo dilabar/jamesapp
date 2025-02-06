@@ -1,7 +1,10 @@
 
 from django import forms
 
+from agent.models import Agent
+
 from .models import *
+from django.utils.timezone import now
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -88,38 +91,69 @@ class ListForm(forms.ModelForm):
 
 class CampaignForm(forms.ModelForm):
     lists = forms.ModelMultipleChoiceField(
-        queryset=List.objects.all(),
+        queryset=List.objects.none(),  # Updated to avoid queryset issues before user is assigned
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Select Lists"
     )
     individual_contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.all(),
+        queryset=Contact.objects.none(),
         widget=forms.CheckboxSelectMultiple,
         required=False,
         label="Select Individual Contacts"
     )
+    
+    campaign_type = forms.ChoiceField(
+        choices=Campaign.CAMPAIGN_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=True,
+        label="Campaign Type"
+    )
+
+    agent = forms.ModelChoiceField(
+        queryset=Agent.objects.none(),  # Set to none initially to filter by user later
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=False,
+        label="Assign Agent"
+    )
 
     class Meta:
         model = Campaign
-        fields = ['name', 'subject', 'content', 'status', 'scheduled_at', 'lists', 'individual_contacts']
+        fields = ['name', 'scheduled_at', 'campaign_type', 'agent', 'lists', 'individual_contacts']
 
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign Name'}),
-            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign Subject'}),
-            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your content here...'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
+            # 'subject': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Subject'}),
+            # 'content': forms.Textarea(attrs={'class': 'form-control btn-pill', 'placeholder': 'Write your content here...'}),
+            # 'status': forms.Select(attrs={'class': 'form-control btn-pill'}),
+            'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        user = kwargs.pop('user', None)  # Get the user from kwargs
         super().__init__(*args, **kwargs)
+
         if user:
             self.fields['lists'].queryset = List.objects.filter(user=user)
             self.fields['individual_contacts'].queryset = Contact.objects.filter(user=user)
+            self.fields['agent'].queryset = Agent.objects.filter(user=user)  # Ensure agents are filtered by user
+        self.fields['agent'].label_from_instance = lambda obj: obj.display_name  # Assuming Agent model has a 'name' field
+    def clean_scheduled_at(self):
+        scheduled_date = self.cleaned_data.get('scheduled_at')
+        if scheduled_date and scheduled_date < now():
+            raise forms.ValidationError("Scheduled date cannot be in the past.")
+        return scheduled_date
+    def save(self, commit=True):
+        campaign = super().save(commit=False)
 
-
+        # If scheduled_at is valid and in the future, update status to "Scheduled"
+        if campaign.scheduled_at and campaign.scheduled_at >= now():
+            campaign.status = 'scheduled'  # Ensure this matches your STATUS_CHOICES
+        
+        if commit:
+            campaign.save()
+            self.save_m2m()  # Save ManyToMany fields
+        return campaign
 
 class CustomFieldForm(forms.ModelForm):
     class Meta:
