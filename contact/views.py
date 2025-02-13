@@ -9,7 +9,7 @@ import openpyxl
 from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
-from jamesapp.tasks import pause_task, process_campaign_calls
+from jamesapp.tasks import pause_task, process_campaign_calls, resume_task
 from twilio.rest import Client
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 import json
@@ -470,17 +470,43 @@ def campaign_detail_v1(request, campaign_id):
 
     }
     return render(request, 'campaign/campaign_detail.html', context)
+@login_required
 def revoke_campaign_task(request, campaign_id):
     # Revoke the campaign's task
     campaign = get_object_or_404(Campaign, id=campaign_id)
-
+    # Check if the campaign is already paused
+    if campaign.status == "paushed":
+        messages.info(request, "This campaign is already paused.")
+        return redirect('contact:campaign_detail', campaign_id=campaign.id)
+    
     task_id = campaign.triggers.get('task_id')
     if not task_id:
         messages.error(request, "No task found for this campaign.")
-        return redirect('contact:campaign_list')
+        return redirect('contact:campaign_detail', campaign_id=campaign.id)
     pause_task(task_id)
-    messages.success(request, f"Task {task_id} has been successfully paushed.")
-    return redirect('contact:campaign_list')
+    campaign.status = "paushed"
+    campaign.save(update_fields=['status'])
+
+    messages.success(request, f"Task {task_id} has been successfully paused.")
+    return redirect('contact:campaign_detail', campaign_id=campaign.id)
+@login_required
+def restart_campaign_task(request, campaign_id):
+    # Revoke the campaign's task
+    campaign = get_object_or_404(Campaign, id=campaign_id)
+    # Check if the campaign is already paused
+    if campaign.status == "started":
+        messages.info(request, "This campaign is already started.")
+        return redirect('contact:campaign_detail', campaign_id=campaign.id)
+    task_id = campaign.triggers.get('task_id')
+    if not task_id:
+        messages.error(request, "No task found for this campaign.")
+        return redirect('contact:campaign_detail', campaign_id=campaign.id)
+    resume_task(campaign.id,request.user.id,campaign.agent.id)
+        # Update campaign status
+    campaign.status = "started"
+    campaign.save(update_fields=['status'])
+    messages.success(request, f"Task {task_id} has been successfully Restarted.")
+    return redirect('contact:campaign_detail', campaign_id=campaign.id)
 
 @login_required
 def campaign_list(request):

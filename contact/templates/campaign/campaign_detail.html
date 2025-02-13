@@ -15,6 +15,17 @@
 
 
 <div class="page-body">
+  {% if messages %}
+  <div class="alert alert-light-warning" role="alert">
+
+        {% for message in messages %}
+
+                 <p class="txt-warning">{{ message }}</p> 
+
+        {% endfor %}
+      </div>
+
+  {% endif %}
     <div class="container-fluid">
         <div class="page-title">
             <div class="row">
@@ -46,10 +57,28 @@
             <div class="col-6">
               <div class="d-flex justify-content-end gap-2">
                   <button class="btn btn-pill btn-outline-info" onclick="location.reload();"> <i class="fa fa-refresh"></i> Refresh</button>
-                  <button class="btn btn-pill btn-primary" 
-                  {% if campaign.status != "running" %}disabled{% endif %}>
-                    <i class="fa fa-pause-circle-o"></i> Pushed
-                  </button>
+                 <!-- Show Pause Button if campaign is "started" -->
+                 {% if campaign.status == "started" %}
+                  <form method="POST" action="{% url 'contact:revoke_campaign_task' campaign.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-pill btn-warning"
+                          onclick="return confirm('Are you sure you want to pause this campaign?');">
+                          <i class="fa fa-pause"></i> Pause
+                      </button>
+                  </form>
+                  {% endif %}
+                  {% if campaign.status == "paushed" %}
+                  <!-- Show Restart Button if campaign is "paused" -->
+                
+                  <form method="POST" action="{% url 'contact:restart_campaign_task' campaign.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-pill btn-success"
+                          onclick="return confirm('Are you sure you want to restart this campaign?');">
+                          <i class="fa fa-play"></i> Restart
+                      </button>
+                  </form>
+                  {% endif %}
+                  
               </div>
           </div>
         </div>
@@ -169,7 +198,7 @@
         <div class="container-fluid">
           <div class="row">
               <!-- Scroll - vertical dynamic Starts-->
-              <div class="col-sm-12">
+              <div class="col-xxl-8 col-md-6 box-col-6">
                   <div class="card">
                    
       
@@ -281,6 +310,19 @@
                       
                   </div>
               </div>
+              <div class="col-xxl-3 col-md-6 box-col-6">
+                <div class="card">
+                  <div class="card-header total-revenue card-no-border">
+                    <h4>Sentimental Call</h4>
+                  
+                  </div>
+                  <div class="card-body pt-0"> 
+                    <div id="doughnutChart"> 
+                   
+                    </div>
+                  </div>
+                </div>
+              </div>
               <!-- Scroll - vertical dynamic Ends-->
           </div>
       </div>
@@ -303,6 +345,8 @@
 <script src="{% static 'manish/js/tooltip-init.js' %}"></script>
 <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+<script src="{% static 'manish/js/chart/apex-chart/apex-chart.js' %}"></script>
+
 <script>
   // Initialize DataTable
   $(document).ready(function() {
@@ -314,6 +358,35 @@
           "lengthChange": false // Disable page size change
       });
   });
+
+  document.addEventListener("DOMContentLoaded", function () {
+            var options = {
+                chart: {
+                    type: "donut"
+                },
+                series: [
+                {{ call_analytics.calls_answered|default:0 }},
+                {{ call_analytics.calls_placed|default:0 }},
+                {{ call_analytics.calls_failed|default:0 }}
+            ],
+            labels: ["Calls Answered", "Calls Placed", "Calls Failed"],
+            colors: ["#4CAF50", "#2196F3", "#FF5722"],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 300
+                        },
+                        legend: {
+                            position: "bottom"
+                        }
+                    }
+                }]
+            };
+
+            var chart = new ApexCharts(document.querySelector("#doughnutChart"), options);
+            chart.render();
+        });
 </script>
 
 {% endblock js %}

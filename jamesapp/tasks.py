@@ -1,3 +1,4 @@
+from datetime import time
 from agent.models import PhoneCall, ServiceDetail
 from celery import shared_task, current_task
 from django.utils import timezone
@@ -16,29 +17,29 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
 
     phone_calls = []
     recipients = campaign.get_recipients()
+    if campaign.status in ["started", "paused"]:
+        for contact in recipients:
+            phone_number = contact.phone_numbers.filter(is_primary=True).first()
+            if not phone_number:
+                continue
 
-    for contact in recipients:
-        phone_number = contact.phone_numbers.filter(is_primary=True).first()
-        if not phone_number:
-            continue
+            # Format the phone number
+            country_code = phone_number.country_code or ''
+            phone_number_str = f"{country_code}{phone_number.phone_number}".strip()
 
-        # Format the phone number
-        country_code = phone_number.country_code or ''
-        phone_number_str = f"{country_code}{phone_number.phone_number}".strip()
+            # Create PhoneCall object
+            phone_call = PhoneCall(
+                phone_number=phone_number_str,
+                call_status='pending',
+                user_id=user_id,
+                agent_id=campaign.agent.id,
+                campaign=campaign,
+                contact=contact
+            )
+            phone_calls.append(phone_call)
 
-        # Create PhoneCall object
-        phone_call = PhoneCall(
-            phone_number=phone_number_str,
-            call_status='pending',
-            user_id=user_id,
-            agent_id=campaign.agent.id,
-            campaign=campaign,
-            contact=contact
-        )
-        phone_calls.append(phone_call)
-
-        # Bulk create phone call records
-    PhoneCall.objects.bulk_create(phone_calls)
+            # Bulk create phone call records
+        PhoneCall.objects.bulk_create(phone_calls)
 
     if not twilio:
         campaign.status = 'failed'
@@ -53,13 +54,14 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
 
     campaign.triggers['task_id'] = self.request.id  # Store Celery task ID in the campaign
     campaign.save()
+    CALL_RATE_LIMIT = 1 
 
     # Loop through PhoneCalls to initiate
     for phone_call in PhoneCall.objects.filter(campaign=campaign, call_status='pending'):
         # Check if task is revoked (Paused)
         if RevokedTask.objects.filter(task_id=self.request.id).exists():
             # If the task is revoked, stop the execution.
-            campaign.status = 'paused'
+            campaign.status = 'paushed'
             campaign.save()
             return "Campaign task paused."
 
@@ -78,6 +80,8 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
             phone_call.call_status = 'initiated'
             phone_call.twilio_call_id = call.sid
             phone_call.save()
+            # Introduce a delay to avoid Twilio rate limits
+            time.sleep(1 / CALL_RATE_LIMIT)
 
         except Exception as e:
             phone_call.call_status = 'failed'
