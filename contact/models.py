@@ -77,14 +77,25 @@ class ListContact(models.Model):
 
 # Campaign Model
 class Campaign(models.Model):
+    RECURRING = 'recurring'
+    ONE_TIME = 'one_time'
+
+    CAMPAIGN_TYPE_CHOICES = [
+        (RECURRING, 'Recurring'),
+        (ONE_TIME, 'One-time'),
+    ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='campaigns', null=True)
     STATUS_CHOICES = [
         ('draft', 'Draft'),
+        ('started', 'Started'),
         ('scheduled', 'Scheduled'),
         ('sent', 'Sent'),
         ('cancelled', 'Cancelled'),
+        ('paushed', 'Paushed'),
     ]
-
+    campaign_type = models.CharField(
+        max_length=20, choices=CAMPAIGN_TYPE_CHOICES, default=ONE_TIME
+    )
     name = models.CharField(max_length=255, unique=True)
     subject = models.CharField(max_length=255, blank=True, null=True)
     content = models.TextField(blank=True, null=True)
@@ -94,6 +105,8 @@ class Campaign(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     triggers = models.JSONField(default=dict, blank=True)  # Store automation triggers.
+    agent = models.ForeignKey('agent.Agent', on_delete=models.CASCADE,related_name='campaigns', null=True, blank=True)
+
 
     def __str__(self):
         return self.name
@@ -103,6 +116,13 @@ class Campaign(models.Model):
         contacts_from_lists = Contact.objects.filter(lists__in=self.lists.all()).distinct()
         direct_contacts = self.individual_contacts.all()
         return contacts_from_lists.union(direct_contacts)
+    def is_recurring(self):
+        """Returns True if the campaign is recurring."""
+        return self.campaign_type == self.RECURRING
+
+    def is_one_time(self):
+        """Returns True if the campaign is one-time."""
+        return self.campaign_type == self.ONE_TIME
 
 
 class CustomField(models.Model):
@@ -163,3 +183,11 @@ class Note(models.Model):
 
     def __str__(self):
         return f"{self.content}"
+    
+
+class RevokedTask(models.Model):
+    task_id = models.CharField(max_length=255, unique=True)
+    revoked_at = models.DateTimeField(auto_now_add=True)  # Track when revoked
+
+    def __str__(self):
+        return self.task_id
