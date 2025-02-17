@@ -124,13 +124,15 @@ def call_history(request):
     return render(request, 'new/calls_history.html', context)
 @login_required
 def call_detail(request, id):
-    # obj = PhoneCall.objects.filter(user=request.user, id=id).first()
-    obj = PhoneCall.objects.select_related('agnt').filter(user=request.user, id=id).first()
+    obj = PhoneCall.objects.filter(user=request.user, id=id).first()
+    # obj = PhoneCall.objects.select_related('campaign').filter(user=request.user, id=id).first()
+   
     if not obj:
         return render(request, 'new/error.html', {'message': 'Call not found'})  # Handle missing call object
 
     play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
-    ag=decrypt(obj.agent_id)
+    print(obj.campaign.agent.agent_id)
+    ag=decrypt(obj.campaign.agent.agent_id)
     transcript = None
     data = get_transcript_data(ag,obj.play_ai_conv_id,play_ai.decrypted_api_key,play_ai.decrypted_account_sid,100,0)
     if data:

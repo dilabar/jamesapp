@@ -17,7 +17,7 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
 
     phone_calls = []
     recipients = campaign.get_recipients()
-    if campaign.status in ["started", "paused"]:
+    if campaign.status in ["draft", "scheduled"]:
         for contact in recipients:
             phone_number = contact.phone_numbers.filter(is_primary=True).first()
             if not phone_number:
@@ -54,7 +54,7 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
 
     campaign.triggers['task_id'] = self.request.id  # Store Celery task ID in the campaign
     campaign.save()
-    CALL_RATE_LIMIT = 1 
+    # CALL_RATE_LIMIT = 1 
 
     # Loop through PhoneCalls to initiate
     for phone_call in PhoneCall.objects.filter(campaign=campaign, call_status='pending'):
@@ -81,7 +81,7 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
             phone_call.twilio_call_id = call.sid
             phone_call.save()
             # Introduce a delay to avoid Twilio rate limits
-            time.sleep(1 / CALL_RATE_LIMIT)
+            # time.sleep(1 / CALL_RATE_LIMIT)
 
         except Exception as e:
             phone_call.call_status = 'failed'

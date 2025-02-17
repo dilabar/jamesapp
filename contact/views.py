@@ -461,7 +461,7 @@ def campaign_detail_v1(request, campaign_id):
     paginator = Paginator(phonecall, 10)  # Adjust number per page as needed
     page_number = request.GET.get('page')
     phone_calls = paginator.get_page(page_number)
-    
+    call_analytics['total_voice_minutes'] = call_analytics['total_voice_minutes'] / 60
     context={
         'campaign': campaign,
         'agdetail':agdetail,
