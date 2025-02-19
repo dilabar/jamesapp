@@ -663,13 +663,13 @@ def contact_details(request, id):
             for phone in phone_numbers:
                 phone.is_primary = (str(phone.id) == selected_phone_id)
                 phone.save()
-        
         # Update other contact fields
         contact.first_name = request.POST.get('first_name')
         contact.last_name = request.POST.get('last_name')
         contact.email = request.POST.get('email')
         contact.phone = request.POST.get('phone')
         contact.contact_type = request.POST.get('contact_type')
+        contact.time_zone = request.POST.get('time_zone')
         contact.save()
         
         # Redirect to the same page after update
