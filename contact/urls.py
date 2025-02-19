@@ -5,6 +5,9 @@ from .api_view import BulkActionTriggerView, BulkActionStatusView, NoteAPI
 app_name='contact'
 urlpatterns = [
     path('', contact_list, name='contact_list'),
+    path('select-contacts/',select_contacts,name='select_contacts'),
+    path('select-lists/',select_lists,name='select_lists'),
+
     path('details/<int:id>/', contact_details, name='contact_details'),
     path('delete/<int:id>/', delete_contact, name='delete_contact'),
     path('add/', add_contact, name='add_contact'),
@@ -14,8 +17,15 @@ urlpatterns = [
     path('lists/', list_overview, name='list_overview'),
     path('lists/create/', create_list, name='create_list'),
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
+    path('list/edit/<int:list_id>/', edit_list, name='edit_list'),
+
+    path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
-    path('campaigns/<int:campaign_id>/', campaign_detail, name='campaign_detail'),
+    path('campaigns/<int:campaign_id>/', campaign_detail_v1, name='campaign_detail'),
+    path('campaign/<int:campaign_id>/pause/', revoke_campaign_task, name='revoke_campaign_task'),
+    path('campaign/<int:campaign_id>/restart/', restart_campaign_task, name='restart_campaign_task'),
+    
+    path('campaigns/delete/<int:campaign_id>/', delete_campaign, name='delete_campaign'),
     path('create-list/', create_list, name='create_list'),
     path('create-campaign/', create_campaign, name='create_campaign'),
     path('campaigns/', campaign_list, name='campaign_list'),
@@ -25,7 +35,9 @@ urlpatterns = [
     path('bulk_action_list/',bulk_action_list,name='bulk_action_list'),
 
 
-    path('custom-fields/', custom_fields, name='custom_fields_view'),
+    path('custom-fields/', custom_fields, name='custom_fields'),
+    path('campaign/<int:campaign_id>/edit/', edit_campaign, name='edit_campaign'),
+    path('delete_custom_field/<int:field_id>/', delete_custom_field, name='delete_custom_field'),
 
      # Trigger the bulk action (POST)
     path('api/bulk-action/', BulkActionTriggerView.as_view(), name='bulk_action_trigger'),

@@ -1,4 +1,35 @@
 {% load static %}
+<style>
+  .call-status-text {
+      font-size: 16px;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      margin-top: 10px;
+  }
+  
+  /* Processing - Blue */
+  .call-status-processing {
+      background-color: #cce5ff;
+      color: #004085;
+      border: 1px solid #b8daff;
+  }
+  
+  /* Call Ended - Green */
+  .call-status-ended {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+  }
+  
+  /* No Messages - Grey */
+  .call-status-none {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+  }
+</style>
 <div class="fade tab-pane" id="pills-favourites" role="tabpanel" aria-labelledby="pills-favourites-tab">
 
   <div class="card right-sidebar-chat">
@@ -42,7 +73,7 @@
     <div class="right-sidebar-Chats">
       <div class="msger">
         <div class="msger-chat">
-          {% if transcript %}
+          {% comment %} {% if transcript %}
               {% for data in transcript %}
                   {% if data.role == "assistant" %}
                   <div class="msg left-msg">
@@ -81,7 +112,16 @@
               {% endfor %}
           {% else %}
               <p>No messages available.</p>
-          {% endif %}
+          {% endif %} {% endcomment %}
+          <div class="msger-chat" id="chat-messages">
+            {% if call_obj.call_status == "initiated" %}
+              <p class="call-status-text">Call is processing...</p>
+            {% elif call_obj.call_status == "completed" %}
+              <p class="call-status-text">Call ended.</p>
+            {% else %}
+              <p class="call-status-text">No messages available.</p>
+            {% endif %}
+          </div>
       </div>
       
 

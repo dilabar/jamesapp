@@ -72,18 +72,15 @@
                                             <td>{{ field.unique_key }}</td> <!-- Displaying Unique Key -->
                                             <td>{{ field.options }}</td> <!-- Displaying Options -->
                                             <td>
-                                                <a href="{% url 'contact:edit_custom_field' field.id %}" class="btn btn-info btn-sm">Edit</a>
-                                                <a href="{% url 'contact:delete_custom_field' field.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                                <a href="{% url 'contact:delete_custom_field' field.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this field?')">Delete</a>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
-                        
-                            <!-- Pagination for Custom Fields -->
-                            
                         </div>
+                        
                         
                     </div>
                 </div>

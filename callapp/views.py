@@ -453,10 +453,10 @@ def forward_call(request):
 
     # Decrypt agent_id and fetch agent data
     try:
-        agg=lg.agent_id
+        agg=lg.agnt
         print(agg)
         print(lg.user)
-        agent = Agent.objects.filter(agent_id=agg, user=lg.user).first()
+        agent = Agent.objects.filter(id=agg.id, user=lg.user).first()
         if not agent:
             logger.error(f"Agent with ID {lg.agent_id} not found.")
             return HttpResponse("Agent not found.", status=404)

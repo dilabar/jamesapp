@@ -1,7 +1,11 @@
 
 from django import forms
 
+from agent.models import Agent
+
 from .models import *
+from django.utils.timezone import now
+from django.core.exceptions import ValidationError
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -86,41 +90,96 @@ class ListForm(forms.ModelForm):
         }
 
 
+
+
+
 class CampaignForm(forms.ModelForm):
-    lists = forms.ModelMultipleChoiceField(
-        queryset=List.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+    lists = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
-        label="Select Lists"
+        label="Target Lists"
     )
-    individual_contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
+    
+    individual_contacts = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
-        label="Select Individual Contacts"
+        label="Individual Contacts"
+    )
+
+    campaign_type = forms.ChoiceField(
+        choices=Campaign.CAMPAIGN_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=True,
+        label="Campaign Type"
+    )
+
+    agent = forms.ModelChoiceField(
+        queryset=Agent.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=False,
+        label="Assign Agent"
     )
 
     class Meta:
         model = Campaign
-        fields = ['name', 'subject', 'content', 'status', 'scheduled_at', 'lists', 'individual_contacts']
-
+        fields = ['name', 'scheduled_at', 'campaign_type', 'agent', 'lists', 'individual_contacts']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign Name'}),
-            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Campaign Subject'}),
-            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your content here...'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
+            'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        user = kwargs.pop('user', None)  
         super().__init__(*args, **kwargs)
+
         if user:
-            self.fields['lists'].queryset = List.objects.filter(user=user)
-            self.fields['individual_contacts'].queryset = Contact.objects.filter(user=user)
+            self.fields['agent'].queryset = Agent.objects.filter(user=user)
 
+        self.fields['agent'].label_from_instance = lambda obj: obj.display_name  
 
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name or len(name) < 3:
+            raise ValidationError("Campaign name must be at least 3 characters long.")
+        return name
 
+    def clean_scheduled_at(self):
+        scheduled_date = self.cleaned_data.get('scheduled_at')
+        if scheduled_date and scheduled_date < now():
+            raise ValidationError("Scheduled date cannot be in the past.")
+        return scheduled_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        lists = cleaned_data.get("lists", "").strip()  # Get lists as string
+        individual_contacts = cleaned_data.get("individual_contacts", "").strip()  # Get contacts as string
+
+        # Ensure at least one selection
+        if not lists and not individual_contacts:
+            raise forms.ValidationError("You must select at least one list or an individual contact.")
+
+        # Convert comma-separated IDs to QuerySet
+        lists_ids = [int(id) for id in lists.split(",") if id.isdigit()]
+        individual_contacts_ids = [int(id) for id in individual_contacts.split(",") if id.isdigit()]
+
+        cleaned_data["lists"] = List.objects.filter(id__in=lists_ids) if lists_ids else List.objects.none()
+        cleaned_data["individual_contacts"] = Contact.objects.filter(id__in=individual_contacts_ids) if individual_contacts_ids else Contact.objects.none()
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        campaign = super().save(commit=False)
+
+        # Set status based on scheduled date
+        if campaign.scheduled_at and campaign.scheduled_at >= now():
+            campaign.status = 'scheduled'
+
+        if commit:
+            campaign.save()
+            self.save_m2m()  # Ensure many-to-many fields (lists & contacts) are saved
+
+        return campaign
 class CustomFieldForm(forms.ModelForm):
     class Meta:
         model = CustomField
@@ -175,3 +234,6 @@ class CustomFieldForm(forms.ModelForm):
             cleaned_data['options'] = [opt.strip() for opt in options.split(',') if opt.strip()]
             print(cleaned_data)
         return cleaned_data
+
+
+

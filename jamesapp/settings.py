@@ -150,9 +150,12 @@ GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY',default="")
 
 # settings.py
 
-CELERY_BROKER_URL = 'pyamqp://guest:guest@localhost//'
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_POOL = 'prefork'
+CELERY_TASK_ALWAYS_EAGER = True
+
 
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')

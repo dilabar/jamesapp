@@ -47,10 +47,16 @@
                         <div class="card-body">
                             <!-- List Details Section -->
                             
-    
+                            <form method="GET" action="" class="mb-3">
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" placeholder="Search contacts..."
+                                        value="{{ search_query }}">
+                                    <button type="submit" class="btn btn-primary">Search</button>
+                                </div>
+                            </form>
                             <!-- Table Section for Contact Details -->
                             <div class="table-responsive user-datatable custom-scrollbar">
-                                <table class="display" id="basic-10">
+                                <table class="display" id="list-contact-table">
                                     <thead>
                                         <tr>
                                            
@@ -65,7 +71,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for contact in list.contacts.all %}
+                                        {% for contact in contacts %}
                                         <tr>
                                             
                                             <td>{{ contact.first_name }} {{ contact.last_name }}</td>
@@ -119,11 +125,19 @@
                                 </table>
                             </div>
                         
-                            <!-- Pagination -->
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
+                                    {% if contacts.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">&laquo; First</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ contacts.previous_page_number }}">Previous</a>
+                                        </li>
+                                    {% endif %}
+                            
                                     {% for i in page_range %}
-                                        {% if i == page_number %}
+                                        {% if i == contacts.number %}
                                             <li class="page-item active" aria-current="page">
                                                 <span class="page-link">{{ i }}</span>
                                             </li>
@@ -133,6 +147,15 @@
                                             </li>
                                         {% endif %}
                                     {% endfor %}
+                            
+                                    {% if contacts.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ contacts.next_page_number }}">Next</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ contacts.paginator.num_pages }}">Last &raquo;</a>
+                                        </li>
+                                    {% endif %}
                                 </ul>
                             </nav>
                         </div>
@@ -151,6 +174,18 @@
     {% block js %}
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    <script>
+          $(document).ready(function() {
+      $('#list-contact-table').DataTable({
+          "paging": false, // Enable pagination
+          "searching": false, // Enable search
+          "ordering": true, // Enable sorting
+          "info": false, // Show table info
+          "lengthChange": false // Disable page size change
+      });
+  });
+
+    </script>
     {% endblock js %}
         
     

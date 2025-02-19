@@ -1,0 +1,177 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block css %}
+<link href="{% static 'css/custom.css' %}" rel="stylesheet">
+
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+
+    <div class="container-fluid">
+        <div class="page-title">
+            <div class="row">
+                <div class="col-6">
+                    <!-- Back Button -->
+                    <a href="javascript:history.back()" class="btn btn-secondary" data-bs-toggle="tooltip" title="Go Back">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </a>
+                </div>
+                <div class="col-6 text-end">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">Marketing</li>
+                        <li class="breadcrumb-item active">Add Campaign</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Starts -->
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title">Enter Campaign Details</h5>
+                        <p class="text-muted">Create your campaign by providing all the necessary details.</p>
+                    </div>
+                    <form class="form theme-form needs-validation  custom-input {% if form.errors %}was-invalidated{% endif %}" method="POST">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-light-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="campaign_type">Campaign Type</label>
+                                    {{ form.campaign_type }}
+                                    {% for error in form.campaign_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                    
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="agent">Voice Agent</label>
+                                    {{ form.agent }}
+                                    {% for error in form.agent.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                    
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="name">Campaign Name</label>
+                                    {{ form.name }}
+                                    {% for error in form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="scheduled_at">Scheduled Time</label>
+                                    {{ form.scheduled_at }}
+                                    {% for error in form.scheduled_at.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            </div>
+                    
+                            <!-- <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label" for="lists">Target Lists</label>
+                                    {{ form.lists }}
+                                </div>
+                            </div>
+                    
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label" for="individual_contacts">Individual Contacts</label>
+                                    {{ form.individual_contacts }}
+                                </div>
+                            </div> -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label">Target Lists</label>
+                                    <button type="button" class="btn btn-outline-primary" onclick="openSelectionWindow('lists')">
+                                        Select Lists
+                                    </button>
+                                    <input type="hidden" id="selectedLists" name="lists">
+                                    <div id="selectedListsDisplay" class="mt-2"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label">Individual Contacts</label>
+                                    <button type="button" class="btn btn-outline-primary" onclick="openSelectionWindow('contacts')">
+                                        Select Contacts
+                                    </button>
+                                    <input type="hidden" id="selectedContacts" name="individual_contacts">
+                                    <div id="selectedContactsDisplay" class="mt-2"></div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    
+                        <div class="card-footer text-end">
+                            <button type="submit" class="btn btn-primary">Save Campaign</button>
+                            <a href="{% url 'contact:campaign_list' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- Form Ends -->
+    </div>
+</div>
+{% endblock body %}
+
+{% block js %}
+<script>
+   function openSelectionWindow(type) {
+    let url = "";
+    if (type === "lists") {
+        url = "{% url 'contact:select_lists' %}";
+    } else if (type === "contacts") {
+        url = "{% url 'contact:select_contacts' %}";
+    }
+
+    const popup = window.open(url, "_blank", "width=600,height=500");
+
+    window.addEventListener("message", function(event) {
+        if (event.origin !== window.location.origin) return; // Secure: Ignore unknown sources
+
+        let selectedIds = event.data.selectedIds.join(",");  // Convert array to comma-separated string
+        let selectedNames = event.data.selectedNames.join(", "); // Display names
+
+        if (type === "lists") {
+            document.getElementById("selectedLists").value = selectedIds;
+            document.getElementById("selectedListsDisplay").innerHTML = selectedNames;
+        } else if (type === "contacts") {
+            document.getElementById("selectedContacts").value = selectedIds;
+            document.getElementById("selectedContactsDisplay").innerHTML = selectedNames;
+        }
+    }, { once: true });  // Ensures the event listener runs only once
+}
+</script>
+{% endblock js %}
