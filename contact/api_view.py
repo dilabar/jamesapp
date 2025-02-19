@@ -85,6 +85,8 @@ class BulkActionTriggerView(View):
         field_mappings = request.POST.get('fieldMappings')
         import_option = request.POST.get('importOption')
         deduplication = request.POST.get('deduplication')
+        list_selection = request.POST.get('listSelection')
+        new_list_name = request.POST.get('newListName')
         listId = request.POST.get('listId')
 
         if not csv_file or not field_mappings or not import_option or not deduplication:
@@ -100,6 +102,26 @@ class BulkActionTriggerView(View):
         try:
              # Save the bulk action in the database
             with transaction.atomic():
+                # Handle List Selection
+                if list_selection == "new":
+                    if not new_list_name:
+                        return JsonResponse({"error": "New list name is required when creating a new list."}, status=400)
+
+                    # Create the new contact list
+                    contact_list = List.objects.create(user=user, name=new_list_name)
+                    list_id = contact_list.id  # Set new list ID
+
+                elif list_selection == "existing":
+                    if not list_id:
+                        return JsonResponse({"error": "Existing list ID is required when selecting an existing list."}, status=400)
+                    
+                    # Ensure the list exists
+                    if not List.objects.filter(id=list_id, user=user).exists():
+                        return JsonResponse({"error": "Selected list does not exist or is not accessible."}, status=404)
+
+                else:
+                    return JsonResponse({"error": "Invalid list selection option."}, status=400)
+
                 bulk_action = BulkAction.objects.create(
                     user=user,
                     action_type='IMPORT',

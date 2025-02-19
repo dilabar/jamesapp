@@ -5,6 +5,7 @@ from agent.models import Agent
 
 from .models import *
 from django.utils.timezone import now
+from django.core.exceptions import ValidationError
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -89,20 +90,22 @@ class ListForm(forms.ModelForm):
         }
 
 
+
+
+
 class CampaignForm(forms.ModelForm):
-    lists = forms.ModelMultipleChoiceField(
-        queryset=List.objects.none(),  # Updated to avoid queryset issues before user is assigned
-        widget=forms.CheckboxSelectMultiple,
+    lists = forms.CharField(
+        widget=forms.HiddenInput(),
         required=False,
-        label="Select Lists"
-    )
-    individual_contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.none(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False,
-        label="Select Individual Contacts"
+        label="Target Lists"
     )
     
+    individual_contacts = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False,
+        label="Individual Contacts"
+    )
+
     campaign_type = forms.ChoiceField(
         choices=Campaign.CAMPAIGN_TYPE_CHOICES,
         widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
@@ -111,7 +114,7 @@ class CampaignForm(forms.ModelForm):
     )
 
     agent = forms.ModelChoiceField(
-        queryset=Agent.objects.none(),  # Set to none initially to filter by user later
+        queryset=Agent.objects.none(),
         widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
         required=False,
         label="Assign Agent"
@@ -120,41 +123,63 @@ class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
         fields = ['name', 'scheduled_at', 'campaign_type', 'agent', 'lists', 'individual_contacts']
-
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
-            # 'subject': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Subject'}),
-            # 'content': forms.Textarea(attrs={'class': 'form-control btn-pill', 'placeholder': 'Write your content here...'}),
-            # 'status': forms.Select(attrs={'class': 'form-control btn-pill'}),
             'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Get the user from kwargs
+        user = kwargs.pop('user', None)  
         super().__init__(*args, **kwargs)
 
         if user:
-            self.fields['lists'].queryset = List.objects.filter(user=user)
-            self.fields['individual_contacts'].queryset = Contact.objects.filter(user=user)
-            self.fields['agent'].queryset = Agent.objects.filter(user=user)  # Ensure agents are filtered by user
-        self.fields['agent'].label_from_instance = lambda obj: obj.display_name  # Assuming Agent model has a 'name' field
+            self.fields['agent'].queryset = Agent.objects.filter(user=user)
+
+        self.fields['agent'].label_from_instance = lambda obj: obj.display_name  
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name or len(name) < 3:
+            raise ValidationError("Campaign name must be at least 3 characters long.")
+        return name
+
     def clean_scheduled_at(self):
         scheduled_date = self.cleaned_data.get('scheduled_at')
         if scheduled_date and scheduled_date < now():
-            raise forms.ValidationError("Scheduled date cannot be in the past.")
+            raise ValidationError("Scheduled date cannot be in the past.")
         return scheduled_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        lists = cleaned_data.get("lists", "").strip()  # Get lists as string
+        individual_contacts = cleaned_data.get("individual_contacts", "").strip()  # Get contacts as string
+
+        # Ensure at least one selection
+        if not lists and not individual_contacts:
+            raise forms.ValidationError("You must select at least one list or an individual contact.")
+
+        # Convert comma-separated IDs to QuerySet
+        lists_ids = [int(id) for id in lists.split(",") if id.isdigit()]
+        individual_contacts_ids = [int(id) for id in individual_contacts.split(",") if id.isdigit()]
+
+        cleaned_data["lists"] = List.objects.filter(id__in=lists_ids) if lists_ids else List.objects.none()
+        cleaned_data["individual_contacts"] = Contact.objects.filter(id__in=individual_contacts_ids) if individual_contacts_ids else Contact.objects.none()
+
+        return cleaned_data
+
     def save(self, commit=True):
         campaign = super().save(commit=False)
 
-        # If scheduled_at is valid and in the future, update status to "Scheduled"
+        # Set status based on scheduled date
         if campaign.scheduled_at and campaign.scheduled_at >= now():
-            campaign.status = 'scheduled'  # Ensure this matches your STATUS_CHOICES
-        
+            campaign.status = 'scheduled'
+
         if commit:
             campaign.save()
-            self.save_m2m()  # Save ManyToMany fields
-        return campaign
+            self.save_m2m()  # Ensure many-to-many fields (lists & contacts) are saved
 
+        return campaign
 class CustomFieldForm(forms.ModelForm):
     class Meta:
         model = CustomField

@@ -75,7 +75,14 @@
         <!-- Page Sidebar Start-->
         {% include 'new/components/sidebar.html' %}
         <!-- Page Sidebar Ends-->
-      
+        <div class="toast-container position-fixed top-0 end-0 p-3 toast-index toast-rtl">
+          <div class="toast hide toast fade" id="toastMessage" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell toast-icons toast-primary"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path></svg><strong class="me-auto" id="title">Riho theme</strong><small class="txt-danger" >just now</small>
+              <button class="btn-close" type="button" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body " id="toastBody">Hello, I'm a web-designer.</div>
+          </div>
+        </div>
         
         {% block body %}
             
@@ -160,19 +167,31 @@
       });
       
   </script>
-  <!-- {% if messages %}
-  <script>
-      document.addEventListener("DOMContentLoaded", function() {
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      var toastElement = document.getElementById("toastMessage");
+      var toastBody = document.getElementById("toastBody");
+      var title = document.getElementById("title");
+
+      {% if messages %}
           {% for message in messages %}
-              Swal.fire({
-                  title: "{% if message.tags == 'success' %}Success!{% elif message.tags == 'error' %}Error!{% elif message.tags == 'warning' %}Warning!{% else %}Message{% endif %}",
-                  text: "{{ message }}",
-                  icon: "{{ message.tags }}",  // SweetAlert2 supports 'success', 'error', 'warning', 'info'
-                  confirmButtonText: "OK"
-              });
+              toastBody.textContent = "{{ message }}";
+              title.textContent = "{{ message.tags }}";
+              toastBody.classList.add("toast-"+"{{ message.tags }}");
+              
+              // Remove 'hide' class and show the toast
+              toastElement.classList.remove("hide");
+              toastElement.classList.add("show");
+
+              // Automatically hide the toast after 3 seconds
+              setTimeout(function () {
+                  toastElement.classList.remove("show");
+                  toastElement.classList.add("hide");
+              }, 3000);
           {% endfor %}
-      });
-  </script>
-  {% endif %} -->
+      {% endif %}
+  });
+</script>
+
   </body>
 </html> 

@@ -312,17 +312,38 @@
           </div>
             <!-- Deduplication Preferences -->
             <div class="mt-4">
-                <label for="listId">List</label>
-                <select id="listId" class="form-select">
-                    {% for ls in all_lists %}
-                    <option value="{{ls.id}}">{{ls.name}}</option>
-                    {% endfor %}
-                </select>
-                <small class="form-text text-muted">
-                     <a href="{% url 'contact:create_list' %}">Create New List</a>
-                </small>
-               
-            </div>
+              <label>List Selection</label>
+              <div class="form-check">
+                  <input type="radio" id="existingList" name="listSelection" class="form-check-input" value="existing" checked onchange="toggleListSelection()">
+                  <label for="existingList" class="form-check-label">Use Existing List</label>
+              </div>
+              <div class="form-check">
+                  <input type="radio" id="newList" name="listSelection" class="form-check-input" value="new" onchange="toggleListSelection()">
+                  <label for="newList" class="form-check-label">Create New List</label>
+              </div>
+          
+              <!-- Existing List Dropdown -->
+              <div id="existingListContainer" class="mt-2">
+                  <label for="listId">Select List</label>
+                  <select id="listId" name="listId" class="form-select">
+                      {% for ls in all_lists %}
+                      <option value="{{ ls.id }}">{{ ls.name }}</option>
+                      {% endfor %}
+                  </select>
+                  <small class="form-text text-muted">
+                      <a href="{% url 'contact:create_list' %}">Create a New List</a>
+                  </small>
+              </div>
+          
+              <!-- New List Input (Initially Hidden) -->
+              <div id="newListContainer" class="mt-2" style="display: none;">
+                  <label for="newListName">Enter New List Name</label>
+                  <input type="text" id="newListName" name="newListName" class="form-control" placeholder="New list name">
+              </div>
+          </div>
+          
+    
+          
             <div class="mt-3">
               <button class="btn btn-secondary" id="prevStep3">Back</button>
               <button class="btn btn-success" id="finishUpload">Finish</button>
@@ -341,7 +362,7 @@
                         <div class="card-body">
                             <!-- Table Section -->
                             <div class="table-responsive user-datatable custom-scrollbar">
-                                <table class="display" id="basic-10">
+                                <table class="display" id="contact-table">
                                     <thead>
                                         <tr>
                                             <!-- Existing columns -->
@@ -431,7 +452,42 @@
                                     </tfoot>
                                 </table>
                             </div>
-                        
+                                          <!-- Pagination -->
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1" aria-label="First">
+          <span aria-hidden="true">&laquo;&laquo;</span>
+        </a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+          <span aria-hidden="true">&lsaquo;</span>
+        </a>
+      </li>
+    {% endif %}
+    
+    <!-- Current page indicator -->
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+          <span aria-hidden="true">&rsaquo;</span>
+        </a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+          <span aria-hidden="true">&raquo;&raquo;</span>
+        </a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+
                            
                         </div>
                         
@@ -533,12 +589,33 @@
                     'contentType': "application/json",   // Include CSRF token for security
                 },
                 success: function (response) {
-                    console.log(response);
-                    window.location.href = '/contact/';
+                  if(response.status =='success'){
+                    window.Swal.fire({
+                  title: "Success!",
+                  text: response.message,
+                  icon: "success",
+                  confirmButtonText: "OK"
+              }).then(() => {
+                  window.location.href = '/contact/'; // Redirect after user clicks OK
+              });
+                  }else{
+                    window.Swal.fire({
+                  title: "Error!",
+                  text: response.message,
+                  icon: "error",
+                  confirmButtonText: "OK"
+              });
+                  }
+                 
                 },
                 error: function (err) {
-                    alert("Error adding contact.");
-                    console.error(err);
+                  console.log(err)
+                  window.Swal.fire({
+                  title: "Error! "+err.statusText,
+                  text: err.responseJSON.message,
+                  icon: "error",
+                  confirmButtonText: "OK"
+              });
                 }
             });
         }); 
@@ -1001,7 +1078,17 @@
       </script>
   
  <script>
+  $(document).ready(function() {
+      $('#contact-table').DataTable({
+          "paging": false, // Enable pagination
+          "searching": true, // Enable search
+          "ordering": true, // Enable sorting
+          "info": false, // Show table info
+          "lengthChange": false // Disable page size change
+      });
+  });
   document.addEventListener('DOMContentLoaded', function () {
+    
     const step1 = document.getElementById('step1');
     const step2 = document.getElementById('step2');
     const step3 = document.getElementById('step3');
@@ -1092,8 +1179,24 @@
         // Collect the import option and deduplication preferences
         const importOption = document.getElementById('importOption').value;
         const deduplication = document.getElementById('deduplication').value;
-        const listId = document.getElementById('listId').value;
+        const listSelection = document.querySelector('input[name="listSelection"]:checked').value; // Get selected radio button value
         
+        let listId = null;
+        let newListName = null;
+
+        if (listSelection === "existing") {
+            listId = document.getElementById("listId").value;
+            if (!listId) {
+                alert("Please select an existing list.");
+                return;
+            }
+        } else if (listSelection === "new") {
+            newListName = document.getElementById("newListName").value.trim();
+            if (!newListName) {
+                alert("Please enter a name for the new list.");
+                return;
+            }
+        }
 
         // Create a FormData object to send the file and other data
         const formData = new FormData();
@@ -1103,7 +1206,15 @@
         formData.append('fieldMappings', JSON.stringify(fieldMappings)); // Attach field mappings as a JSON string
         formData.append('importOption', importOption); // Attach the import option
         formData.append('deduplication', deduplication); // Attach the deduplication option
-        formData.append('listId', listId); // Attach the list option
+        formData.append("listSelection", listSelection); // Attach the list selection
+
+        // Append either listId or newListName based on selection
+        if (listSelection === "existing") {
+            formData.append("listId", listId);
+        } else if (listSelection === "new") {
+            formData.append("newListName", newListName);
+        }
+
 
         console.log(JSON.stringify(fieldMappings));
         
@@ -1202,7 +1313,13 @@ function updateStatus(index) {
 }
 
  </script>
-
+      <script>
+        function toggleListSelection() {
+            let isExisting = document.getElementById("existingList").checked;
+            document.getElementById("existingListContainer").style.display = isExisting ? "block" : "none";
+            document.getElementById("newListContainer").style.display = isExisting ? "none" : "block";
+        }
+    </script>
     {% endblock js %}
         
     
