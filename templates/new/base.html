@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick-theme.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/scrollbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/sweetalert2.css' %}">
     <!-- Range slider css-->
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/rangeslider/rSlider.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/animate.css' %}">
@@ -114,6 +115,9 @@
     <script src="{% static 'manish/js/header-slick.js' %}"></script>
     <script src="{% static 'manish/js/chart/apex-chart/apex-chart.js' %}"></script>
     <script src="{% static 'manish/js/chart/apex-chart/stock-prices.js' %}"></script>
+<!-- Include SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Range Slider js-->
     <script src="{% static 'manish/js/range-slider/rSlider.min.js' %}"></script>
     <script src="{% static 'manish/js/rangeslider/rangeslider.js' %}"></script>
@@ -124,6 +128,7 @@
     <script src="{% static 'manish/js/counter/counter-custom.js' %}"></script>
     <script src="{% static 'manish/js/custom-card/custom-card.js' %}"></script>
     <!-- calendar js-->
+  
     <script src="{% static 'manish/js/calendar/fullcalender.js' %}"></script>
     <script src="{% static 'manish/js/calendar/custom-calendar.js' %}"></script>
     <script src="{% static 'manish/js/dashboard/dashboard_2.js' %}"></script>
@@ -153,6 +158,21 @@
           }
           // Add more shortcuts if needed
       });
+      
   </script>
+  <!-- {% if messages %}
+  <script>
+      document.addEventListener("DOMContentLoaded", function() {
+          {% for message in messages %}
+              Swal.fire({
+                  title: "{% if message.tags == 'success' %}Success!{% elif message.tags == 'error' %}Error!{% elif message.tags == 'warning' %}Warning!{% else %}Message{% endif %}",
+                  text: "{{ message }}",
+                  icon: "{{ message.tags }}",  // SweetAlert2 supports 'success', 'error', 'warning', 'info'
+                  confirmButtonText: "OK"
+              });
+          {% endfor %}
+      });
+  </script>
+  {% endif %} -->
   </body>
 </html> 

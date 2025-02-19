@@ -62,9 +62,21 @@
                                         {% for l in list %}
                                         <tr>
                                             <td>{{ l.action_type }}</td>
-                                            <td>{{ l.status }}</td>
-                                            <td>{{ l.started_at|date:"M d, Y H:i" }}</td>
-                                            <td>{{ l.completed_at|date:"M d, Y H:i" }}</td>
+                                            <td> <span class="
+                                                badge 
+                                                {% if l.status == 'PENDING' %}badge-light-warning
+                                                {% elif l.status == 'COMPLETED' %}badge-light-success
+                                                {% elif l.status == 'FAILED' %}badge-light-danger
+                                                {% elif l.status == 'PROCESSING' %}badge-light-info
+                                                {% elif l.status == 'STOP' %}badge-light-secondary
+                                                {% elif l.status == 'RESUMED' %}badge-light-primary
+                                                {% else %}badge-light{% endif %}
+                                            ">
+                                                {{ l.status }}
+                                            </span>
+                                            </td>
+                                            <td>{{ l.started_at|date:"M d, Y H:i:s" }}</td>
+                                            <td>{{ l.completed_at|date:"M d, Y H:i:s" }}</td>
                                             <td>
                                             
                                             </td>

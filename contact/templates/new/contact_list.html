@@ -1112,25 +1112,37 @@
 
         // Send the request using AJAX
         $.ajax({
-            url: "/contact/api/bulk-action/", // Replace with your backend endpoint
-            method: "POST",
-            data: formData,
-            processData: false, // Prevent jQuery from converting the data into a query string
-            contentType: false, // Prevent jQuery from setting content type header
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
-            },
-            success: function (response) {
-                // Handle the success response
-                alert('Bulk action has been completed!');
-                window.location.href = '/contact/'; // Redirect or update UI accordingly
-            },
-            error: function (err) {
-                // Handle the error response
-                alert("Error completing bulk action.");
-                console.error(err);
-            }
+    url: "/contact/api/bulk-action/", // Replace with your backend endpoint
+    method: "POST",
+    data: formData,
+    processData: false, // Prevent jQuery from converting the data into a query string
+    contentType: false, // Prevent jQuery from setting content type header
+    headers: {
+        'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token for security
+    },
+    success: function (response) {
+        // Handle the success response using SweetAlert2
+        window.Swal.fire({
+            title: "Success!",
+            text: "Bulk action has been completed!",
+            icon: "success",
+            confirmButtonText: "OK"
+        }).then(() => {
+            window.location.href = '/contact/bulk_action_list/'; // Redirect after user clicks OK
         });
+    },
+    error: function (err) {
+        // Handle the error response using SweetAlert2
+        window.Swal.fire({
+            title: "Error!",
+            text: "Error completing bulk action.",
+            icon: "error",
+            confirmButtonText: "OK"
+        });
+        console.error(err);
+    }
+});
+
     });
 });
 
