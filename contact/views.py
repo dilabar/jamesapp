@@ -692,11 +692,21 @@ def contact_details(request, id):
 def bulk_upload(request):
     if request.method == 'POST' and request.FILES.get('csvFile'):
         csv_file = request.FILES['csvFile']
+        raw_data = csv_file.read()
         headers = []
         try:
             # Read CSV headers
-            csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
+                # Try UTF-8 first
+            try:
+                decoded_data = raw_data.decode('utf-8').splitlines()
+            except UnicodeDecodeError:
+                # Fallback to latin-1 if UTF-8 fails
+                decoded_data = raw_data.decode('latin-1').splitlines()
+            # csv_reader = csv.reader(csv_file.read().decode('utf-8').splitlines())
+            csv_reader = csv.reader(decoded_data)
+            
             headers = next(csv_reader)  # Get the first row as headers
+            
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
 
