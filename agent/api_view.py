@@ -135,6 +135,7 @@ def call_detail(request, id):
     ag=decrypt(obj.campaign.agent.agent_id)
     transcript = None
     data = get_transcript_data(ag,obj.play_ai_conv_id,play_ai.decrypted_api_key,play_ai.decrypted_account_sid,100,0)
+    print('data',data)
     if data:
         transcript=data
 
