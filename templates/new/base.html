@@ -29,6 +29,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/slick-theme.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/scrollbar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/sweetalert2.css' %}">
     <!-- Range slider css-->
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/rangeslider/rSlider.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/animate.css' %}">
@@ -74,7 +75,14 @@
         <!-- Page Sidebar Start-->
         {% include 'new/components/sidebar.html' %}
         <!-- Page Sidebar Ends-->
-      
+        <div class="toast-container position-fixed top-0 end-0 p-3 toast-index toast-rtl">
+          <div class="toast hide toast fade" id="toastMessage" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell toast-icons toast-primary"><path d="M22 17H2a3 3 0 0 0 3-3V9a7 7 0 0 1 14 0v5a3 3 0 0 0 3 3zm-8.27 4a2 2 0 0 1-3.46 0"></path></svg><strong class="me-auto" id="title">Riho theme</strong><small class="txt-danger" >just now</small>
+              <button class="btn-close" type="button" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body " id="toastBody">Hello, I'm a web-designer.</div>
+          </div>
+        </div>
         
         {% block body %}
             
@@ -114,6 +122,9 @@
     <script src="{% static 'manish/js/header-slick.js' %}"></script>
     <script src="{% static 'manish/js/chart/apex-chart/apex-chart.js' %}"></script>
     <script src="{% static 'manish/js/chart/apex-chart/stock-prices.js' %}"></script>
+<!-- Include SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Range Slider js-->
     <script src="{% static 'manish/js/range-slider/rSlider.min.js' %}"></script>
     <script src="{% static 'manish/js/rangeslider/rangeslider.js' %}"></script>
@@ -124,6 +135,7 @@
     <script src="{% static 'manish/js/counter/counter-custom.js' %}"></script>
     <script src="{% static 'manish/js/custom-card/custom-card.js' %}"></script>
     <!-- calendar js-->
+  
     <script src="{% static 'manish/js/calendar/fullcalender.js' %}"></script>
     <script src="{% static 'manish/js/calendar/custom-calendar.js' %}"></script>
     <script src="{% static 'manish/js/dashboard/dashboard_2.js' %}"></script>
@@ -153,6 +165,33 @@
           }
           // Add more shortcuts if needed
       });
+      
   </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      var toastElement = document.getElementById("toastMessage");
+      var toastBody = document.getElementById("toastBody");
+      var title = document.getElementById("title");
+
+      {% if messages %}
+          {% for message in messages %}
+              toastBody.textContent = "{{ message }}";
+              title.textContent = "{{ message.tags }}";
+              toastBody.classList.add("toast-"+"{{ message.tags }}");
+              
+              // Remove 'hide' class and show the toast
+              toastElement.classList.remove("hide");
+              toastElement.classList.add("show");
+
+              // Automatically hide the toast after 3 seconds
+              setTimeout(function () {
+                  toastElement.classList.remove("show");
+                  toastElement.classList.add("hide");
+              }, 3000);
+          {% endfor %}
+      {% endif %}
+  });
+</script>
+
   </body>
 </html> 

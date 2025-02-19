@@ -5,6 +5,9 @@ from .api_view import BulkActionTriggerView, BulkActionStatusView, NoteAPI
 app_name='contact'
 urlpatterns = [
     path('', contact_list, name='contact_list'),
+    path('select-contacts/',select_contacts,name='select_contacts'),
+    path('select-lists/',select_lists,name='select_lists'),
+
     path('details/<int:id>/', contact_details, name='contact_details'),
     path('delete/<int:id>/', delete_contact, name='delete_contact'),
     path('add/', add_contact, name='add_contact'),

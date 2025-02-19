@@ -29,6 +29,11 @@ from .forms import CustomFieldForm, ExcelUploadForm,ListForm
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+
+import re  # For phone number validation
+
 
 
 
@@ -48,6 +53,7 @@ def contact_list(request):
     page_number = request.GET.get('page')  # Get the current page number
     page_obj = paginator.get_page(page_number)  # Get the contacts for the current page
     
+    
     # Prepare context
     context = {
         'page_obj': page_obj,
@@ -65,26 +71,75 @@ def contact_list(request):
 
 
 
+
 @login_required
 def add_contact(request):
-    """Handles creating a new contact with associated email, phone, lists, and campaigns."""
-    all_lists = List.objects.filter(user=request.user)  # Filter lists by logged-in user
-    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()  # Filter campaigns by user's lists
+    """Handles creating a new contact with validation and error handling."""
+    all_lists = List.objects.filter(user=request.user)
+    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
 
     if request.method == 'POST':
-        
         try:
-            # Parse JSON data
             data = json.loads(request.body)
 
-            # Process `contact_info` or save to database
-            first_name = data.get('firstName', '')
-            last_name = data.get('lastName', '')
+            # Extract and validate first & last name
+            first_name = data.get('firstName', '').strip()
+            last_name = data.get('lastName', '').strip()
+            
+            if not first_name or len(first_name) > 50:
+                return JsonResponse({'status': 'error', 'message': 'First name is required and must be under 50 characters.'}, status=400)
+            if len(last_name) > 50:
+                return JsonResponse({'status': 'error', 'message': 'Last name must be under 50 characters.'}, status=400)
+
+            # Extract and validate emails
             emails = data.get('emails', {})
+            valid_emails = {}
+
+            for email, is_primary in emails.items():
+                email = email.strip()
+                try:
+                    validate_email(email)  # Django's built-in email validator
+                    valid_emails[email] = is_primary
+                except ValidationError:
+                    return JsonResponse({'status': 'error', 'message': f'Invalid email: {email}'}, status=400)
+
+            if not valid_emails:
+                return JsonResponse({'status': 'error', 'message': 'At least one valid email is required.'}, status=400)
+
+            # Extract and validate phone numbers
             phone_data = data.get('phoneData', {})
-            contact_type = data.get('contactType', '')
-            time_zone = data.get('timeZone', '')
-            lists = data.get('lists', [])  # Get the list of selected lists
+            valid_phone_numbers = {}
+
+            phone_regex = re.compile(r'^\+?[1-9]\d{7,14}$')  # Simple regex for international numbers
+
+            for phone_id, phone_info in phone_data.items():
+                phone_number = str(phone_id).strip()
+                country_code = phone_info.get('country_code', '').strip()
+                
+                if not phone_regex.match(phone_number):
+                    return JsonResponse({'status': 'error', 'message': f'Invalid phone number: {phone_number}'}, status=400)
+                
+                valid_phone_numbers[phone_number] = phone_info
+
+            # Extract and validate contact type & time zone
+            contact_type = data.get('contactType', '').strip()
+            time_zone = data.get('timeZone', '').strip()
+
+            if not contact_type:
+                return JsonResponse({'status': 'error', 'message': 'Contact type is required.'}, status=400)
+            if not time_zone:
+                return JsonResponse({'status': 'error', 'message': 'Time zone is required.'}, status=400)
+
+            # Validate lists
+            lists = data.get('lists', [])
+            valid_lists = []
+
+            for list_id in lists:
+                try:
+                    list_obj = get_object_or_404(List, id=list_id, user=request.user)
+                    valid_lists.append(list_obj)
+                except Exception:
+                    return JsonResponse({'status': 'error', 'message': f'Invalid or unauthorized list ID: {list_id}'}, status=400)
 
             # Create the contact instance
             contact = Contact.objects.create(
@@ -96,41 +151,39 @@ def add_contact(request):
                 created_at=timezone.now()
             )
 
-            # Process emails and save
-            for email, is_primary in emails.items():
+            # Save emails
+            for email, is_primary in valid_emails.items():
                 Email.objects.create(
                     contact=contact,
                     user=request.user,
-                    email=email.strip(),
-                    is_primary=is_primary == 1  # Mark active if primary
+                    email=email,
+                    is_primary=is_primary == 1
                 )
 
-            # Process phone numbers and save
-            for phone_id, phone_info in phone_data.items():
+            # Save phone numbers
+            for phone_number, phone_info in valid_phone_numbers.items():
                 PhoneNumber.objects.create(
                     contact=contact,
                     user=request.user,
-                    phone_number=str(phone_id).strip(),
-                    country_code=phone_info.get('country_code', '').strip(),
-                    is_primary=phone_info.get('primary', 0) == 1,  # Mark active if primary
+                    phone_number=phone_number,
+                    country_code=phone_info.get('country_code', ''),
+                    is_primary=phone_info.get('primary', 0) == 1
                 )
 
-            # Associate contact with selected lists
-            for list_id in lists:
-                list_obj = get_object_or_404(List, id=list_id, user=request.user)
-                list_obj.contacts.add(contact)  # Add the contact to the list
+            # Associate with lists
+            for list_obj in valid_lists:
+                list_obj.contacts.add(contact)
 
-            contact.save()  # Save contact after associating lists
+            contact.save()
 
-            # Example response
             return JsonResponse({'status': 'success', 'message': 'Contact added successfully!'})
 
         except json.JSONDecodeError:
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON data'}, status=400)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-    else:
-        return JsonResponse({'error': 'Invalid HTTP method'}, status=405)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid HTTP method'}, status=405)
 
 def upload_excel(request):
     if request.method == 'POST' and request.FILES['file_upload']:
@@ -389,9 +442,33 @@ def list_overview(request):
     context = {'lists': listsd}
     return render(request, 'new/list_overview.html', context)
 
+
+
 def list_detail(request, list_id):
     list_obj = get_object_or_404(List, id=list_id)
-    return render(request, 'new/list_detail.html', {'list': list_obj})
+    search_query = request.GET.get('search', '')  # Get search input
+    contacts = Contact.objects.filter(lists=list_obj)
+    # Filter contacts based on search query (search by name, email, or phone)
+    if search_query:
+        contacts = contacts.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(emails__email__icontains=search_query) |  # Correct related lookup for emails
+            Q(phone_numbers__phone_number__icontains=search_query)  # Fixed field lookup
+        ).distinct()
+
+    # Pagination settings
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(contacts, 10)  # Show 10 contacts per page
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'new/list_detail.html', {
+        'list': list_obj,
+        'contacts': page_obj,
+        'search_query': search_query,  # Pass search query to template
+        'page_range': paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1),
+        'page_number': page_obj.number
+    })
 
 
 
@@ -404,12 +481,16 @@ def create_campaign(request):
             campaign.user = request.user  # Assign logged-in user
             campaign.save()
             form.save_m2m()  # Save Many-to-Many relationships
+            messages.success(request, "Campaign created successfully!")
             return redirect('contact:campaign_detail', campaign_id=campaign.id)
+        else:
+            print(form.errors)
+            messages.error(request, "There was an error creating the campaign.")
+    
     else:
         form = CampaignForm(user=request.user)
 
     return render(request, 'campaign/create_campaign.html', {'form': form})
-
 
 
 def campaign_detail(request, campaign_id):
@@ -424,6 +505,7 @@ def campaign_detail(request, campaign_id):
 
     }
     return render(request, 'new/campaign_detail.html', context)
+@login_required
 def campaign_detail_v1(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
     if request.user.is_agency():
@@ -728,7 +810,7 @@ def bulk_upload(request):
         return JsonResponse({'headers': headers,'fields': custom_field_data})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
+@login_required
 def add_custom_field(request):
     if request.method == 'POST':
         form = CustomFieldForm(request.POST)
@@ -761,7 +843,7 @@ def bulk_action_list(request):
 
 
 
-
+@login_required
 def delete_contact(request, id):
     contact = get_object_or_404(Contact, id=id)
     
@@ -773,7 +855,7 @@ def delete_contact(request, id):
 
 
 
-
+@login_required
 def custom_fields(request):
     # Get all custom fields from the database
     custom_fields = CustomField.objects.all()
@@ -781,7 +863,7 @@ def custom_fields(request):
     return render(request, 'custom/custom_overview.html', {'custom_fields': custom_fields})
   # Adjust the template name as needed
 
-
+@login_required
 def delete_list(request, list_id):
     # Get the list by ID or return a 404 if not found
     list_to_delete = get_object_or_404(List, id=list_id, user=request.user)
@@ -801,7 +883,7 @@ def delete_list(request, list_id):
 
 
 
-
+@login_required
 def delete_campaign(request, campaign_id):
     # Get the campaign or return a 404 if not found
     campaign = get_object_or_404(Campaign, id=campaign_id, lists__user=request.user)
@@ -813,7 +895,7 @@ def delete_campaign(request, campaign_id):
     return redirect('contact:campaign_list')
 
 
-
+@login_required
 def delete_custom_field(request, field_id):
     # Retrieve the custom field object by its ID, or return 404 if not found
     custom_field = get_object_or_404(CustomField, id=field_id)
@@ -875,3 +957,37 @@ def edit_list(request, list_id):
 
     context = {'form': form, 'list': list_obj}
     return render(request, 'new/edit_list.html', context)
+@login_required
+def select_lists(request):
+    search_query = request.GET.get('search', '')  # Get search input
+    lists = List.objects.filter(user=request.user)
+
+    if search_query:
+        lists = lists.filter(name__icontains=search_query)  # Search filter
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(lists, 10)  # Show 10 lists per page
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'contact/select_lists.html', {'page_obj': page_obj, 'search_query': search_query})
+@login_required
+def select_contacts(request):
+    query = request.GET.get('search', '')  # Get search query from request
+    page_number = request.GET.get('page', 1)  # Get current page
+
+    # Filter contacts by user
+    contacts = Contact.objects.filter(user=request.user)
+
+    # Apply search filter if query exists
+    if query:
+        contacts = contacts.filter(first_name__icontains=query) | contacts.filter(last_name__icontains=query)
+
+    # Paginate results (5 contacts per page)
+    paginator = Paginator(contacts, 10)
+    page_obj = paginator.get_page(page_number)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'contact/select_contacts.html', {'page_obj': page_obj})
+
+    return render(request, 'contact/select_contacts.html', {'page_obj': page_obj, 'search_query': query})

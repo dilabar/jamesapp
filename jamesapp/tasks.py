@@ -2,8 +2,9 @@ from datetime import time
 from agent.models import PhoneCall, ServiceDetail
 from celery import shared_task, current_task
 from django.utils import timezone
+from jamesapp.utils import deduplicate_contacts, parse_csv
 from twilio.rest import Client
-from contact.models import Campaign, RevokedTask
+from contact.models import BulkAction, Campaign, Contact, CustomField, Email, List, PhoneNumber, RevokedTask
 from celery import current_app
 
 
@@ -109,3 +110,101 @@ def resume_task(campaign_id, user_id, agent_id):
     # Re-push the task to Celery to resume execution
     process_campaign_calls.apply_async(args=[campaign_id, user_id, agent_id])
     print(f"Campaign {campaign_id} task resumed.")
+
+
+@shared_task
+def process_bulk_action(action_id):
+    """
+    Celery task to process the bulk action.
+    """
+    action = BulkAction.objects.get(id=action_id)
+    action.status = "PROCESSING"
+    action.started_at = timezone.now()
+    action.save()
+
+    try:
+        file_path = action.csv_file.path
+        contacts_data = parse_csv(file_path)
+
+        deduplication = action.data.get("deduplication", "email,phone")
+        listId = action.data.get("listId", "")
+        import_option = action.data.get("importOption", "create")
+        field_mappings = action.data.get("field_mappings", [])
+
+        predefined_fields = {str(field.id): field for field in CustomField.objects.filter(is_predefined=True)}
+        custom_fields = {str(field.id): field for field in CustomField.objects.filter(user=action.user, is_predefined=False)}
+        all_fields = {**predefined_fields, **custom_fields}
+
+        for row in contacts_data:
+            if action.status == 'PAUSED':
+                continue  # Skip processing if paused
+            if action.status == 'FAILED':
+                break  # Stop processing if failed
+
+            try:
+                contact_data = {}
+                dynamic_field_data = {}
+
+                for field_mapping in field_mappings:
+                    field_id = str(field_mapping['field_id'])
+                    csv_header = field_mapping['csv_header']
+                    mapped_field = all_fields.get(field_id)
+
+                    if mapped_field:
+                        if mapped_field.is_predefined:
+                            contact_data[mapped_field.unique_key] = row.get(csv_header, "").strip()
+                        else:
+                            dynamic_field_data[mapped_field.unique_key] = row.get(csv_header, "").strip()
+
+                first_name = contact_data.get("first_name", "")
+                last_name = contact_data.get("last_name", "")
+                email = contact_data.get("email", "")
+                phone_number = contact_data.get("phone_number", "")
+                contact_type = contact_data.get("contact_type", "")
+
+                existing_contacts = deduplicate_contacts({"email": email, "phone": phone_number}, deduplication)
+                if existing_contacts.exists():
+                    if import_option in ("update", "create_update"):
+                        contact = existing_contacts.first()
+                        contact.first_name = first_name
+                        contact.last_name = last_name
+                        contact.contact_type = contact_type
+                        contact.custom_fields.update(dynamic_field_data)
+                        contact.save()
+                else:
+                    contact = Contact.objects.create(
+                        user=action.user,
+                        first_name=first_name,
+                        last_name=last_name,
+                        contact_type=contact_type,
+                        custom_fields=dynamic_field_data,
+                    )
+
+                    if email:
+                        Email.objects.create(contact=contact, email=email, user=action.user, is_primary=True)
+                    if phone_number:
+                        PhoneNumber.objects.create(contact=contact, phone_number=phone_number, user=action.user, is_primary=True)
+
+                list_obj = List.objects.get(id=listId)
+                list_obj.contacts.add(contact)
+
+                action.success_count += 1
+            except Exception as e:
+                action.failure_count += 1
+                action.error_details.append({
+                    'row': row,
+                    'error': str(e)
+                })
+
+            action.save()
+
+        action.status = "COMPLETED"
+        action.completed_at = timezone.now()
+        action.save()
+
+    except Exception as e:
+        action.status = "FAILED"
+        action.error_message = str(e)
+        action.completed_at = timezone.now()
+        action.save()
+        raise e
