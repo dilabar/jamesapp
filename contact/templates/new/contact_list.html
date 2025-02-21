@@ -175,20 +175,16 @@
                                                 </div>
                                                 <div class="row">
                                                   <div class="col">
-                                                      <div class="mb-3">
-                                                          <label class="form-label" for="lists">Lists</label>
-                                                          {% if all_lists %}
-                                                              <select class="form-select input-air-primary" id="lists" name="lists" multiple>
-                                                                  {% for list in all_lists %}
-                                                                      <option value="{{ list.id }}" {% if list.id in form.lists.value %}selected{% endif %}>
-                                                                          {{ list.name }}
-                                                                      </option>
-                                                                  {% endfor %}
-                                                              </select>
-                                                          {% else %}
-                                                              <p>No lists available. <a href="{% url 'contact:create_list' %}">Create a new list</a>.</p>
-                                                          {% endif %}
+                                                    <div class="row mb-4">
+                                                      <div class="col-md-12">
+                                                          <label class="form-label">Target Lists</label>
+                                                          <button type="button" class="btn btn-outline-primary" onclick="openSelectionWindow('lists')">
+                                                              Select Lists
+                                                          </button>
+                                                          <input type="hidden" id="selectedLists" name="lists">
+                                                          <div id="selectedListsDisplay" class="mt-2"></div>
                                                       </div>
+                                                  </div>
                                                   </div>
                                                   <div class="col">
                                                       <div class="mb-3">
@@ -1320,6 +1316,35 @@ function updateStatus(index) {
             document.getElementById("newListContainer").style.display = isExisting ? "none" : "block";
         }
     </script>
+
+
+<script>
+      function openSelectionWindow(type) {
+       let url = "";
+       if (type === "lists") {
+           url = "{% url 'contact:select_lists' %}";
+       } else if (type === "contacts") {
+           url = "{% url 'contact:select_contacts' %}";
+       }
+   
+       const popup = window.open(url, "_blank", "width=600,height=500");
+   
+       window.addEventListener("message", function(event) {
+           if (event.origin !== window.location.origin) return; // Secure: Ignore unknown sources
+   
+           let selectedIds = event.data.selectedIds.join(",");  // Convert array to comma-separated string
+           let selectedNames = event.data.selectedNames.join(", "); // Display names
+   
+           if (type === "lists") {
+               document.getElementById("selectedLists").value = selectedIds;
+               document.getElementById("selectedListsDisplay").innerHTML = selectedNames;
+           } else if (type === "contacts") {
+               document.getElementById("selectedContacts").value = selectedIds;
+               document.getElementById("selectedContactsDisplay").innerHTML = selectedNames;
+           }
+       }, { once: true });  // Ensures the event listener runs only once
+   }
+   </script>
     {% endblock js %}
         
     
