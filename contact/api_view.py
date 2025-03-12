@@ -87,7 +87,7 @@ class BulkActionTriggerView(View):
         deduplication = request.POST.get('deduplication')
         list_selection = request.POST.get('listSelection')
         new_list_name = request.POST.get('newListName')
-        listId = request.POST.get('listId')
+        list_id = request.POST.get('listId')
 
         if not csv_file or not field_mappings or not import_option or not deduplication:
             return JsonResponse({'error': 'Missing required data'}, status=400)
@@ -130,7 +130,7 @@ class BulkActionTriggerView(View):
                         'field_mappings': field_mappings,
                         'importOption': import_option,
                         'deduplication': deduplication,
-                        'listId':listId
+                        'listId':list_id
                     },
                 )
         
@@ -174,6 +174,7 @@ def process_bulk_action(action_id):
         # Extract parameters from the action
         deduplication = action.data.get("deduplication", "email,phone")
         listId = action.data.get("listId", "")
+
         import_option = action.data.get("importOption", "create")
         field_mappings = action.data.get("field_mappings", [])  # ["1", "2", "3", "4", "5"]
 
