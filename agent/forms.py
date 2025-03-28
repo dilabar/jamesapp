@@ -135,6 +135,65 @@ class AgentForm(forms.ModelForm):
         return instance
     
 
+class AgentFormV1(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)  # ✅ request.user ko form me pass karne ke liye
+        super().__init__(*args, **kwargs)
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+       
+        if self.user:
+            instance.user = self.user  # ✅ request.user assign karna
+        if commit:
+            instance.save()
+        return instance
+    voice_speed = forms.ChoiceField(
+        choices=[
+            (0.5, "0.5"), (0.6, "0.6"), (0.7, "0.7"), (0.8, "0.8"), (0.9, "0.9"),
+            (1.0, "1.0"), (1.1, "1.1"), (1.2, "1.2"), (1.3, "1.3"), (1.4, "1.4"), (1.5, "1.5")
+        ],
+        initial=1.0,  # ✅ Default value set
+        widget=forms.Select(attrs={"class": "form-control"})
+    )
+    llm_model = forms.ChoiceField(
+        choices=[
+            ("PlayHT2.0-turbo", "PlayHT2.0-turbo"),
+            ("Play3.0-mini", "Play3.0-mini"),
+            ("PlayDialog", "PlayDialog"),
+            ("play-tts", "play-tts")
+        ],
+        initial="PlayDialog",  # ✅ Default value
+        widget=forms.Select(attrs={"class": "form-control"})
+        )
+
+    class Meta:
+        model = Agent
+        fields = [
+            "voice", "voice_speed", "display_name", "description", "greeting",
+            "prompt", "critical_knowledge", "visibility",
+            "answer_only_from_critical_knowledge", "avatar_photo_url",
+            "critical_knowledge_files", "phone_numbers", "llm_model"
+        ]
+      
+        widgets = {
+            "voice": forms.TextInput(attrs={"class": "form-control","value":"s3://voice-cloning-zero-shot/37RKAKle9paS_85btF3lr/your-voice/manifest.json"}),
+            # "voice_speed": forms.Select(
+            # attrs={"class": "form-control"},
+            #     choices=[
+            #         (0.5, "0.5"), (0.6, "0.6"), (0.7, "0.7"), (0.8, "0.8"), (0.9, "0.9"),
+            #         (1.0, "1.0"), (1.1, "1.1"), (1.2, "1.2"), (1.3, "1.3"), (1.4, "1.4"), (1.5, "1.5")
+            #     ]
+            # ),
+            "display_name": forms.TextInput(attrs={"class": "form-control"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "greeting": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+            "prompt": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "critical_knowledge": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "visibility": forms.Select(attrs={"class": "form-control"}, choices=[("public", "Public"), ("private", "Private")]),
+            "answer_only_from_critical_knowledge": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "avatar_photo_url": forms.URLInput(attrs={"class": "form-control"}),
+            # "llm_model": forms.TextInput(attrs={"class": "form-control"},value="play"),
+        }
 
 

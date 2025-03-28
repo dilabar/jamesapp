@@ -24,6 +24,7 @@ urlpatterns = [
     path('agent/setup/', agent_setup, name='agent_setup'),
     path('onboard/', onboard, name='onboard'),
     path('api/playai/webhook/', playai_webhook, name='playai-webhook'),
+    path('create-agent/', AgentCreateView.as_view(), name='create-agent'),
     
 
 ]

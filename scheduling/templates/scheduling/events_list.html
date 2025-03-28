@@ -71,14 +71,19 @@
                                     <td><a href="{{ event.calendar_link }}" target="_blank">View Event</a></td>
 
                                     <td>
-                                        {% if event.status == 'cancelled' %}
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        {% elif event.end_time < now %}
-                                            <span class="badge bg-success">Completed</span>
-                                        {% else %}
-                                            <span class="badge bg-info">Upcoming</span>
-                                        {% endif %}
-                                    </td>
+                                      {% if event.status == 'cancelled' %}
+                                          <span class="badge bg-danger">Cancelled</span>
+                                      {% elif event.status == 'failed' %}
+                                          <span class="badge bg-danger">Failed</span>
+                                      {% elif event.status == 'completed' and event.end_time < now %}
+                                          <span class="badge bg-success">Completed</span>
+                                      {% elif event.status == 'pending' %}
+                                          <span class="badge bg-warning">Pending</span>
+                                      {% else %}
+                                          <span class="badge bg-info">Upcoming</span>
+                                      {% endif %}
+                                  </td>
+                                  
 
                                     
                                 </tr>
