@@ -166,12 +166,12 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
         for phone_call in pending_calls:
             try:
                 call = client.calls.create(
-                    url=f'https://ee76-2409-40e1-303c-fb20-7149-2cec-c56a-64.ngrok-free.app/call/start_twilio_stream/{user_id}/{agent_id}/{campaign_id}/',
+                    url=f'https://secretvoiceagent.net/call/start_twilio_stream/{user_id}/{agent_id}/{campaign_id}/',
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone,
                     record=True,
                     method='POST',
-                    status_callback=f'https://ee76-2409-40e1-303c-fb20-7149-2cec-c56a-64.ngrok-free.app/call/call_status_callback/{phone_call.id}/',
+                    status_callback=f'https://secretvoiceagent.net/call/call_status_callback/{phone_call.id}/',
                     status_callback_method='POST',
                     status_callback_event=["initiated", "ringing", "answered", "completed"]
                 )
