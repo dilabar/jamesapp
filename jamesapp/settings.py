@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY',default="")
 
 # False if not in os.environ because of casting above
 DEBUG = os.getenv('DEBUG',default=True)
-ALLOWED_HOSTS = ["127.0.0.1","localhost","secretvoiceagent.net","4f96-2409-40e1-1149-40b9-2599-4415-9c40-5094.ngrok-free.app"]
+ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS=['https://*.ngrok-free.app','https://secretvoiceagent.net','http://secretvoiceagent.net']
 # Application definition
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'rest_framework',
     'callapp',
     'agent',
@@ -155,6 +156,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_POOL = 'prefork'
 CELERY_TASK_ALWAYS_EAGER = True
+CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule' 
 
 
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')

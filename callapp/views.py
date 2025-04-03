@@ -65,7 +65,7 @@ def call_initiate(request, agnt_id):
             )
             try:
                 call = client.calls.create(
-                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/',
+                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/{campaign_id}/',
                     to=phone_call.phone_number,
                     from_=twilio.decrypted_twilio_phone,
                     record=True,
@@ -118,7 +118,7 @@ def call_initiate(request, agnt_id):
                             )
                             try:
                                 call = client.calls.create(
-                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/',
+                                    url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/{campaign_id}/',
                                     to=phone_call.phone_number,
                                     from_=twilio.decrypted_twilio_phone,
                                     record=True,
@@ -170,7 +170,7 @@ def start_card(request):
     return render(request, 'callapp/agent_card.html',context)
    
 @csrf_exempt
-def start_twilio_stream(request, user_id,agnt_id):
+def start_twilio_stream(request, user_id,agnt_id,camp_id):
     if request.method == 'POST':
         call_sid = request.POST.get('CallSid')
     else:
@@ -378,7 +378,7 @@ def call_status_callback(request,id):
     lg.to_country = to_country
     lg.from_city = from_city
     lg.to_city = to_city
-
+    print(call_status)
     if call_status =='initiated':
         logger.info(f"Call {call_sid} initiated.")
         pass

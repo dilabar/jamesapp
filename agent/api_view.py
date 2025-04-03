@@ -6,12 +6,14 @@ import random
 from django.conf import settings
 from django.http import HttpResponse
 import requests
+from agent.forms import AgentFormV1
 from twilio.rest import Client
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import urllib
 from django.core.paginator import Paginator
 from django.db.models import F
+from django.db import transaction
 
 from rateMaster.models import CallRate
 from scheduling.models import CalendarConnection
@@ -185,63 +187,79 @@ def playai_webhook(request):
         try:
             # Parse incoming JSON payload
             data = json.loads(request.body)
+
             # Extract event details from the payload
             summary = data.get("summary", "No Title")
             start_time = data.get("start_time")
             end_time = data.get("end_time")
             description = data.get("description", "No Description")
-            attendees = data.get("attendees")
+            attendees = data.get("attendees", [])
+
             agentId = data.get("agentId")
-            agent_id_hash = sha256(agentId.encode()).hexdigest()
+            agent_id_hash = hashlib.sha256(agentId.encode()).hexdigest()
 
-            agd=Agent.objects.filter(agent_id_hash=agent_id_hash).first()
+            agd = Agent.objects.filter(agent_id_hash=agent_id_hash).first()
+            if not agd:
+                return JsonResponse({"status": "error", "message": "Agent not found"}, status=400)
 
-            # Optionally, add to Google Calendar
-            user = agd.user  # Ensure the user is set correctly
-            calendar_connection = CalendarConnection.objects.get(user_id=user)
-            if calendar_connection.provider == 'google':
-                raw_credentials = calendar_connection.credentials
-                credentials = Credentials(
-                token=raw_credentials.get("token"),
-                refresh_token=raw_credentials.get("refresh_token"),
-                token_uri=raw_credentials.get("token_uri"),
-                client_id=raw_credentials.get("client_id"),
-                client_secret=raw_credentials.get("client_secret"),
-                )
-                # credentials = Credentials(**calendar_connection.credentials)
-                service = build('calendar', 'v3', credentials=credentials)
-               
-                event = {
-                    "summary": summary,
-                    "description": description,
-                    "start": {"dateTime": start_time, "timeZone": "UTC"},
-                    "end": {"dateTime": end_time, "timeZone": "UTC"},
-                    "attendees": [{"email": attendees}],
-                    # "attendees": [{"email": 'dilbarh2@gmail.com'}],
-                }
-                calendar_event = service.events().insert(calendarId='primary', body=event).execute()
+            # Save event to the database first
+            saved_event = GoogleCalendarEvent.objects.create(
+                summary=summary,
+                start_time=start_time,
+                end_time=end_time,
+                description=description,
+                attendees=attendees,
+                # calendar_event_id=None,  # Initially null
+                # calendar_link=None,  # Initially null
+                status="pending",  # Initially pending
+            )
 
-                # Save event details to the database
-                saved_event = GoogleCalendarEvent.objects.create(
-                    summary=summary,
-                    start_time=start_time,
-                    end_time=end_time,
-                    description=description,
-                    attendees=attendees,
-                    calendar_event_id=f"{calendar_event['id']}",  # Access event ID as string
-                    calendar_link=calendar_event['htmlLink'],  # Use htmlLink for the event URL
-                )
+            # Try booking Google Calendar event
+            try:
+                user = agd.user  # Ensure the user is set correctly
+                calendar_connection = CalendarConnection.objects.get(user_id=user)
+                if calendar_connection.provider == "google":
+                    raw_credentials = calendar_connection.credentials
+                    credentials = Credentials(
+                        token=raw_credentials.get("token"),
+                        refresh_token=raw_credentials.get("refresh_token"),
+                        token_uri=raw_credentials.get("token_uri"),
+                        client_id=raw_credentials.get("client_id"),
+                        client_secret=raw_credentials.get("client_secret"),
+                    )
+                    service = build("calendar", "v3", credentials=credentials)
+
+                    event = {
+                        "summary": summary,
+                        "description": description,
+                        "start": {"dateTime": start_time, "timeZone": "UTC"},
+                        "end": {"dateTime": end_time, "timeZone": "UTC"},
+                        "attendees": [{"email": email} for email in attendees],  # Handle multiple attendees
+                    }
+                    calendar_event = service.events().insert(calendarId="primary", body=event).execute()
+
+                    # Update event in database with Google Calendar details
+                    saved_event.calendar_event_id = calendar_event["id"]
+                    saved_event.calendar_link = calendar_event["htmlLink"]
+                    saved_event.status = "booked"
+                    saved_event.save()
+
+            except Exception as calendar_error:
+                print(f"Google Calendar Error: {str(calendar_error)}")
+                saved_event.status = "failed"
+                saved_event.save()
 
             # Respond with success and event details
             return JsonResponse({
                 "status": "success",
-                "message": "Event booked successfully.",
+                "message": "Event processed.",
                 "event": {
                     "id": saved_event.id,
                     "summary": saved_event.summary,
                     "start_time": saved_event.start_time,
                     "end_time": saved_event.end_time,
                     "calendar_link": saved_event.calendar_link,
+                    "status": saved_event.status,  # Indicate booking success/failure
                 },
             })
 
@@ -249,8 +267,72 @@ def playai_webhook(request):
             print(f"Error occurred: {str(e)}")
             return JsonResponse({"status": "error", "message": f"Error occurred: {str(e)}"}, status=400)
 
-    # Handle non-POST requests
     return JsonResponse({"status": "error", "message": "Invalid request method."}, status=405)
+class AgentCreateView(View):
+    def get(self, request):
+        form = AgentFormV1()
 
+        return render(request, 'agent/agent_create.html', {'form': form})
 
-  
+    def post(self, request):
+        form = AgentFormV1(request.POST,user=request.user)
+        if form.is_valid():
+            print("valid")
+        
+            agent = form.save(commit=False)
+            
+            # Prepare API request
+            url = "https://api.play.ai/api/v1/agents"
+            payload = {
+                "voice": agent.voice,
+                "voiceSpeed": agent.voice_speed,
+                "ttsModel": agent.llm_model,
+                "displayName": agent.display_name,
+                "description": agent.description,
+                "greeting": agent.greeting,
+                "prompt": agent.prompt,
+                "criticalKnowledge": agent.critical_knowledge,
+                "visibility": agent.visibility,
+                "answerOnlyFromCriticalKnowledge": agent.answer_only_from_critical_knowledge,
+                # "avatarPhotoUrl": agent.avatar_photo_url,
+                # "criticalKnowledgeFiles": agent.critical_knowledge_files,
+                # "phoneNumbers": agent.phone_numbers,
+                "actions": []
+            }
+
+            headers = {
+                "content-type": "application/json",
+                "Authorization": "Bearer ak-524c684b1aa44488b66087078dd9efc0",
+                "X-USER-ID": "kXeov3rz8WZD6FEAKs2i2UrUbtb2"
+            }
+            response = requests.post(url, json=payload, headers=headers)
+            print(response.json())
+            if response.status_code == 201:
+                response_json = response.json()
+                if response_json.get("id", agent.agent_id):
+                    agent.agent_id_hash = hashlib.sha256(response_json.get("id", agent.agent_id).encode()).hexdigest()
+                    agent.agent_id = encrypt(response_json.get("id", agent.agent_id))  # 🔐 Encrypt agent_id
+                    # agent.agent_id = response_json.get("id", agent.agent_id)
+                agent.voice = response_json.get("voice", agent.voice)
+                agent.voice_speed = response_json.get("voiceSpeed", agent.voice_speed)
+                agent.display_name = response_json.get("displayName", agent.display_name)
+                agent.description = response_json.get("description", agent.description)
+                agent.greeting = response_json.get("greeting", agent.greeting)
+                agent.prompt = response_json.get("prompt", agent.prompt)
+                agent.critical_knowledge = response_json.get("criticalKnowledge", agent.critical_knowledge)
+                agent.visibility = response_json.get("visibility", agent.visibility)
+                agent.avatar_photo_url = response_json.get("avatarPhotoUrl", agent.avatar_photo_url)
+                agent.critical_knowledge_files = response_json.get("criticalKnowledgeFiles", agent.critical_knowledge_files)
+                agent.phone_numbers = response_json.get("phoneNumbers", agent.phone_numbers)
+                # agent.actions = response_json.get("actions", agent.actions)
+                agent.response_data = response_json
+                agent.save()
+                
+                return redirect('agent:agent_list')
+            else:
+                return JsonResponse({"error": "API request failed", "status_code": response.status_code}, status=400)
+    
+        # 🚨 Debug: Print form errors
+        print("Form errors:", form.errors)  # Print errors in the terminal
+        return JsonResponse({"error": "Invalid form data", "errors": form.errors}, status=400)
+

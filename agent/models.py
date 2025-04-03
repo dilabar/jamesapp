@@ -12,9 +12,9 @@ from jamesapp.utils import decrypt, encrypt
 # Create your models here.
 class Agent(models.Model):
     id = models.AutoField(primary_key=True)  # Auto-incrementing primary key
-    agent_id = models.CharField(max_length=255, unique=True)
+    agent_id = models.CharField(max_length=255, unique=True,null=True, blank=True)
     agent_id_hash = models.CharField(max_length=64, unique=True, null=True, blank=True)  # Use SHA-256 hash
-    voice = models.URLField(null=True, blank=True)
+    voice = models.CharField(max_length=500, blank=True, null=True)
     voice_speed = models.FloatField(null=True, blank=True)
     display_name = models.CharField(max_length=255,null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -36,12 +36,12 @@ class Agent(models.Model):
     updated_at = models.DateTimeField(auto_now=True)      # Automatically update on save
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='agents',null=True)
 
-    def save(self, *args, **kwargs):
-        # Encrypt sensitive data before saving
-        if self.agent_id:
-            self.agent_id_hash = hashlib.sha256(self.agent_id.encode()).hexdigest()
-            self.agent_id = encrypt(self.agent_id)
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Encrypt sensitive data before saving
+    #     if self.agent_id:
+    #         self.agent_id_hash = hashlib.sha256(self.agent_id.encode()).hexdigest()
+    #         self.agent_id = encrypt(self.agent_id)
+    #     super().save(*args, **kwargs)
     @property
     def decrypted_agent_id(self):
         return decrypt(self.agent_id)
@@ -145,25 +145,27 @@ class GoogleCalendarEvent(models.Model):
     summary = models.CharField(max_length=255)
     
     # Event Start and End Times
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(null=True,blank=True)
+    end_time = models.DateTimeField(null=True,blank=True)
 
     # Event Description
-    description = models.TextField()
+    description = models.TextField(null=True,blank=True)
 
     # Attendees (storing emails of attendees)
-    attendees = models.JSONField()  # To store a list of email addresses
+    attendees = models.JSONField(null=True,blank=True)  # To store a list of email addresses
     
     # Google Calendar Event ID and Link
-    calendar_event_id = models.CharField(max_length=255, unique=True)
-    calendar_link = models.URLField()
+    calendar_event_id = models.CharField(max_length=255, unique=True,null=True,blank=True)
+    calendar_link = models.URLField(null=True,blank=True)
 
     # Status of the booking
     status = models.CharField(max_length=50, choices=[
+        ('pending', 'Pending'),
         ('booked', 'Booked'),
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
-    ], default='booked')
+        ('failed', 'Failed'),
+    ], default='pending')
 
     # Timestamps for when the event was created/modified
     created_at = models.DateTimeField(auto_now_add=True)

@@ -75,10 +75,14 @@ class TwilioToPlayAIStreamConsumer(WebsocketConsumer):
         try:
             twilio_data = json.loads(text_data)
             event_type = twilio_data.get('event')
+           
 
+            if event_type == 'start':
+                
+                 logger.info(f"Twilio start {twilio_data}")
             if event_type == 'connected':
                 self.twilio_connected = True
-                logger.info("Twilio connected")
+                logger.info(f"Twilio connected")
             elif event_type == "media":
                 self.stream_id = twilio_data.get('streamSid')
                 audio_payload = twilio_data["media"].get("payload")

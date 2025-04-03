@@ -1,0 +1,161 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block header %}
+    <link rel="stylesheet" href="{% static 'path/to/bootstrap.css' %}">  <!-- Ensure you include Bootstrap CSS -->
+{% endblock header %}
+
+{% block css %}
+
+{% endblock css %}
+
+{% block body %}
+<div class="page-body">
+    <div class="container-fluid">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-6">
+            <h4></h4>
+          </div>
+          <div class="col-6">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">                                       
+                    <svg class="stroke-icon">
+                      <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                    </svg></a></li>
+              <li class="breadcrumb-item">Agents</li>
+              <li class="breadcrumb-item active">Agent List</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Container-fluid starts-->
+    <div class="container-fluid">
+      <div class="row">
+       <!-- Left Side - Form Controls -->
+       <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-white">
+                <h5>Create Agent</h5>
+            </div>
+            <div class="card-body form-section">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="display_name" class="form-label">Display Name:</label>
+                        <!-- <input type="text" name="display_name" id="display_name" class="form-control" required> -->
+                        {{form.display_name}}
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description:</label>
+                        {{form.description}}
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="greeting" class="form-label">Greeting:</label>
+                        {{form.greeting}}
+
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="prompt" class="form-label">Prompt:</label>
+                        {{form.prompt}}
+
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="voice" class="form-label">Voice URL:</label>
+                        {{form.voice}}
+
+                        <!-- <input type="url" name="voice" id="voice" class="form-control" value="s3://voice-cloning-zero-shot/37RKAKle9paS_85btF3lr/your-voice/manifest.json"> -->
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="voice_speed" class="form-label">Voice Speed:</label>
+                        {{form.voice_speed}}
+
+                    </div>
+        
+                    
+        
+                   
+        
+                   
+                    <div class="mb-3">
+                        <label for="critical_knowledge" class="form-label">Critical Knowledge:</label>
+                        {{form.critical_knowledge}}
+
+                        <!-- <textarea name="critical_knowledge" id="critical_knowledge" class="form-control" rows="3"></textarea> -->
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="visibility" class="form-label">Visibility:</label>
+                        {{form.visibility}}
+
+                       
+                    </div>
+        
+                    <div class="mb-3 form-check">
+                        {{form.answer_only_from_critical_knowledge}}
+
+                        <!-- <input type="checkbox" name="answer_only_from_critical_knowledge" id="answer_only_from_critical_knowledge" class="form-check-input"> -->
+                        <label for="answer_only_from_critical_knowledge" class="form-check-label">Answer Only from Critical Knowledge</label>
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="avatar_photo_url" class="form-label">Avatar Photo URL:</label>
+                        {{form.avatar_photo_url}}
+
+                        <!-- <input type="url" name="avatar_photo_url" id="avatar_photo_url" class="form-control"> -->
+                    </div>
+        
+                    <div class="mb-3">
+                        <label for="llm_model" class="form-label">LLM Model:</label>
+                        {{form.llm_model}}
+
+                        <!-- <input type="text" name="llm_model" id="llm_model" class="form-control"> -->
+                    </div>
+        
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side - Actions and Settings -->
+    <div class="col-md-5">
+        <!-- <div class="card">
+            <div class="card-header text-white">
+                <h5>Actions</h5>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-info ">Apply Sample Script</button>
+                <button class="btn btn-warning ">Test Agent</button>
+                <button class="btn btn-danger ">Delete Agent</button>
+            </div>
+        </div> -->
+
+        <div class="card">
+            <div class="card-header text-white">
+                <h5>Settings</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">General settings</li>
+                    <li class="list-group-item">Speech settings</li>
+                    <li class="list-group-item">Call settings</li>
+                    <li class="list-group-item">Functions</li>
+                    <li class="list-group-item">Knowledge Base</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+       
+        </div>
+    </div>
+</div> 
+{% endblock body %}
+{% block js %}
+
+{% endblock js %}
