@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
     'rest_framework',
     'callapp',
     'agent',
@@ -155,6 +156,7 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_POOL = 'prefork'
 CELERY_TASK_ALWAYS_EAGER = True
+CELERY_BEAT_SCHEDULE_FILENAME = 'celerybeat-schedule' 
 
 
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
