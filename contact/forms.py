@@ -96,7 +96,7 @@ class ListForm(forms.ModelForm):
 class CampaignForm(forms.ModelForm):
     lists = forms.CharField(
         widget=forms.HiddenInput(),
-        required=False,
+        required=True,
         label="Target Lists"
     )
     
@@ -135,7 +135,12 @@ class CampaignForm(forms.ModelForm):
         if user:
             self.fields['agent'].queryset = Agent.objects.filter(user=user)
 
-        self.fields['agent'].label_from_instance = lambda obj: obj.display_name  
+        self.fields['agent'].label_from_instance = lambda obj: obj.display_name.title()  
+        # Disable all campaign types except 'ontime'
+        # campaign_type_choices = self.fields['campaign_type'].choices
+     
+        # self.fields['campaign_type'].choices = [choice for choice in campaign_type_choices if choice[0] == 'one_time']
+        # self.fields['campaign_type'].widget.attrs['disabled'] = True  # Disable the entire select field so only 'one time' is available
 
     def clean_name(self):
         name = self.cleaned_data.get('name')
