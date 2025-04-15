@@ -1,6 +1,6 @@
 {% extends 'new/base.html' %}
 {% load static %}
-
+{% load custom_filters %}
 {% block header %}
 
 {% endblock header %}
@@ -223,7 +223,7 @@
                                     <td>{{ call.phone_number }}</td>
                                     <td>{% if call.is_call_answered %} Yes {% else %} No {% endif %}</td>
 
-                                    <td>{{ call.call_duration_fixed }}</td>
+                                    <td>{{ call.call_duration_fixed|format_seconds }}</td>
                                     <td>
                                     <div>
                                       

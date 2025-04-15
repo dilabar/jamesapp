@@ -6,7 +6,7 @@ from jamesapp.utils import deduplicate_contacts, parse_csv
 from twilio.rest import Client
 from contact.models import BulkAction, Campaign, Contact, CustomField, Email, List, PhoneNumber, RevokedTask
 from celery import current_app
-
+from django.db import transaction
 from celery import group
 import time
 
@@ -140,7 +140,9 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
             )
             phone_calls.append(phone_call)
 
-        PhoneCall.objects.bulk_create(phone_calls)
+        # Insert phone calls in bulk
+        with transaction.atomic():
+            PhoneCall.objects.bulk_create(phone_calls)
         campaign.status = 'started'
         campaign.triggers['task_id'] = self.request.id
         campaign.save()

@@ -20,6 +20,7 @@ urlpatterns = [
     path('twilio-service/', twilio_service_detail_view, name='twilio_service'),
     path('summarize_transcript/<str:agent_id>/<str:cid>/', summarize_transcript, name='summarize_transcript'),
     path('call_history/', call_history, name='call_history'),
+    path('call-history/data/', call_history_data, name='call_history_data'),
     path('call_history/<int:id>/', call_detail, name='call_detail'),
     path('agent/setup/', agent_setup, name='agent_setup'),
     path('onboard/', onboard, name='onboard'),

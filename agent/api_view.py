@@ -5,6 +5,7 @@ import os
 import random
 from django.conf import settings
 from django.http import HttpResponse
+from django.urls import reverse
 import requests
 from agent.forms import AgentFormV1
 from twilio.rest import Client
@@ -12,9 +13,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import urllib
 from django.core.paginator import Paginator
-from django.db.models import F
+from django.db.models import Q, F
 from django.db import transaction
-
+from django.utils.timesince import timesince
+from django.utils.timezone import now
 from rateMaster.models import CallRate
 from scheduling.models import CalendarConnection
 from jamesapp.utils import decrypt, encrypt, get_transcript_data
@@ -60,39 +62,7 @@ def calculate_bill(call):
 
 @login_required
 def call_history(request):
-    # Fetch phone calls for the logged-in user
-    # print(f"start..........")
-    # phone_cals = PhoneCall.objects.all()  # Filter by user if required
 
-    # for phone_call in phone_cals:
-    #     print(f"phone_call..........",phone_call.id)
-
-    #     # Retrieve the Agent object based on agent_id
-    #     if phone_call.agent_id:
-    #         ag=decrypt(phone_call.agent_id)
-    #         hs=hashlib.sha256(ag.encode()).hexdigest()
-    #         print(f"ag..........",ag)
-    #         print(f"hs..........",hs)
-       
-    #         agent = get_object_or_404(Agent, agent_id_hash=hs)  # Match by agent_id
-
-    #         # Update the PhoneCall with the corresponding Agent
-    #         phone_call.agnt = agent  # Set the agent foreign key field
-    #         phone_call.save()  # Save the updated PhoneCall object
-    #         print(f"phone_call..........",phone_call.id)
-    #     # else:
-    #     # phone_call.agent_id=encrypt("YOUR-AI-CLONE-0k26dDh7LesuHadHoV8YH")
-
-    #     # print(f"phone_call. update.........",phone_call.id)
-    #     # phone_call.save()
-
-    # print(f"done..........")
-        
-    # phone_calls = (
-    #     PhoneCall.objects.filter(user=request.user)
-    #     .order_by(F('timestamp').desc(nulls_last=True))  # Order by 'date' descending
-    # )
-    # Determine whether the user is an agency or a sub-account
     if request.user.is_agency:
         # Get the agency's sub-accounts and include the agency itself
         user_queryset = request.user.get_all_subaccounts()
@@ -124,6 +94,75 @@ def call_history(request):
         'page_range': range(1, total_pages + 1),  # Create a range of pages
     }
     return render(request, 'new/calls_history.html', context)
+def get_status_badge(status):
+    status = status.lower()
+    badge_class = {
+        'initiated': 'primary',
+        'completed': 'success',
+        'ringing': 'warning',
+        'failed': 'danger',
+        'forwarded': 'secondary',
+        'inprogress': 'info',
+        'pending': 'light'
+    }.get(status, 'dark')
+    
+    return f'''<span class="badge badge-{badge_class}">{status.capitalize()}</span>'''
+
+@login_required
+def call_history_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
+    if request.user.is_agency:
+        user_queryset = request.user.get_all_subaccounts()
+    else:
+        user_queryset = [request.user]
+
+    queryset = PhoneCall.objects.filter(user__in=user_queryset).select_related('agnt').order_by(F('timestamp').desc(nulls_last=True))
+
+    if search_value:
+        queryset = queryset.filter(
+            Q(phone_number__icontains=search_value) |
+            Q(twilio_call_id__icontains=search_value) |  # ✅ Corrected
+            Q(agnt__display_name__icontains=search_value)|
+            Q(call_status__icontains=search_value)  # ✅ Added search for call_status
+        )
+
+    total = queryset.count()
+    calls = queryset[start:start + length]
+
+    data = []
+    for index, call in enumerate(calls, start=start + 1):
+        bill = calculate_bill(call)  # Your custom logic
+        timestamp = call.timestamp.strftime('%Y-%m-%d %H:%M:%S') if call.timestamp else 'N/A'
+        time_ago = timesince(call.timestamp, now()) + " ago" if call.timestamp else 'N/A'
+        data.append({
+                'index': index,
+                'agent': call.agnt.display_name.title() if call.agnt else 'N/A',
+                'phone_number': call.phone_number,
+                'call_sid': call.twilio_call_id,
+                'duration': f"{call.call_duration // 60}m {call.call_duration % 60}s" if call.call_duration else '0m 0s',
+                'timestamp': timestamp,
+                'time_ago': time_ago,
+                'bill': f"${bill:.2f}" if bill else '$0.00',
+                'campaign_name': getattr(call, 'campaign_name', 'Demo').capitalize() if hasattr(call, 'campaign_name') else 'Demo',
+                'customer_name': f"<a href='#'>{getattr(call, 'customer_name', 'NA').capitalize()}</a>" if hasattr(call, 'customer_name') else '<a href="#">NA</a>',
+                'call_status_badge': get_status_badge(call.call_status or ''),
+                'actions': f'''
+                    <a href="{reverse('agent:call_detail', args=[call.id])}" class="btn btn-warning btn-sm mt-2">
+                        Details
+                    </a>
+                '''
+            })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data
+    })
 @login_required
 def call_detail(request, id):
     obj = PhoneCall.objects.filter(user=request.user, id=id).first()

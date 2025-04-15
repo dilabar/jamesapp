@@ -31,41 +31,102 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-
+from django.views.decorators.csrf import csrf_exempt
 import re  # For phone number validation
 
+from django.utils.timesince import timesince
 
 
-
+@login_required
 def contact_list(request):
-    all_lists = List.objects.filter(user = request.user).order_by('created_at')
-    all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct().order_by('created_at')
+    # all_lists = List.objects.filter(user = request.user).order_by('created_at')
+    # all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct().order_by('created_at')
 
-    if request.user.is_agency():
+    # if request.user.is_agency():
 
-        contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts()).order_by('created_at')
-    else:
-        contacts = Contact.objects.filter(user=request.user).order_by('created_at')
+    #     contacts = Contact.objects.filter(user__in=request.user.get_all_subaccounts()).order_by('created_at')
+    # else:
+    #     contacts = Contact.objects.filter(user=request.user).order_by('created_at')
 
     
-    # Pagination setup
-    paginator = Paginator(contacts, 10)  # Show 10 contacts per page
-    page_number = request.GET.get('page')  # Get the current page number
-    page_obj = paginator.get_page(page_number)  # Get the contacts for the current page
+    # # Pagination setup
+    # paginator = Paginator(contacts, 10)  # Show 10 contacts per page
+    # page_number = request.GET.get('page')  # Get the current page number
+    # page_obj = paginator.get_page(page_number)  # Get the contacts for the current page
     
     
     # Prepare context
     context = {
-        'page_obj': page_obj,
-        'contacts': contacts,  # You can also pass the full list if needed elsewhere
-        'page_range': paginator.page_range,  # The range of page numbers
-        'page_number': page_obj.number, 
-        'all_lists': all_lists,
-        'all_campaigns': all_campaigns, # Current page number
+        # 'page_obj': page_obj,
+        # 'contacts': contacts,  # You can also pass the full list if needed elsewhere
+        # 'page_range': paginator.page_range,  # The range of page numbers
+        # 'page_number': page_obj.number, 
+        # 'all_lists': all_lists,
+        # 'all_campaigns': all_campaigns, # Current page number
     }
     
     return render(request, 'new/contact_list.html', context)
+@login_required
+def contact_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
 
+    if request.user.is_agency():
+        queryset = Contact.objects.filter(user__in=request.user.get_all_subaccounts())
+    else:
+        queryset = Contact.objects.filter(user=request.user)
+
+    if search_value:
+        queryset = queryset.filter(
+            Q(first_name__icontains=search_value) |
+            Q(last_name__icontains=search_value) |
+            Q(emails__email__icontains=search_value) |
+            Q(phone_numbers__phone_number__icontains=search_value)
+        ).distinct()
+
+    total_records = queryset.count()
+    queryset = queryset.order_by('-created_at')[start:start+length]
+
+    data = []
+    for contact in queryset:
+        emails = contact.emails.all()
+        phones = contact.phone_numbers.all()
+
+        email_list = [
+            f"{email.email}{' (Primary)' if email.is_primary else ''}"
+            for email in emails
+        ]
+        phone_list = [
+            f"{phone.phone_number}{' (Primary)' if phone.is_primary else ''}"
+            for phone in phones
+        ]
+        actions = f'''
+           
+            <button class="btn btn-sm btn-danger del-con" data-id="{contact.id}">Delete</button>
+        '''
+        full_name = f"{contact.first_name} {contact.last_name or ''}".strip().title()
+        contact_detail_url = reverse('contact:contact_details', args=[contact.id])
+        data.append({
+            'name': f'<a href="{contact_detail_url}">{full_name}</a>',
+            'email': ', '.join(email_list) or 'No emails',
+            'phone': ', '.join(phone_list) or 'No phone numbers available',
+            'created_at': contact.created_at.strftime('%Y-%m-%d %H:%M'),
+            'created_ago': f"{timesince(contact.created_at)} ago",
+            'contact_type': contact.contact_type if contact.contact_type else 'NA',
+            'timezone': contact.time_zone if contact.time_zone else 'NA',
+            # 'lists': ', '.join([lst.name for lst in contact.lists.all()]) if hasattr(contact, 'lists') else '',
+            # 'campaigns': ', '.join([camp.name for camp in contact.campaigns.all()]) if hasattr(contact, 'campaigns') else '',
+            'actions': actions
+        })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total_records,
+        'recordsFiltered': total_records,
+        'data': data,
+    })
 
 
 
@@ -432,42 +493,122 @@ def create_list(request):
 
 
 def list_overview(request):
+    # if request.user.is_agency():
+
+    #     listsd = List.objects.filter(user__in=request.user.get_all_subaccounts())
+    #     print(request.user.get_all_subaccounts())
+    # else:
+    #     listsd = List.objects.filter(user=request.user)
+
+    context = {}
+    return render(request, 'list/list.html', context)
+
+def list_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
     if request.user.is_agency():
-
-        listsd = List.objects.filter(user__in=request.user.get_all_subaccounts())
-        print(request.user.get_all_subaccounts())
+        queryset = List.objects.filter(user__in=request.user.get_all_subaccounts())
     else:
-        listsd = List.objects.filter(user=request.user)
+        queryset = List.objects.filter(user=request.user)
 
-    context = {'lists': listsd}
-    return render(request, 'new/list_overview.html', context)
+    if search_value:
+        queryset = queryset.filter(name__icontains=search_value)
 
+    total = queryset.count()
+    queryset = queryset.order_by('-created_at')[start:start + length]
 
+    data = []
+    for index, lst in enumerate(queryset, start=start + 1):
+        detail_url = reverse('contact:list_detail', args=[lst.id])
+        edit_url = reverse('contact:edit_list', args=[lst.id])
+        delete_url = reverse('contact:delete_list', args=[lst.id])
+
+        actions = f'''
+            <a href="{detail_url}" class="btn btn-primary btn-sm">View Details</a>
+            <a href="{edit_url}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{delete_url}" class="btn btn-danger btn-sm" 
+               onclick="return confirm('Are you sure you want to delete this list?');">Delete</a>
+        '''
+
+        data.append({
+            "index": index,
+            "name": lst.name.title(),
+            "count": lst.contacts.count(),
+            "created_at": lst.created_at.strftime("%Y-%m-%d %H:%M"),
+            "action": actions
+        })
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": total,
+        "recordsFiltered": total,
+        "data": data
+    })
 
 def list_detail(request, list_id):
     list_obj = get_object_or_404(List, id=list_id)
-    search_query = request.GET.get('search', '')  # Get search input
-    contacts = Contact.objects.filter(lists=list_obj)
-    # Filter contacts based on search query (search by name, email, or phone)
-    if search_query:
-        contacts = contacts.filter(
-            Q(first_name__icontains=search_query) |
-            Q(last_name__icontains=search_query) |
-            Q(emails__email__icontains=search_query) |  # Correct related lookup for emails
-            Q(phone_numbers__phone_number__icontains=search_query)  # Fixed field lookup
+   
+
+    return render(request, 'list/list_detail.html', {
+        'list': list_obj,
+      
+    })
+@login_required
+def list_detail_data(request, list_id):
+    list_obj = get_object_or_404(List, id=list_id)
+    search_value = request.GET.get('search[value]', '')
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+
+    queryset = Contact.objects.filter(lists=list_obj).prefetch_related('emails', 'phone_numbers')
+
+    if search_value:
+        queryset = queryset.filter(
+            Q(first_name__icontains=search_value) |
+            Q(last_name__icontains=search_value) |
+            Q(emails__email__icontains=search_value) |
+            Q(phone_numbers__phone_number__icontains=search_value)
         ).distinct()
 
-    # Pagination settings
-    page_number = request.GET.get('page', 1)
-    paginator = Paginator(contacts, 10)  # Show 10 contacts per page
-    page_obj = paginator.get_page(page_number)
+    total_records = queryset.count()
+    queryset = queryset[start:start + length]
 
-    return render(request, 'new/list_detail.html', {
-        'list': list_obj,
-        'contacts': page_obj,
-        'search_query': search_query,  # Pass search query to template
-        'page_range': paginator.get_elided_page_range(number=page_obj.number, on_each_side=1, on_ends=1),
-        'page_number': page_obj.number
+    data = []
+    for i, contact in enumerate(queryset, start=start + 1):
+
+        email_str = ', '.join([
+            f"{email.email}{' (Primary)' if email.is_primary else ''}"
+            for email in contact.emails.all()
+        ]) or 'No emails'
+
+        phone_str = ', '.join([
+            f"{phone.phone_number}{' (Primary)' if phone.is_primary else ''}"
+            for phone in contact.phone_numbers.all()
+        ]) or 'No phone numbers'
+
+        data.append({
+            'index': i,
+            'name': f"{contact.first_name} {contact.last_name or ''}".strip(),
+            'email': email_str,
+            'phone': phone_str,
+            'created_at': contact.created_at.strftime('%Y-%m-%d %H:%M'),
+            'created_ago':f"{timesince(contact.created_at)} ago",  # optional if you pass timeago string
+            'contact_type': contact.contact_type if contact.contact_type else 'NA',
+            'timezone': contact.time_zone or '',
+            'actions': f'''
+                <a href="{reverse('contact:contact_details', args=[contact.id])}" class="btn btn-sm btn-info">View</a>
+                <a href="{reverse('contact:delete_contact', args=[contact.id])}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            '''
+        })
+
+    return JsonResponse({
+        'draw': int(request.GET.get('draw', 1)),
+        'recordsTotal': total_records,
+        'recordsFiltered': total_records,
+        'data': data
     })
 
 
@@ -543,7 +684,8 @@ def campaign_detail_v1(request, campaign_id):
     paginator = Paginator(phonecall, 10)  # Adjust number per page as needed
     page_number = request.GET.get('page')
     phone_calls = paginator.get_page(page_number)
-    call_analytics['total_voice_minutes'] = call_analytics['total_voice_minutes'] / 60
+    # call_analytics['total_voice_minutes'] = call_analytics['total_voice_minutes'] / 60
+    call_analytics['total_voice_minutes']=f"{call_analytics['total_voice_minutes'] // 60}m {call_analytics['total_voice_minutes']% 60}s" if call_analytics['total_voice_minutes'] else '0m 0s'
     context={
         'campaign': campaign,
         'agdetail':agdetail,
@@ -590,18 +732,86 @@ def restart_campaign_task(request, campaign_id):
     messages.success(request, f"Task {task_id} has been successfully Restarted.")
     return redirect('contact:campaign_detail', campaign_id=campaign.id)
 
+# @login_required
+# def campaign_list(request):
+#     # Fetch campaigns for the logged-in user
+#     campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
+
+#     # Optional: Add filtering and sorting
+#     search_query = request.GET.get('q')
+#     if search_query:
+#         campaigns = campaigns.filter(name__icontains=search_query)
+
+#     return render(request, 'campaign/campaign_list.html', {'campaigns': campaigns})
 @login_required
 def campaign_list(request):
-    # Fetch campaigns for the logged-in user
+    # # Fetch campaigns for the logged-in user
+    # campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
+
+    # # Optional: Add filtering
+    # search_query = request.GET.get('q')
+    # if search_query:
+    #     campaigns = campaigns.filter(name__icontains=search_query)
+
+    # # Add ordering - most recent first
+    # campaigns = campaigns.order_by('-created_at')
+
+    # # Pagination
+    # paginator = Paginator(campaigns, 5)  # Show 10 campaigns per page
+    # page_number = request.GET.get('page')
+    # page_obj = paginator.get_page(page_number)
+
+    return render(request, 'campaign/campaign_list.html')
+
+def campaign_data(request):
+    draw = request.GET.get('draw')
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 5))
+    search_value = request.GET.get('search[value]', '')
+
     campaigns = Campaign.objects.filter(lists__user=request.user).distinct()
 
-    # Optional: Add filtering and sorting
-    search_query = request.GET.get('q')
-    if search_query:
-        campaigns = campaigns.filter(name__icontains=search_query)
+    if search_value:
+        campaigns = campaigns.filter(Q(name__icontains=search_value))
 
-    return render(request, 'campaign/campaign_list.html', {'campaigns': campaigns})
+    total = campaigns.count()
+    campaigns = campaigns.order_by('-created_at')[start:start+length]
 
+    data = []
+    for campaign in campaigns:
+        view_url = reverse('contact:campaign_detail', args=[campaign.id])
+        edit_url = reverse('contact:edit_campaign', args=[campaign.id])
+        delete_url = reverse('contact:delete_campaign', args=[campaign.id])
+        if campaign.scheduled_at:
+            scheduled_display = campaign.scheduled_at.strftime('%b %d, %Y %H:%M')
+        else:
+            scheduled_display = 'Not Scheduled'
+        actions = f'''
+            <a href="{view_url}" class="btn btn-sm btn-outline-success" title="View">
+                <i class="fa fa-play"></i>
+            </a>
+            <a href="{edit_url}" class="btn btn-sm btn-outline-warning" title="Edit">
+                <i class="icon-pencil-alt"></i>
+            </a>
+            <a href="{delete_url}" class="btn btn-sm btn-outline-danger" title="Delete"
+            onclick="return confirm('Are you sure you want to delete this campaign?');">
+                <i class="icon-trash"></i>
+            </a>
+        '''
+        data.append({
+            'name': campaign.name.title(),
+            'created_at': campaign.created_at.strftime('%b %d, %Y %H:%M'),
+            'scheduled_at':scheduled_display,
+            'created_ago':f"{timesince(campaign.created_at)} ago",  # optional if you pass timeago string
+            'actions': actions,
+        })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total if search_value else total,
+        'data': data,
+    })
 
 def start_campaign(user, campaign_id):
     """
@@ -843,16 +1053,25 @@ def bulk_action_list(request):
 
 
 
-@login_required
-def delete_contact(request, id):
-    contact = get_object_or_404(Contact, id=id)
+# @login_required
+# def delete_contact(request, id):
+#     contact = get_object_or_404(Contact, id=id)
     
+#     if request.method == 'POST':
+#         contact.delete()
+#         return redirect('contact:contact_list')  # Redirect to the contact list page after deletion
+
+#     return redirect('contact:contact_list')  # Redirect if not POST
+@csrf_exempt
+def delete_contact(request, id):
     if request.method == 'POST':
-        contact.delete()
-        return redirect('contact:contact_list')  # Redirect to the contact list page after deletion
-
-    return redirect('contact:contact_list')  # Redirect if not POST
-
+        try:
+            contact = Contact.objects.get(id=id, user=request.user)
+            contact.delete()
+            return JsonResponse({'success': True})
+        except Contact.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Contact not found.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 
 @login_required
