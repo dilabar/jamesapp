@@ -8,6 +8,8 @@ from django.conf import settings
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from django.db import transaction
 from django.db.models import Q 
+from openai import OpenAI
+import traceback
 
 
 # Generate a key (Only do this once, then store it securely!)
@@ -78,7 +80,7 @@ def get_transcript_data(agent_id,cid,PLAY_AI_API_KEY,PLAY_AI_USER_ID,pagesize=10
 
 
     try:
-        response = requests.get(api_url, headers=headers,params=querystring)
+        response = requests.get(api_url, headers=headers)
         response.raise_for_status()  # Will raise an HTTPError for non-2xx responses
         return response.json()  # Parse and return the JSON response data
 
@@ -242,8 +244,8 @@ def deduplicate_contacts(contact_data, deduplication_option):
     :param deduplication_option: String indicating deduplication strategy ('email,phone' or 'phone,email').
     :return: A QuerySet of existing contacts to avoid duplicates.
     """
-    print(contact_data.get('email'))
-    print(contact_data.get('phone_number'))
+    # print(contact_data.get('email'))
+    # print(contact_data.get('phone_number'))
     if deduplication_option == 'email,phone':
         # Check first by email, then by phone number
         existing_contacts = Contact.objects.filter(
@@ -258,3 +260,41 @@ def deduplicate_contacts(contact_data, deduplication_option):
         existing_contacts = Contact.objects.none()  # No deduplication if criteria are incorrect
     
     return existing_contacts
+
+
+def analyze_conversation_log(transcript_text):
+    """
+    Calls OpenAI's ChatGPT to analyze and summarize a conversation transcript.
+    
+    :param transcript_text: String, the full conversation text
+    :return: String, the AI-generated summary
+    """
+    try:
+        client = OpenAI(api_key=settings.OPEN_AI_API_KEY)
+
+        # Optional: Truncate large transcript
+        if len(transcript_text) > 8000:
+            transcript_text = transcript_text[:8000]
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an AI assistant that summarizes call center conversations in a professional tone."
+                },
+                {
+                    "role": "user",
+                    "content": f"Please summarize the following conversation:\n\n{transcript_text}"
+                }
+            ],
+            temperature=0.7,
+            max_tokens=300
+        )
+
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        print(f"[AI Summary Error] {e}")
+        traceback.print_exc()
+        return "Unable to generate summary at the moment."

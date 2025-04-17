@@ -19,8 +19,8 @@ from django.utils.timesince import timesince
 from django.utils.timezone import now
 from rateMaster.models import CallRate
 from scheduling.models import CalendarConnection
-from jamesapp.utils import decrypt, encrypt, get_transcript_data
-from .models import Agent, PhoneCall, ServiceDetail,GoogleCalendarEvent
+from jamesapp.utils import analyze_conversation_log, decrypt, encrypt, get_transcript_data
+from .models import Agent, Conversation, PhoneCall, ServiceDetail,GoogleCalendarEvent
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -172,12 +172,42 @@ def call_detail(request, id):
         return render(request, 'new/error.html', {'message': 'Call not found'})  # Handle missing call object
 
     play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
-    print(obj.campaign.agent.agent_id)
+    # print(obj.campaign.agent.agent_id)
     ag=decrypt(obj.campaign.agent.agent_id)
+        # Check if the transcript is already available for this call
     transcript = None
-    data = get_transcript_data(ag,obj.play_ai_conv_id,play_ai.decrypted_api_key,play_ai.decrypted_account_sid,100,0)
-    if data:
-        transcript=data
+    conversation, created = Conversation.objects.get_or_create(
+        phone_call=obj
+    )
+
+    if conversation.transcript_available:
+        # ✅ Transcript already available, no need to call API
+        transcript = conversation.transcript_data
+
+    else:
+        # ❌ Transcript not available, fetch from external API
+        data = get_transcript_data(
+            ag, 
+            obj.play_ai_conv_id, 
+            play_ai.decrypted_api_key, 
+            play_ai.decrypted_account_sid, 
+            100, 0
+        )
+        if data:
+            transcript = data
+            # Format transcript for summary
+            # transcript_text = "\n".join(
+            #     [f"{item['role'].capitalize()}: {item['content']}" for item in data]
+            # )
+
+            # Generate AI summary (assumed to be a function)
+            # summary = analyze_conversation_log(transcript_text)
+
+            # Update or create the conversation record
+            conversation.transcript_data = data
+            conversation.transcript_available = True
+            conversation.save()
+
 
     # Calculate end time
     if obj.timestamp and obj.call_duration:
@@ -188,9 +218,47 @@ def call_detail(request, id):
     context = {
         'call_obj': obj,
         'end_time': end_time,
-        'transcript': transcript
+        'transcript': transcript,
+        'conversation_obj':conversation
     }
     return render(request, 'new/all_conversation_log.html', context)
+
+@csrf_exempt
+def analyze_call_summary(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            call_id = data.get("call_id")
+
+            if not call_id:
+                return JsonResponse({"error": "Missing call_id"}, status=400)
+
+            conversation = Conversation.objects.get(phone_call_id=call_id)
+
+            # If already summarized, return existing summary
+            if conversation.ai_summary:
+                return JsonResponse({"summary": conversation.ai_summary})
+
+            # Generate transcript text
+            transcript_text = "\n".join(
+                [f"{item['role'].capitalize()}: {item['content']}" for item in conversation.transcript_data]
+            )
+
+            # Analyze and generate summary
+            ai_summary = analyze_conversation_log(transcript_text)
+
+            # Save the summary
+            conversation.ai_summary = ai_summary
+            conversation.save()
+
+            return JsonResponse({"summary": ai_summary})
+
+        except Conversation.DoesNotExist:
+            return JsonResponse({"error": "Conversation not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=400)
 @login_required
 def agent_setup(request):
     

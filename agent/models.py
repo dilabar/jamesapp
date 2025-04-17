@@ -177,4 +177,16 @@ class GoogleCalendarEvent(models.Model):
 
 
 
+class Conversation(models.Model):
+    phone_call = models.ForeignKey(PhoneCall, on_delete=models.CASCADE, related_name="conversations")
+    # agent_id = models.CharField(max_length=100)
+    # conversation_id = models.CharField(max_length=100)
+    # transcript = models.TextField()
+    ai_summary = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    transcript_data = models.JSONField(blank=True, null=True) 
+    transcript_available = models.BooleanField(default=False)  # <-- New field
 
+
+    def __str__(self):
+        return f"{self.phone_call.id}"

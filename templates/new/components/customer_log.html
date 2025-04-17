@@ -73,11 +73,11 @@
     <div class="right-sidebar-Chats">
       <div class="msger">
         <div class="msger-chat">
-          {% comment %} {% if transcript %}
+          {% if transcript %}
               {% for data in transcript %}
                   {% if data.role == "assistant" %}
                   <div class="msg left-msg">
-                      <div class="msg-img"><span class="avatar-text">A</span></div>
+                      <div class="msg-img"><span class="avatar-text"></span></div>
                       <div class="msg-bubble">
                           <div class="msg-info">
                               <div class="msg-info-name">Assistant</div>
@@ -88,11 +88,12 @@
                   </div>
                   {% elif data.role == "user" %}
                   <div class="msg right-msg">
-                      <div class="msg-img"><span class="avatar-text">U</span></div>
+                      <div class="msg-img"><span class="avatar-text"></span></div>
                       <div class="msg-bubble">
                           <div class="msg-info">
                               <div class="msg-info-name">User</div>
-                              <div class="msg-info-time">{{ data.timestamp }}</div>
+                              <div class="msg-info-time"><span class="text-muted">{{ data.timestamp }}</span>
+                              </div>
                           </div>
                           <div class="msg-text">{{ data.content }}</div>
                       </div>
@@ -112,16 +113,8 @@
               {% endfor %}
           {% else %}
               <p>No messages available.</p>
-          {% endif %} {% endcomment %}
-          <div class="msger-chat" id="chat-messages">
-            {% if call_obj.call_status == "initiated" %}
-              <p class="call-status-text">Call is processing...</p>
-            {% elif call_obj.call_status == "completed" %}
-              <p class="call-status-text">Call ended.</p>
-            {% else %}
-              <p class="call-status-text">No messages available.</p>
-            {% endif %}
-          </div>
+          {% endif %} 
+       
       </div>
       
 

@@ -1,92 +1,7 @@
-{% comment %} {% load static %}
-<div class="fade tab-pane " id="pills-call-summary" role="tabpanel" aria-labelledby="pills-call-summary-tab">
 
-
-  {% comment %} <!-- Call Summarize Section -->
-  {% if call_obj.hand_off_summary %}
-  <div class="card mb-4">
-      <div class="card-header">
-          <h4 class="fw-bold">Call Summarize</h4>
-      </div>
-      <div class="card-body">
-          <p class="text-muted">{{ call_obj.hand_off_summary }}</p>
-      </div>
-  </div>
-  {% endif %} {% endcomment %}
-  {% comment %} <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Call Summary AI Analysis</title>
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
-      <style>
-          body {
-              background-color: #f8f9fa;
-          }
-          .container {
-              max-width: 800px;
-              margin-top: 30px;
-              background: white;
-              padding: 20px;
-              border-radius: 8px;
-              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          }
-          .header-section {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-          }
-          .summary-box {
-              background: #f1f3f5;
-              padding: 15px;
-              border-left: 5px solid #007bff;
-              border-radius: 5px;
-              font-size: 14px;
-              margin-top: 15px;
-          }
-      </style>
-  </head>
-  <body>
-  
-  <div class="container">
-      <!-- Header with Analyze Button -->
-      <div class="header-section">
-          <h4><i class="fas fa-microphone"></i> Call Summary AI Analysis</h4>
-          <button class="btn btn-primary" onclick="analyzeCall()">Analyze Call</button>
-      </div>
-  
-      <!-- AI Generated Summary -->
-      <div id="callSummary" class="summary-box d-none mt-3">
-          <h6><i class="fas fa-chart-line"></i> AI Analysis:</h6>
-          <p id="aiSummary">Processing...</p>
-      </div>
-  </div>
-  
-  <script>
-      function analyzeCall() {
-          // Show summary section
-          document.getElementById("callSummary").classList.remove("d-none");
-  
-          // Simulated AI-generated analysis (Mock Data)
-          setTimeout(() => {
-              document.getElementById("aiSummary").innerText = 
-                  "The conversation focused on addressing a billing dispute. " +
-                  "The customer expressed concern over unexpected charges, and the agent provided a detailed breakdown of the bill. " +
-                  "After some clarification, the issue was resolved, and the customer seemed satisfied. " +
-                  "However, a follow-up email was suggested to ensure clarity.";
-          }, 2000); // Simulate AI processing delay
-      }
-  </script>
-  
-  </body>
-  </html>
-  
-  
-</div> {% endcomment %}
 
 {% load static %}
+
 
 <div class="fade tab-pane" id="pills-call-summary" role="tabpanel" aria-labelledby="pills-call-summary-tab">
 
@@ -96,19 +11,28 @@
             <h4 class="fw-bold">
                 <i class="fa-solid fa-microphone me-2"></i> Call Summary AI Analysis
             </h4>
-            <button class="btn btn-primary" onclick="analyzeCall()">Analyze Call</button>
+
+            {% if conversation_obj.ai_summary %}
+                <span class="badge  bg-light">Analyzed</span>
+            {% else %}
+                <button class="btn btn-primary" onclick="analyzeCall()">Analyze Call</button>
+            {% endif %}
         </div>
         <div class="card-body">
-            <div id="callSummary" class="summary-box d-none mt-3">
+            <div id="callSummary" class="summary-box mt-3 {% if not conversation_obj.ai_summary %}d-none{% endif %}">
                 <h6><i class="fas fa-chart-line"></i> AI Analysis:</h6>
-                <p id="aiSummary">Processing...</p>
+                <p id="aiSummary">
+                    {% if conversation_obj.ai_summary %}
+                        {{ conversation_obj.ai_summary }}
+                    {% else %}
+                        Processing...
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- CSS Styles -->
 <style>
     .summary-box {
         background: #f1f3f5;
@@ -121,7 +45,7 @@
 </style>
 
 <!-- JavaScript Logic -->
-<script>
+<!-- <script>
     function analyzeCall() {
         // Show summary section
         document.getElementById("callSummary").classList.remove("d-none");
@@ -135,7 +59,7 @@
                 "However, a follow-up email was suggested to ensure clarity.";
         }, 2000); // Simulate AI processing delay
     }
-</script>
+</script> -->
 
 <!-- Ensure FontAwesome is Included -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">

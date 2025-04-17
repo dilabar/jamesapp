@@ -237,5 +237,52 @@
 {% block js %}
 <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+
+<script>
+  function analyzeCall() {
+      const summaryBox = $("#callSummary");
+      const summaryText = $("#aiSummary");
+
+      // Show the summary box and update text
+      summaryBox.removeClass("d-none");
+      summaryText.text("Processing...");
+
+      $.ajax({
+          url: "{% url 'agent:analyze_call_summary' %}",
+          type: "POST",
+          headers: {
+              "X-CSRFToken": getCookie("csrftoken")
+          },
+          data: JSON.stringify({
+              call_id: {{ call_obj.id }}
+          }),
+          contentType: "application/json",
+          success: function(response) {
+              summaryText.text(response.summary);
+          },
+          error: function(xhr, status, error) {
+              summaryText.text("An error occurred during analysis.");
+              console.error("Error:", error);
+          }
+      });
+  }
+
+  // Get CSRF token from cookie
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+</script>
+
 {% endblock js %}
     

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from agent.models import Agent, GoogleCalendarEvent, PhoneCall, ServiceDetail
+from agent.models import Agent, GoogleCalendarEvent, PhoneCall, ServiceDetail,Conversation
 
 # Register your models here.
 @admin.register(Agent)
@@ -20,5 +20,7 @@ class ServiceDetailAdmin(admin.ModelAdmin):
 class GoogleCalendarEventAdmin(admin.ModelAdmin):
     list_display = ('summary', 'start_time','end_time','status')
     search_fields = ('summary', 'attendees')
+
+admin.site.register(Conversation)
 
     
