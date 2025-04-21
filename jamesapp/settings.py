@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'agency',
     'contact',
     'rateMaster',
+    'logger',
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True

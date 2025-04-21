@@ -1,6 +1,10 @@
 import csv
+import json
 import os
+import socket
+from django.forms import model_to_dict
 import requests
+
 import chardet
 from contact.models import Contact, Email, PhoneNumber
 from cryptography.fernet import Fernet
@@ -8,10 +12,11 @@ from django.conf import settings
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from django.db import transaction
 from django.db.models import Q 
+from logger.models import ActivityLog
 from openai import OpenAI
 import traceback
 
-
+from django.core.serializers.json import DjangoJSONEncoder
 # Generate a key (Only do this once, then store it securely!)
 # key = Fernet.generate_key()
 
@@ -295,6 +300,24 @@ def analyze_conversation_log(transcript_text):
         return response.choices[0].message.content.strip()
 
     except Exception as e:
-        print(f"[AI Summary Error] {e}")
+        # print(f"[AI Summary Error] {e}")
         traceback.print_exc()
         return "Unable to generate summary at the moment."
+    
+def log_activity(user, action, additional_info=None):
+    ip_address = socket.gethostbyname(socket.gethostname())
+    ActivityLog.objects.create(
+        user=user,
+        action=action,
+        ip_address=ip_address,
+        additional_info=additional_info
+    )
+
+def contact_to_serializable_dict(contact):
+    data = model_to_dict(contact)
+    for key, value in data.items():
+        try:
+            json.dumps(value, cls=DjangoJSONEncoder)  # test serialization
+        except TypeError:
+            data[key] = str(value)  # fallback to string representation
+    return data

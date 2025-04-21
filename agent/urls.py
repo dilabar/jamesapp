@@ -12,6 +12,7 @@ urlpatterns = [
     path('get-conversation/<str:agent_id>/', get_conversation, name='get_conversation'),
     path('get-transcript/<str:agent_id>/<str:cid>/', get_transcript, name='get_transcript'),
     path('dashboards/', dashboards, name='dashboards'),
+    path('api/dashboard-stats/', dashboard_stats_api, name='dashboard-stats-api'),
     path('login/', login, name='login'),
     path('signup/', signup, name='signup'),
     path('reset-password/', reset, name='reset'),

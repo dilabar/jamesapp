@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+from time import localtime
+from django.http import HttpResponse, JsonResponse
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
@@ -8,6 +9,8 @@ from django.contrib.auth import login as auth_login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from contact.models import List
+from logger.models import ActivityLog
 import openai
 from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
@@ -61,7 +64,44 @@ def dashboards(request):
     
     return render(request, 'dashboard/dashboard.html')
 
+@login_required
+def dashboard_stats_api(request):
+    try:
+        total_agents_active = Agent.objects.filter(user=request.user).count()
+        total_campaigns = Campaign.objects.filter(user=request.user).count()
+        total_lists = List.objects.filter(user=request.user).count()
+        total_contacts = Contact.objects.filter(user=request.user).count()
+        total_phonecalls = PhoneCall.objects.filter(user=request.user).count()
+        # Recent Activity Logs
+        logs = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')[:10]  # latest 10 logs
+        
+        logs_data = []
+        for log in logs:
+            logs_data.append({
+                'user': log.user.get_full_name() or log.user.username,
+                'timestamp': log.timestamp,
+                'action': log.action,
+                'additional_info': log.additional_info,
+                'img_url': '/static/manish/images/user/26.png'  # You can customize per user later
+            })
+        data = {
+            'total_agents_active': total_agents_active,
+            'total_campaigns': total_campaigns,
+            'total_lists': total_lists,
+            'total_contacts': total_contacts,
+            'total_phonecalls': total_phonecalls,
+            'activity_logs': logs_data
+        }
 
+        return JsonResponse(data, status=200)
+
+    except Exception as e:
+        # Log the error here if needed
+        print(e)
+        return JsonResponse(
+            {'error': 'Something went wrong while fetching dashboard stats.'},
+            status=500
+        )
 
 
 
