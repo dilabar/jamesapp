@@ -1,4 +1,5 @@
 import threading
+from django.forms import model_to_dict
 from django.shortcuts import render, redirect ,  get_object_or_404
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -10,6 +11,7 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from jamesapp.tasks import pause_task, process_campaign_calls, resume_task
+from jamesapp.utils import contact_to_serializable_dict, log_activity
 from twilio.rest import Client
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 import json
@@ -236,6 +238,12 @@ def add_contact(request):
                 list_obj.contacts.add(contact)
 
             contact.save()
+                        # Serialize custom field info for logging
+            contact_data = contact_to_serializable_dict(contact)
+
+            # Log the activity
+          
+            log_activity(request.user, f"Created a new contact: {contact.first_name} {contact.last_name}, Type: {contact.contact_type}",additional_info=contact_data)
 
             return JsonResponse({'status': 'success', 'message': 'Contact added successfully!'})
 
@@ -1028,6 +1036,15 @@ def add_custom_field(request):
             custom_field = form.save(commit=False)
             custom_field.user = request.user  # Associate the field with the logged-in user
             custom_field.save()
+            # Serialize custom field info for logging
+            custom_field_data = model_to_dict(custom_field)
+
+            # Log the activity
+            log_activity(
+                request.user, 
+                f"Added custom field: {custom_field.name}", 
+                additional_info=custom_field_data
+            )
             messages.success(request, 'Custom field added successfully.')
             return redirect('contact:add_custom_field')
         else:
@@ -1064,15 +1081,26 @@ def bulk_action_list(request):
 #     return redirect('contact:contact_list')  # Redirect if not POST
 @csrf_exempt
 def delete_contact(request, id):
+    """Handles deleting a contact."""
     if request.method == 'POST':
         try:
+            # Get the contact and check if it belongs to the logged-in user
             contact = Contact.objects.get(id=id, user=request.user)
+            contact_data = contact_to_serializable_dict(contact)
+            # Log the activity of deleting the contact
+            log_activity(
+                request.user, 
+                f"Deleted contact: {contact.first_name} {contact.last_name}, Contact ID: {contact.id}", additional_info=contact_data
+            )
+            
+            # Perform the deletion
             contact.delete()
             return JsonResponse({'success': True})
+        
         except Contact.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Contact not found.'})
+    
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
-
 
 @login_required
 def custom_fields(request):
@@ -1086,7 +1114,12 @@ def custom_fields(request):
 def delete_list(request, list_id):
     # Get the list by ID or return a 404 if not found
     list_to_delete = get_object_or_404(List, id=list_id, user=request.user)
-
+    list_data = model_to_dict(list_to_delete)
+    # Log the activity of deleting the contact
+    log_activity(
+        request.user, 
+        f"Deleted List: {list_to_delete.name}, List ID: {list_to_delete.id}", additional_info=list_data
+    )
     # Delete the list
     list_to_delete.delete()
 
