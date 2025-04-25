@@ -1,7 +1,7 @@
 
 from django import forms
 
-from agent.models import Agent
+from agent.models import Agent, TwilioPhoneNumber
 
 from .models import *
 from django.utils.timezone import now
@@ -119,10 +119,15 @@ class CampaignForm(forms.ModelForm):
         required=False,
         label="Assign Agent"
     )
-
+    twilio_phone = forms.ModelChoiceField(
+        queryset=TwilioPhoneNumber.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=True,
+        label="Send From (Twilio Number)"
+    )
     class Meta:
         model = Campaign
-        fields = ['name', 'scheduled_at', 'campaign_type', 'agent', 'lists', 'individual_contacts']
+        fields = ['name', 'scheduled_at', 'campaign_type', 'agent','twilio_phone', 'lists', 'individual_contacts']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
             'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
@@ -134,8 +139,10 @@ class CampaignForm(forms.ModelForm):
 
         if user:
             self.fields['agent'].queryset = Agent.objects.filter(user=user)
+            self.fields['twilio_phone'].queryset = TwilioPhoneNumber.objects.filter(service__user=user)
 
-        self.fields['agent'].label_from_instance = lambda obj: obj.display_name.title()  
+        self.fields['agent'].label_from_instance = lambda obj: obj.display_name.title()
+        self.fields['twilio_phone'].label_from_instance = lambda obj: obj.phone_number  
         # Disable all campaign types except 'ontime'
         # campaign_type_choices = self.fields['campaign_type'].choices
      

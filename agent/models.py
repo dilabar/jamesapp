@@ -140,6 +140,13 @@ class ServiceDetail(models.Model):
     def __str__(self):
         return f"{self.service_name}"
     
+class TwilioPhoneNumber(models.Model):
+    service = models.ForeignKey('ServiceDetail', on_delete=models.CASCADE, related_name='twilio_numbers')
+    phone_number = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
 class GoogleCalendarEvent(models.Model):
     # Event Title
     summary = models.CharField(max_length=255)

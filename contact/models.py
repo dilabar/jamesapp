@@ -106,7 +106,7 @@ class Campaign(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     triggers = models.JSONField(default=dict, blank=True)  # Store automation triggers.
     agent = models.ForeignKey('agent.Agent', on_delete=models.CASCADE,related_name='campaigns', null=True, blank=True)
-
+    twilio_phone = models.ForeignKey('agent.TwilioPhoneNumber', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
