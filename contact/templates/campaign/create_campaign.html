@@ -72,9 +72,19 @@
                                     </div>
                                 {% endfor %}
                                 </div>
+                           
                             </div>
-                    
+                           
                             <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="agent">From Phone number</label>
+                                    {{ form.twilio_phone }}
+                                    {% for error in form.twilio_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="name">Campaign Name</label>
                                     {{ form.name }}

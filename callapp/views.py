@@ -27,7 +27,7 @@ def call_initiate(request, agnt_id):
         # Show agents for the agency and all its sub-accounts
         user=request.user
         campaigns = Campaign.objects.filter(user__in=user.get_all_subaccounts())  # Agency campaigns
-        print(campaigns)
+        # print(campaigns)
     else:
         # Show only the logged-in user's agents
         user=request.user.parent_agency
@@ -35,7 +35,7 @@ def call_initiate(request, agnt_id):
 
 
 
-    print(campaigns)
+    # print(campaigns)
         
         
     twilio = ServiceDetail.objects.filter(user=user, service_name='twilio').first()
@@ -67,7 +67,7 @@ def call_initiate(request, agnt_id):
                 call = client.calls.create(
                     url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/{campaign_id}/',
                     to=phone_call.phone_number,
-                    from_=twilio.decrypted_twilio_phone,
+                    from_=selected_campaign.twilio_phone.phone_number,#twilio.decrypted_twilio_phone,
                     record=True,
                     method='POST',
                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
@@ -120,7 +120,7 @@ def call_initiate(request, agnt_id):
                                 call = client.calls.create(
                                     url=f'{request.scheme}://{request.get_host()}/call/start_twilio_stream/{user.id}/{agnt_id}/{campaign_id}/',
                                     to=phone_call.phone_number,
-                                    from_=twilio.decrypted_twilio_phone,
+                                    from_=selected_campaign.twilio_phone.phone_number,#twilio.decrypted_twilio_phone,
                                     record=True,
                                     method='POST',
                                     status_callback=f'{request.scheme}://{request.get_host()}/call/call_status_callback/{phone_call.id}/',
