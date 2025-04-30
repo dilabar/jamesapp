@@ -77,6 +77,10 @@
                           <i class="fa fa-play"></i> Restart
                       </button>
                   </form>
+                  {% elif campaign.status == "draft" %}
+                  <button class="btn btn-pill btn-success" id="start-campaign-btn" data-campaign-id="{{campaign.id}}">
+                    Start Campaign
+                  </button>
                   {% endif %}
                   
               </div>
@@ -357,6 +361,7 @@
           "info": false, // Show table info
           "lengthChange": false // Disable page size change
       });
+
   });
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -387,6 +392,59 @@
             var chart = new ApexCharts(document.querySelector("#doughnutChart"), options);
             chart.render();
         });
+</script>
+<script>
+document.getElementById("start-campaign-btn").addEventListener("click", function () {
+    const campaignId = this.getAttribute("data-campaign-id");
+    const apiUrl = "{% url 'contact:start_campaign_api' campaign.id %}"
+    fetch(apiUrl, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken'),
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Agar backend ne error diya hai (e.g. 400, 500)
+            return response.json().then(data => {
+                throw new Error(data.error || "Something went wrong.");
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        Swal.fire({
+            icon: "success",
+            title: "Campaign Started",
+            text: data.message || "Campaign is now processing in background."
+        });
+    })
+    .catch(error => {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "Something went wrong while starting the campaign."
+        });
+    });
+
+    // CSRF helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
 </script>
 
 {% endblock js %}

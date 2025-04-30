@@ -666,8 +666,8 @@ def campaign_detail_v1(request, campaign_id):
           # 🔹 **Start Campaign Asynchronously**
     if campaign.status in ['draft', 'scheduled']:  # Only start if not already running
                 # Store call records in the database (bulk insert)
-        
-        process_campaign_calls.apply_async(args=[campaign.id, request.user.id, campaign.agent.id])
+        pass
+        # process_campaign_calls.apply_async(args=[campaign.id, request.user.id, campaign.agent.id])
     phonecall = (
         PhoneCall.objects.filter(campaign_id=campaign_id)
         .select_related('contact')  # Join with Contact model
@@ -682,7 +682,7 @@ def campaign_detail_v1(request, campaign_id):
     )
     # Call Analytics with total voice minutes computed correctly
     call_analytics = phonecall.aggregate(
-         calls_placed=Count('id'),  # All calls made
+        calls_placed=Count('id'),  # All calls made
         calls_answered=Count('id', filter=Q(call_status__in=['in-progress', 'completed'])),  # Answered Calls
         calls_failed=Count('id', filter=Q(call_status__in=['failed', 'no-answer', 'busy', 'canceled','initiated'])),  # Failed Calls
         calls_completed=Count('id', filter=Q(call_status='completed')),  # Successfully Completed Calls
@@ -729,17 +729,29 @@ def restart_campaign_task(request, campaign_id):
     if campaign.status == "started":
         messages.info(request, "This campaign is already started.")
         return redirect('contact:campaign_detail', campaign_id=campaign.id)
-    task_id = campaign.triggers.get('task_id')
-    if not task_id:
-        messages.error(request, "No task found for this campaign.")
-        return redirect('contact:campaign_detail', campaign_id=campaign.id)
+    # if not task_id:
+    #     messages.error(request, "No task found for this campaign.")
+    #     return redirect('contact:campaign_detail', campaign_id=campaign.id)
     resume_task(campaign.id,request.user.id,campaign.agent.id)
         # Update campaign status
     campaign.status = "started"
     campaign.save(update_fields=['status'])
+    task_id = campaign.triggers.get('task_id')
+
     messages.success(request, f"Task {task_id} has been successfully Restarted.")
     return redirect('contact:campaign_detail', campaign_id=campaign.id)
+@login_required
+def start_campaign_view(request, campaign_id):
+    campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
+    print(campaign.status)
+    if campaign.status not in ['draft', 'scheduled']:
+        return JsonResponse({"error": "Campaign already started or finished."}, status=400)
 
+    task = process_campaign_calls.delay(campaign.id, request.user.id, campaign.agent.id)
+    campaign.status = 'queued'
+    campaign.triggers = {'task_id': task.id}
+    campaign.save()
+    return JsonResponse({"message": "Campaign started. Processing in background.", "task_id": task.id})
 # @login_required
 # def campaign_list(request):
 #     # Fetch campaigns for the logged-in user

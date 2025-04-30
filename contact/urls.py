@@ -50,4 +50,5 @@ urlpatterns = [
     path('api/bulk-action/<int:action_id>/status/', BulkActionStatusView.as_view(), name='bulk_action_status'),
     path('api/notes/<int:contact_id>/', NoteAPI.as_view(), name='notes_api'),
     path('api/notes/<int:contact_id>/<int:note_id>/', NoteAPI.as_view(), name='note_detail_api'),
+    path("api/start-campaign/<int:campaign_id>/", start_campaign_view, name="start_campaign_api"),
 ]
