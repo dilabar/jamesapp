@@ -75,15 +75,15 @@ class ExcelUploadForm(forms.Form):
 
 # Form for the List Model
 class ListForm(forms.ModelForm):
-    contacts = forms.ModelMultipleChoiceField(
-        queryset=Contact.objects.all(),
-        widget=forms.CheckboxSelectMultiple,
-        required=False
-    )
+    # contacts = forms.ModelMultipleChoiceField(
+    #     queryset=Contact.objects.all(),
+    #     widget=forms.CheckboxSelectMultiple,
+    #     required=False
+    # )
 
     class Meta:
         model = List
-        fields = ['name', 'description', 'contacts']
+        fields = ['name', 'description']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),

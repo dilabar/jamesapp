@@ -66,15 +66,15 @@
                                 </div>
 
                                 <!-- Contacts Field -->
-                                <div class="mb-3">
+                                <!-- <div class="mb-3">
                                     <label for="id_contacts" class="form-label">Select Contacts</label>
                                     {{ form.contacts }}
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class="card-footer text-end">
                                 <button class="btn btn-primary me-3" type="submit">Save Changes</button>
-                                <a href="{% url 'contact:list_detail' list.id %}" class="btn btn-secondary">Cancel</a>
+                                <a href="{% url 'contact:list_overview' %}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>
                     </div>

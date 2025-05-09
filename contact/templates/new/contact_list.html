@@ -323,7 +323,7 @@
                                         <label for="listId">Select List</label>
                                         <select id="listId" name="listId" class="form-select">
                                             {% for ls in all_lists %}
-                                            <option value="{{ ls.id }}">{{ ls.name }}</option>
+                                            <option value="{{ ls.id }}">{{ ls.name }} ({{ ls.contacts.count }})</option>
                                             {% endfor %}
                                         </select>
                                         <small class="form-text text-muted">

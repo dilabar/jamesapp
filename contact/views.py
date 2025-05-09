@@ -43,7 +43,7 @@ from django.utils.timesince import timesince
 
 @login_required
 def contact_list(request):
-    # all_lists = List.objects.filter(user = request.user).order_by('created_at')
+    all_lists = List.objects.filter(user = request.user).order_by('created_at')
     # all_campaigns = Campaign.objects.filter(lists__user=request.user).distinct().order_by('created_at')
 
     # if request.user.is_agency():
@@ -65,7 +65,7 @@ def contact_list(request):
         # 'contacts': contacts,  # You can also pass the full list if needed elsewhere
         # 'page_range': paginator.page_range,  # The range of page numbers
         # 'page_number': page_obj.number, 
-        # 'all_lists': all_lists,
+        'all_lists': all_lists,
         # 'all_campaigns': all_campaigns, # Current page number
     }
     
@@ -482,23 +482,23 @@ def create_list(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         contact_ids = request.POST.getlist('contacts')
-        contacts = Contact.objects.filter(id__in=contact_ids)
+        # contacts = Contact.objects.filter(id__in=contact_ids)
 
         try:
             # Attempt to create the list
             new_list = List.objects.create(name=name, description=description,user=request.user)
-            new_list.contacts.set(contacts)  # Associate selected contacts
-            return redirect('contact:contact_list')  # Redirect after successful creation
+            # new_list.contacts.set(contacts)  # Associate selected contacts
+            return redirect('contact:list_overview')  # Redirect after successful creation
         except IntegrityError:
             # Handle duplicate name error
             error_message = "A list with this name already exists. Please choose a different name."
             return render(request, 'new/create_list.html', {
                 'error_message': error_message,
-                'contacts': Contact.objects.all(),  # Pass contacts for the form
+                # 'contacts': Contact.objects.all(),  # Pass contacts for the form
             })
     else:
         return render(request, 'new/create_list.html', {
-            'contacts': Contact.objects.filter(user__in=request.user.get_all_subaccounts()),  # Pass contacts for the form
+            # 'contacts': Contact.objects.filter(user__in=request.user.get_all_subaccounts()),  # Pass contacts for the form
         })
 
 
@@ -1296,7 +1296,7 @@ def edit_list(request, list_id):
         form = ListForm(request.POST, instance=list_obj)
         if form.is_valid():
             form.save()  # Save the updated list
-            return redirect('contact:list_detail', list_id=list_id)  # Redirect to the list detail page
+            return redirect('contact:list_overview')  # Redirect to the list detail page
     else:
         form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
 
