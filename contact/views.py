@@ -1,4 +1,6 @@
 import threading
+import uuid
+from threading import Thread
 from django.forms import model_to_dict
 from django.shortcuts import render, redirect ,  get_object_or_404
 from django.core.paginator import Paginator
@@ -22,9 +24,9 @@ from contact.forms import CampaignForm, ContactForm, EmailForm, ExcelUploadForm,
 from contact.models import *
 from datetime import datetime
 import pandas as pd
-from django.db.models import Sum, Count, Q,Value,Case, When,F
-from django.db.models.functions import Coalesce
-
+from django.db.models import Sum, Count, Q,Value,Case, When,F,CharField
+from django.db.models.functions import Coalesce, Concat
+from django.utils.html import escape
 
 from .task import process_bulk_action
 from .forms import CustomFieldForm, ExcelUploadForm,ListForm
@@ -657,51 +659,128 @@ def campaign_detail(request, campaign_id):
 @login_required
 def campaign_detail_v1(request, campaign_id):
     campaign = get_object_or_404(Campaign, id=campaign_id)
-    if request.user.is_agency():
-        agdetail=Agent.objects.filter(user=request.user)
-    else:
-        agdetail=Agent.objects.filter(user=request.user.parent_agency)
-    # phonecall = PhoneCall.objects.filter(campaign_id=campaign_id)
-        # Optimized query: Fetch phone calls and join with Contact model
-          # 🔹 **Start Campaign Asynchronously**
-    if campaign.status in ['draft', 'scheduled']:  # Only start if not already running
-                # Store call records in the database (bulk insert)
-        pass
-        # process_campaign_calls.apply_async(args=[campaign.id, request.user.id, campaign.agent.id])
-    phonecall = (
-        PhoneCall.objects.filter(campaign_id=campaign_id)
-        .select_related('contact')  # Join with Contact model
-        .only('id', 'call_status', 'contact__first_name', 'contact__last_name', 'call_duration', 'phone_number')  # Fetch only required fields
-        .annotate(
-            call_duration_fixed=Coalesce(F('call_duration'), Value(0)),  # If NULL, replace with 0
-            is_call_answered=Case(
-                When(call_status__in=['in-progress', 'completed'], then=Value(True)),  # Mark True for answered calls
-                default=Value(False),
-            ),
-        )
-    )
-    # Call Analytics with total voice minutes computed correctly
-    call_analytics = phonecall.aggregate(
-        calls_placed=Count('id'),  # All calls made
-        calls_answered=Count('id', filter=Q(call_status__in=['in-progress', 'completed'])),  # Answered Calls
-        calls_failed=Count('id', filter=Q(call_status__in=['failed', 'no-answer', 'busy', 'canceled','initiated'])),  # Failed Calls
-        calls_completed=Count('id', filter=Q(call_status='completed')),  # Successfully Completed Calls
-        total_voice_minutes=Coalesce(Sum('call_duration'), Value(0))  # Sum of call durations
-    )
-       # Paginate PhoneCall records (10 per page)
-    paginator = Paginator(phonecall, 10)  # Adjust number per page as needed
-    page_number = request.GET.get('page')
-    phone_calls = paginator.get_page(page_number)
-    # call_analytics['total_voice_minutes'] = call_analytics['total_voice_minutes'] / 60
-    call_analytics['total_voice_minutes']=f"{call_analytics['total_voice_minutes'] // 60}m {call_analytics['total_voice_minutes']% 60}s" if call_analytics['total_voice_minutes'] else '0m 0s'
-    context={
-        'campaign': campaign,
-        'agdetail':agdetail,
-        'call_analytics': call_analytics,
-        'phone_calls': phone_calls,  # Pass paginated phone calls
 
+    # Get agent detail for agency or parent agency
+    if request.user.is_agency():
+        agdetail = Agent.objects.filter(user=request.user)
+    else:
+        agdetail = Agent.objects.filter(user=request.user.parent_agency)
+
+    # Query only for call analytics — actual calls will load in DataTable API
+    phonecall_qs = PhoneCall.objects.filter(campaign_id=campaign_id)
+        # Total calls placed (Total count - Pending calls)
+    # pending_calls = phonecall_qs.filter(call_status__in=['pending']).count()
+
+
+
+    call_analytics = phonecall_qs.aggregate(
+        calls_placed=Count('id'),
+        calls_answered=Count('id', filter=Q(call_status__in=['in-progress', 'completed'])),
+        calls_failed=Count('id', filter=Q(call_status__in=['failed', 'no-answer', 'busy', 'canceled', 'initiated'])),
+        calls_completed=Count('id', filter=Q(call_status='completed')),
+        calls_pending=Count('id', filter=Q(call_status='pending')),
+        total_voice_minutes=Coalesce(Sum('call_duration'), Value(0))
+    )
+
+    # Format total voice minutes to "Xm Ys"
+    total_secs = call_analytics['total_voice_minutes'] or 0
+    call_analytics['total_voice_minutes'] = f"{total_secs // 60}m {total_secs % 60}s"
+    call_analytics['calls_placed'] = call_analytics['calls_placed'] - call_analytics['calls_pending']
+
+    context = {
+        'campaign': campaign,
+        'agdetail': agdetail,
+        'call_analytics': call_analytics,
     }
     return render(request, 'campaign/campaign_detail.html', context)
+@login_required
+def campaign_calls_data_api(request, campaign_id):
+    search = request.GET.get('search[value]', '')
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    order_column_index = request.GET.get('order[0][column]', '0')
+    order_column = request.GET.get(f'columns[{order_column_index}][data]', 'id')
+    order_dir = request.GET.get('order[0][dir]', 'asc')
+
+    # Map 'contact_name' to the annotated full_name field
+    if order_column == 'contact_name':
+        order_column = 'full_name'
+    
+    order = order_column if order_dir == 'asc' else f'-{order_column}'
+
+    phonecalls = (
+        PhoneCall.objects
+        .filter(campaign_id=campaign_id)
+        .select_related('contact')
+        .annotate(
+            call_duration_fixed=Coalesce(F('call_duration'), Value(0)),
+            is_call_answered=Case(
+                When(call_status__in=['in-progress', 'completed'], then=Value(True)),
+                default=Value(False),
+            ),
+            full_name=Concat(
+                F('contact__first_name'),
+                Value(' '),
+                F('contact__last_name'),
+                output_field=CharField()
+            )
+        )
+    )
+
+    if search:
+        phonecalls = phonecalls.filter(
+            Q(contact__first_name__icontains=search) |
+            Q(contact__last_name__icontains=search) |
+            Q(phone_number__icontains=search)
+        )
+
+    total = phonecalls.count()
+
+    phonecalls = phonecalls.order_by(order)
+
+    paginator = Paginator(phonecalls, length)
+    page = paginator.get_page(start // length + 1)
+
+    status_map = {
+        "initiated": ("badge-light-light", "The call has been created but not yet started dialing."),
+        "queued": ("badge-light-warning", "The call is waiting in the queue to be processed."),
+        "ringing": ("badge-light-info", "The recipient's phone is ringing."),
+        "in-progress": ("badge-light-primary", "The call has been answered and is currently active."),
+        "completed": ("badge-light-success", "The call has ended successfully."),
+        "busy": ("badge-light-danger", "The recipient’s phone is busy."),
+        "failed": ("badge-light-dark", "The call could not be initiated."),
+        "no-answer": ("badge-light-secondary", "The call rang but was not answered."),
+        "canceled": ("badge-light-secondary", "The call was canceled."),
+    }
+
+    data = []
+    for call in page.object_list:
+        contact_name = escape(f"{call.contact.first_name} {call.contact.last_name}") if call.contact else "Unknown"
+        contact_url = reverse('contact:contact_details', args=[call.contact.id]) if call.contact else "#"
+        detail_url = reverse('agent:call_detail', args=[call.id])
+
+        status_class, status_desc = status_map.get(call.call_status, ("badge-light-secondary", "No status description available"))
+        call_status_html = f"""
+        <a href="#" class="badge {status_class}" data-bs-toggle="tooltip" data-bs-title="{escape(status_desc)}">
+            {call.call_status.upper()}
+        </a>
+        """
+
+        data.append({
+            'contact_name': f'<a href="{contact_url}">{contact_name}</a>',
+            'phone_number': escape(call.phone_number),
+            'is_call_answered': 'Yes' if call.is_call_answered else 'No',
+            'call_duration': f"{call.call_duration_fixed // 60}m {call.call_duration_fixed % 60}s",
+            'call_status': call_status_html,
+            'detail': f'<a href="{detail_url}">Call Detail</a>',
+        })
+
+    return JsonResponse({
+        'data': data,
+        'recordsTotal': total,
+        'recordsFiltered': total if not search else page.paginator.count,
+        'draw': int(request.GET.get('draw', 1)),
+    })
 @login_required
 def revoke_campaign_task(request, campaign_id):
     # Revoke the campaign's task
@@ -752,6 +831,7 @@ def start_campaign_view(request, campaign_id):
     campaign.triggers = {'task_id': task.id}
     campaign.save()
     return JsonResponse({"message": "Campaign started. Processing in background.", "task_id": task.id})
+
 # @login_required
 # def campaign_list(request):
 #     # Fetch campaigns for the logged-in user
@@ -1126,7 +1206,8 @@ def custom_fields(request):
 def delete_list(request, list_id):
     # Get the list by ID or return a 404 if not found
     list_to_delete = get_object_or_404(List, id=list_id, user=request.user)
-    list_data = model_to_dict(list_to_delete)
+    # list_data = model_to_dict(list_to_delete)
+    list_data = model_to_dict(list_to_delete, exclude=['contacts'])
     # Log the activity of deleting the contact
     log_activity(
         request.user, 

@@ -10,7 +10,7 @@ from django.db import transaction
 from celery import group
 import time
 
-MAX_CONCURRENT_CALLS = 2
+MAX_CONCURRENT_CALLS = 5
 CALL_RATE_LIMIT = 1  # 1 call per second
 
 
@@ -194,6 +194,8 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
     campaign.triggers['sent_at'] = timezone.now().isoformat()
     campaign.save()
     return "Campaign calls processed successfully."
+
+
 def pause_task(task_id):
     """Revoke a Celery task and store it in the database."""
     current_app.control.revoke(task_id, terminate=True)  # Revoke the task

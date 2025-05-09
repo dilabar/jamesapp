@@ -138,6 +138,16 @@ def call_history_data(request):
         bill = calculate_bill(call)  # Your custom logic
         timestamp = call.timestamp.strftime('%Y-%m-%d %H:%M:%S') if call.timestamp else 'N/A'
         time_ago = timesince(call.timestamp, now()) + " ago" if call.timestamp else 'N/A'
+        calldetail_url =reverse('agent:call_detail', args=[call.id]) if call.agnt else '#'
+        if call.agnt and call.agnt.display_name:
+            calldetail_url = reverse('agent:call_detail', args=[call.id])
+            detail_button = f'''
+                <a href="{calldetail_url}" class="btn btn-warning btn-sm mt-2">Details</a>
+                '''
+        else:
+            detail_button = '''
+                <a href="#" class="btn btn-secondary btn-sm mt-2 disabled" style="pointer-events: none;">Details</a>
+             '''
         data.append({
                 'index': index,
                 'agent': call.agnt.display_name.title() if call.agnt else 'N/A',
@@ -150,11 +160,7 @@ def call_history_data(request):
                 'campaign_name': getattr(call, 'campaign_name', 'Demo').capitalize() if hasattr(call, 'campaign_name') else 'Demo',
                 'customer_name': f"<a href='#'>{getattr(call, 'customer_name', 'NA').capitalize()}</a>" if hasattr(call, 'customer_name') else '<a href="#">NA</a>',
                 'call_status_badge': get_status_badge(call.call_status or ''),
-                'actions': f'''
-                    <a href="{reverse('agent:call_detail', args=[call.id])}" class="btn btn-warning btn-sm mt-2">
-                        Details
-                    </a>
-                '''
+                'actions': detail_button
             })
 
     return JsonResponse({

@@ -217,107 +217,25 @@
                                       <th>Call Answered</th>
                                       <th>Call Duration</th>
                                       <th>Status</th>
+                                      <th>Action</th>
                                      
                                   </tr>
                               </thead>
-                              <tbody>
-                                  {% for call in phone_calls %}
-                                  <tr>
-                                    <td>{{ call.contact.first_name }} {{ call.contact.last_name }}</td>
-                                    <td>{{ call.phone_number }}</td>
-                                    <td>{% if call.is_call_answered %} Yes {% else %} No {% endif %}</td>
-
-                                    <td>{{ call.call_duration_fixed|format_seconds }}</td>
-                                    <td>
-                                    <div>
-                                      
-  <a href="#" class="badge {% if call.call_status == 'initiated' %}badge-light-light{% elif call.call_status == 'queued' %}badge-light-warning{% elif call.call_status == 'ringing' %}badge-light-info{% elif call.call_status == 'in-progress' %}badge-light-primary{% elif call.call_status == 'completed' %}badge-light-success{% elif call.call_status == 'busy' %}badge-light-danger{% elif call.call_status == 'failed' %}badge-light-dark{% elif call.call_status == 'no-answer' %}badge-light-secondary{% else %}badge-light-secondary{% endif %}" 
-  data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="popover text" data-bs-title="
-        {% if call.call_status == 'queued' %}
-          The call is waiting in the queue to be processed.
-        {% elif call.call_status == 'initiated' %}
-          The call has been created but not yet started dialing.
-        {% elif call.call_status == 'ringing' %}
-          The recipient's phone is ringing.
-        {% elif call.call_status == 'in-progress' %}
-          The call has been answered and is currently active.
-        {% elif call.call_status == 'completed' %}
-          The call has ended successfully.
-        {% elif call.call_status == 'busy' %}
-          The recipient’s phone is busy (engaged in another call).
-        {% elif call.call_status == 'failed' %}
-          The call could not be initiated due to errors (e.g., invalid number).
-        {% elif call.call_status == 'no-answer' %}
-          The call rang but was not answered.
-        {% elif call.call_status == 'canceled' %}
-          The call was canceled.
-        {% else %}
-          No status description available.
-        {% endif %}">
-    {{ call.call_status | upper }}
-                                    </a>
-</div>
-
-
-
-                                    </td>
-
-                                   
-                                  </tr>
-                                  {% empty %}
-                                  <tr>
-                                      <td colspan="4" class="text-center">No Call Log Found.</td>
-                                  </tr>
-                                  {% endfor %}
-                              </tbody>
+                              <tbody></tbody>
                           </table>
                       </div>
                   
-                                      <!-- Pagination -->
-                    <nav aria-label="Page navigation">
-                      <ul class="pagination justify-content-center">
-                        {% if phone_calls.has_previous %}
-                          <li class="page-item">
-                            <a class="page-link" href="?page=1" aria-label="First">
-                              <span aria-hidden="true">&laquo;&laquo;</span>
-                            </a>
-                          </li>
-                          <li class="page-item">
-                            <a class="page-link" href="?page={{ phone_calls.previous_page_number }}" aria-label="Previous">
-                              <span aria-hidden="true">&lsaquo;</span>
-                            </a>
-                          </li>
-                        {% endif %}
-                        
-                        <!-- Current page indicator -->
-                        <li class="page-item disabled">
-                          <span class="page-link">Page {{ phone_calls.number }} of {{ phone_calls.paginator.num_pages }}</span>
-                        </li>
-
-                        {% if phone_calls.has_next %}
-                          <li class="page-item">
-                            <a class="page-link" href="?page={{ phone_calls.next_page_number }}" aria-label="Next">
-                              <span aria-hidden="true">&rsaquo;</span>
-                            </a>
-                          </li>
-                          <li class="page-item">
-                            <a class="page-link" href="?page={{ phone_calls.paginator.num_pages }}" aria-label="Last">
-                              <span aria-hidden="true">&raquo;&raquo;</span>
-                            </a>
-                          </li>
-                        {% endif %}
-                      </ul>
-                    </nav>
+                
 
                   </div>
                   
                       
                   </div>
               </div>
-              <div class="col-xxl-3 col-md-6 box-col-6">
+              <div class="col-xxl-4 col-md-6 box-col-6">
                 <div class="card">
                   <div class="card-header total-revenue card-no-border">
-                    <h4>Sentimental Call</h4>
+                    <h4>Doughnut Chart</h4>
                   
                   </div>
                   <div class="card-body pt-0"> 
@@ -354,13 +272,26 @@
 <script>
   // Initialize DataTable
   $(document).ready(function() {
-      $('#campaign-calls-table').DataTable({
-          "paging": false, // Enable pagination
-          "searching": true, // Enable search
-          "ordering": true, // Enable sorting
-          "info": false, // Show table info
-          "lengthChange": false // Disable page size change
-      });
+    $('#campaign-calls-table').DataTable({
+    "processing": true,
+    "serverSide": true,
+    "ajax": {
+        "url": "{% url 'contact:campaign_calls_data_api' campaign.id %}",
+        "type": "GET"
+    },
+    "columns": [
+        { "data": "contact_name" },
+        { "data": "phone_number" },
+        { "data": "is_call_answered" },
+        { "data": "call_duration" },
+        { "data": "call_status" },
+        { "data": "detail" ,"orderable": false}
+    ],
+    "drawCallback": function() {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    }
+});
+
 
   });
 
@@ -372,10 +303,11 @@
                 series: [
                 {{ call_analytics.calls_answered|default:0 }},
                 {{ call_analytics.calls_placed|default:0 }},
-                {{ call_analytics.calls_failed|default:0 }}
+                {{ call_analytics.calls_failed|default:0 }},
+                {{ call_analytics.calls_pending|default:0 }}
             ],
-            labels: ["Calls Answered", "Calls Placed", "Calls Failed"],
-            colors: ["#4CAF50", "#2196F3", "#FF5722"],
+            labels: ["Calls Answered", "Calls Placed", "Calls Failed","Calls Pending"],
+            colors: ["#4CAF50", "#2196F3", "#FF5722","#f2f2f2"],
                 responsive: [{
                     breakpoint: 480,
                     options: {

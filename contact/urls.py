@@ -25,6 +25,7 @@ urlpatterns = [
     path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
     path('campaigns/<int:campaign_id>/', campaign_detail_v1, name='campaign_detail'),
+    path('campaign/<int:campaign_id>/calls-data/', campaign_calls_data_api, name='campaign_calls_data_api'),
     path('campaign/<int:campaign_id>/pause/', revoke_campaign_task, name='revoke_campaign_task'),
     path('campaign/<int:campaign_id>/restart/', restart_campaign_task, name='restart_campaign_task'),
     
