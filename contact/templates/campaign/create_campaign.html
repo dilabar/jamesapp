@@ -3,7 +3,7 @@
 
 {% block css %}
 <link href="{% static 'css/custom.css' %}" rel="stylesheet">
-
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 {% endblock css %}
 
 {% block body %}
@@ -42,7 +42,7 @@
                         <h5 class="card-title">Enter Campaign Details</h5>
                         <p class="text-muted">Create your campaign by providing all the necessary details.</p>
                     </div>
-                    <form class="form theme-form needs-validation  custom-input {% if form.errors %}was-invalidated{% endif %}" method="POST">
+                    <form class="form theme-form needs-validation  custom-input {% if form.errors %}was-invalidated{% endif %}" id="scheduleForm" method="POST">
                         {% csrf_token %}
                         {% if form.non_field_errors %}
                         <div class="alert alert-light-danger">
@@ -94,6 +94,7 @@
                                         </div>
                                     {% endfor %}
                                 </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label" for="scheduled_at">Scheduled Time</label>
                                     {{ form.scheduled_at }}
@@ -101,8 +102,17 @@
                                     <div class="invalid-feedback d-block">
                                         {{ error }}
                                     </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                      <input type="hidden" id="utcTime" name="utc_time">
                                 </div>
+                                 <div class="mb-3">
+                                    {{ form.timezone.label_tag }}  
+                                    {{ form.timezone }}
+                                    {% if form.timezone.errors %}
+                                        <div class="text-danger">{{ form.timezone.errors }}</div>
+                                    {% endif %}
+                                    </div>
+
                             </div>
                     
                             <!-- <div class="row mb-4">
@@ -157,6 +167,30 @@
 {% endblock body %}
 
 {% block js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script>
+        $('#scheduleForm').on('submit', function(e) {
+            var localTime = $('#id_scheduled_at').val();
+            var timezone = $('#id_timezone').val();
+            
+            
+            if (localTime && timezone) {
+                var utcTime = moment.tz(localTime, timezone).utc().format('YYYY-MM-DDTHH:mm:ss');
+                $('#utcTime').val(utcTime);
+            }
+        });
+    </script>
+
+<!-- <script>
+    flatpickr("#id_scheduled_at", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today"
+    });
+</script> -->
+
 <script>
    function openSelectionWindow(type) {
     let url = "";
@@ -207,4 +241,16 @@
 
 
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tzSelect = document.querySelector("select[name='timezone']");
+    if (tzSelect && !tzSelect.value) {
+      const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if ([...tzSelect.options].some(opt => opt.value === detectedTz)) {
+        tzSelect.value = detectedTz;
+      }
+    }
+  });
+</script>
+
 {% endblock js %}

@@ -7,6 +7,26 @@
 
 {% block css %}
 <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+<style>
+  /* Custom progress bar color */
+  .swal2-timer-progress-bar {
+    background: linear-gradient(to right, #00c6ff, #0072ff); /* blue gradient */
+    height: 5px !important;
+  }
+
+  /* Custom header styling */
+  .swal2-title {
+    color: #0072ff;
+    font-weight: bold;
+    font-size: 24px;
+  }
+
+  /* Custom countdown number styling */
+  .swal2-html-container b {
+    color: #e74c3c;
+    font-size: 20px;
+  }
+</style>
 {% endblock css %}
 
 
@@ -52,7 +72,7 @@
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-6">
-                <h4>{{campaign | upper}} <div class="badge-light-primary product-sub badge rounded-pill"><span>{{campaign.status | capfirst}}</span></div></h4>
+                <h4>{{campaign | upper}} <div class="badge-light-primary product-sub badge rounded-pill"><span id="camp_sts">{{campaign.status | capfirst}}</span></div></h4>
             </div>
             <div class="col-6">
               <div class="d-flex justify-content-end gap-2">
@@ -270,114 +290,161 @@
 <script src="{% static 'manish/js/chart/apex-chart/apex-chart.js' %}"></script>
 
 <script>
-  // Initialize DataTable
-  $(document).ready(function() {
-    $('#campaign-calls-table').DataTable({
-    "processing": true,
-    "serverSide": true,
-    "ajax": {
-        "url": "{% url 'contact:campaign_calls_data_api' campaign.id %}",
-        "type": "GET"
-    },
-    "columns": [
-        { "data": "contact_name" },
-        { "data": "phone_number" },
-        { "data": "is_call_answered" },
-        { "data": "call_duration" },
-        { "data": "call_status" },
-        { "data": "detail" ,"orderable": false}
-    ],
-    "drawCallback": function() {
-        $('[data-bs-toggle="tooltip"]').tooltip();
-    }
-});
+  let refreshInterval = null;
 
+  $(document).ready(function () {
+    const table = $('#campaign-calls-table').DataTable({
+      processing: true,
+      serverSide: true,
+      ajax: {
+        url: "{% url 'contact:campaign_calls_data_api' campaign.id %}",
+        type: "GET",
+        dataSrc: function (json) {
+          // ✅ Update campaign status in HTML
+          if (json.campaign_status) {
+            document.getElementById("camp_sts").innerText = json.campaign_status.charAt(0).toUpperCase() + json.campaign_status.slice(1);
 
-  });
-
-  document.addEventListener("DOMContentLoaded", function () {
-            var options = {
-                chart: {
-                    type: "donut"
-                },
-                series: [
-                {{ call_analytics.calls_answered|default:0 }},
-                {{ call_analytics.calls_placed|default:0 }},
-                {{ call_analytics.calls_failed|default:0 }},
-                {{ call_analytics.calls_pending|default:0 }}
-            ],
-            labels: ["Calls Answered", "Calls Placed", "Calls Failed","Calls Pending"],
-            colors: ["#4CAF50", "#2196F3", "#FF5722","#f2f2f2"],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: {
-                            width: 300
-                        },
-                        legend: {
-                            position: "bottom"
-                        }
-                    }
-                }]
-            };
-
-            var chart = new ApexCharts(document.querySelector("#doughnutChart"), options);
-            chart.render();
-        });
-</script>
-<script>
-document.getElementById("start-campaign-btn").addEventListener("click", function () {
-    const campaignId = this.getAttribute("data-campaign-id");
-    const apiUrl = "{% url 'contact:start_campaign_api' campaign.id %}"
-    fetch(apiUrl, {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": getCookie('csrftoken'),
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({})
-    })
-    .then(response => {
-        if (!response.ok) {
-            // Agar backend ne error diya hai (e.g. 400, 500)
-            return response.json().then(data => {
-                throw new Error(data.error || "Something went wrong.");
-            });
+            // ✅ Stop refreshing if status is 'sent'
+            if ((json.campaign_status === 'sent' || json.campaign_status === 'paushed') && refreshInterval) {
+              clearInterval(refreshInterval);
+              refreshInterval = null;
+            }
+          }
+          return json.data;
         }
-        return response.json();
-    })
-    .then(data => {
-        Swal.fire({
-            icon: "success",
-            title: "Campaign Started",
-            text: data.message || "Campaign is now processing in background."
-        });
-    })
-    .catch(error => {
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: error.message || "Something went wrong while starting the campaign."
-        });
+      },
+      columns: [
+        { data: "contact_name" },
+        { data: "phone_number" },
+        { data: "is_call_answered" },
+        { data: "call_duration" },
+        { data: "call_status" },
+        { data: "detail", orderable: false }
+      ],
+      drawCallback: function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+      }
     });
 
+    // ✅ Start refreshing every 5 seconds
+    refreshInterval = setInterval(function () {
+      table.ajax.reload(null, false); // reload without resetting pagination
+    }, 5000);
+  });
+
+  // Donut Chart for Analytics
+  document.addEventListener("DOMContentLoaded", function () {
+    var options = {
+      chart: {
+        type: "donut"
+      },
+      series: [
+        {{ call_analytics.calls_answered|default:0 }},
+        {{ call_analytics.calls_placed|default:0 }},
+        {{ call_analytics.calls_failed|default:0 }},
+        {{ call_analytics.calls_pending|default:0 }}
+      ],
+      labels: ["Calls Answered", "Calls Placed", "Calls Failed", "Calls Pending"],
+      colors: ["#4CAF50", "#2196F3", "#FF5722", "#f2f2f2"],
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 300
+          },
+          legend: {
+            position: "bottom"
+          }
+        }
+      }]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#doughnutChart"), options);
+    chart.render();
+  });
+
+  // Start Campaign button click
+  document.getElementById("start-campaign-btn").addEventListener("click", function () {
+    showCountdown();
+    const apiUrl = "{% url 'contact:start_campaign_api' campaign.id %}";
+    fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie('csrftoken'),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({})
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.error || "Something went wrong.");
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Swal.fire({
+      //   icon: "success",
+      //   title: "Campaign Started",
+      //   text: data.message || "Campaign is now processing in background."
+      // });
+    })
+    .catch(error => {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.message || "Something went wrong while starting the campaign."
+      });
+    });
+    function showCountdown() {
+      let timerInterval;
+      Swal.fire({
+        title: "Campaign Started!",
+        html: 'Please wait <b></b> seconds...',
+        timer: 60000,
+        timerProgressBar: true,
+        showConfirmButton: false,         // ❌ Hide "OK"
+        showCancelButton: true,           // ✅ Show "Skip Waiting"
+        cancelButtonText: "Skip Waiting",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        allowEnterKey: false,
+        willOpen: () => {
+          const b = Swal.getHtmlContainer().querySelector('b');
+          timerInterval = setInterval(() => {
+            b.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
+          }, 1000);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.cancel) {
+          Swal.fire("Skipped", "You skipped the waiting time.", "info");
+        } else {
+          Swal.fire("Done", "Campaign is running in background.", "success");
+        }
+      });
+    }
     // CSRF helper
     function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
         }
-        return cookieValue;
+      }
+      return cookieValue;
     }
-});
+  });
 </script>
+
 
 {% endblock js %}
     

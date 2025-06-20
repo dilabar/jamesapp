@@ -1,4 +1,5 @@
 
+from django.utils import timezone
 from django import forms
 
 from agent.models import Agent, TwilioPhoneNumber
@@ -6,7 +7,7 @@ from agent.models import Agent, TwilioPhoneNumber
 from .models import *
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
-
+from pytz import common_timezones
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
@@ -125,9 +126,15 @@ class CampaignForm(forms.ModelForm):
         required=True,
         label="Send From (Twilio Number)"
     )
+    timezone = forms.ChoiceField(
+        choices=[(tz, tz) for tz in common_timezones],
+        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
+        required=False,
+        label="Time Zone"
+    )
     class Meta:
         model = Campaign
-        fields = ['name', 'scheduled_at', 'campaign_type', 'agent','twilio_phone', 'lists', 'individual_contacts']
+        fields = ['name', 'scheduled_at','timezone', 'campaign_type', 'agent','twilio_phone', 'lists', 'individual_contacts']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
             'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
@@ -157,6 +164,7 @@ class CampaignForm(forms.ModelForm):
 
     def clean_scheduled_at(self):
         scheduled_date = self.cleaned_data.get('scheduled_at')
+        
         if scheduled_date and scheduled_date < now():
             raise ValidationError("Scheduled date cannot be in the past.")
         return scheduled_date
@@ -177,19 +185,49 @@ class CampaignForm(forms.ModelForm):
 
         cleaned_data["lists"] = List.objects.filter(id__in=lists_ids) if lists_ids else List.objects.none()
         cleaned_data["individual_contacts"] = Contact.objects.filter(id__in=individual_contacts_ids) if individual_contacts_ids else Contact.objects.none()
+        timezone_name = cleaned_data.get("timezone")
+        scheduled_at = cleaned_data.get('scheduled_at')
+
+        print(f"clean data {scheduled_at}")
+        # if scheduled_at and timezone_name:
+        #     try:
+        #         # Step 1: Treat as naive
+        #         if scheduled_at.tzinfo is not None and scheduled_at.tzinfo.utcoffset(scheduled_at) is not None:
+        #             raise ValidationError("Datetime should be naive (without timezone).")
+
+        #         # Step 2: Localize to selected timezone
+        #         user_tz = pytz.timezone(timezone_name)
+        #         aware_local = user_tz.localize(scheduled_at)
+
+        #         # Step 3: Convert to UTC
+        #         scheduled_utc = aware_local.astimezone(pytz.UTC)
+
+        #         cleaned_data['scheduled_at_utc'] = scheduled_utc
+
+        #     except Exception as e:
+        #         raise ValidationError(f"Timezone conversion failed: {e}")
+        
+        if timezone_name:
+            try:
+                import pytz
+                pytz.timezone(timezone_name)  # validate it exists
+            except Exception:
+                self.add_error("timezone", "Invalid timezone selected.")
 
         return cleaned_data
 
     def save(self, commit=True):
         campaign = super().save(commit=False)
 
-        # Set status based on scheduled date
-        if campaign.scheduled_at and campaign.scheduled_at >= now():
+        print(f"now {now()}")
+        print(f"timezone.now() {timezone.now()}")
+        # print(f"campaign.scheduled_at_utc {campaign.scheduled_at_utc}")
+        if campaign.scheduled_at_utc and campaign.scheduled_at_utc >= timezone.now():
             campaign.status = 'scheduled'
 
         if commit:
             campaign.save()
-            self.save_m2m()  # Ensure many-to-many fields (lists & contacts) are saved
+            self.save_m2m()
 
         return campaign
 class CustomFieldForm(forms.ModelForm):

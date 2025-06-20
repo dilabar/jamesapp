@@ -12,6 +12,7 @@ import openpyxl
 from django.contrib import messages
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
+from jamesapp.redis_queue import enqueue_campaign_task
 from jamesapp.tasks import pause_task, process_campaign_calls, resume_task
 from jamesapp.utils import contact_to_serializable_dict, log_activity
 from twilio.rest import Client
@@ -39,7 +40,8 @@ from django.views.decorators.csrf import csrf_exempt
 import re  # For phone number validation
 
 from django.utils.timesince import timesince
-
+import logging
+logger = logging.getLogger(__name__)
 
 @login_required
 def contact_list(request):
@@ -626,10 +628,15 @@ def list_detail_data(request, list_id):
 @login_required
 def create_campaign(request):
     if request.method == 'POST':
+        from django.utils.dateparse import parse_datetime
         form = CampaignForm(request.POST, user=request.user)
         if form.is_valid():
+            utc_time_str = request.POST.get('utc_time')
+            scheduled_time = parse_datetime(utc_time_str)
+           
             campaign = form.save(commit=False)
             campaign.user = request.user  # Assign logged-in user
+            campaign.scheduled_at_utc = scheduled_time
             campaign.save()
             form.save_m2m()  # Save Many-to-Many relationships
             messages.success(request, "Campaign created successfully!")
@@ -774,12 +781,14 @@ def campaign_calls_data_api(request, campaign_id):
             'call_status': call_status_html,
             'detail': f'<a href="{detail_url}">Call Detail</a>',
         })
-
+    # ✅ Add campaign status
+    campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
     return JsonResponse({
         'data': data,
         'recordsTotal': total,
         'recordsFiltered': total if not search else page.paginator.count,
         'draw': int(request.GET.get('draw', 1)),
+        'campaign_status': campaign.status  # ✅ added line
     })
 @login_required
 def revoke_campaign_task(request, campaign_id):
@@ -819,18 +828,59 @@ def restart_campaign_task(request, campaign_id):
 
     messages.success(request, f"Task {task_id} has been successfully Restarted.")
     return redirect('contact:campaign_detail', campaign_id=campaign.id)
+
+# @login_required
+# def start_campaign_view(request, campaign_id):
+#     campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
+#     if campaign.status not in ['draft', 'scheduled']:
+#         return JsonResponse({"error": "Campaign already started or finished."}, status=400)
+#     # # campaign.status = 'queued'
+#     # campaign.triggers = {'task_id': F'{campaign.id}-{request.user.id}-{campaign.agent.id}'}
+#     # campaign.save()
+
+#     process_campaign_calls.delay(campaign.id, request.user.id, campaign.agent.id)
+#     # print("Task state:", task.state)
+
+#     return JsonResponse({"message": "Campaign started. Processing in background.", "task_id": F'{campaign.id}-{request.user.id}-{campaign.agent.id}'})
 @login_required
 def start_campaign_view(request, campaign_id):
-    campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
-    print(campaign.status)
-    if campaign.status not in ['draft', 'scheduled']:
-        return JsonResponse({"error": "Campaign already started or finished."}, status=400)
+    try:
+        campaign = get_object_or_404(Campaign, id=campaign_id, user=request.user)
 
-    task = process_campaign_calls.delay(campaign.id, request.user.id, campaign.agent.id)
-    campaign.status = 'queued'
-    campaign.triggers = {'task_id': task.id}
-    campaign.save()
-    return JsonResponse({"message": "Campaign started. Processing in background.", "task_id": task.id})
+        if campaign.status not in ['draft', 'scheduled']:
+            return JsonResponse({
+                "error": "Campaign already started or finished.",
+                "status": False
+            }, status=400)
+
+        if not campaign.agent:
+            return JsonResponse({
+                "error": "Campaign has no agent assigned.",
+                "status": False
+            }, status=400)
+
+        # Enqueue in Redis queue
+        enqueue_campaign_task(campaign.id, request.user.id, campaign.agent.id)
+
+        return JsonResponse({
+            "message": "Campaign queued. Will be processed shortly.",
+            "status": True,
+            "queued": True
+        })
+
+    except ConnectionError as e:
+        logger.exception("Redis connection failed.")
+        return JsonResponse({
+            "error": "Failed to connect to task queue. Please try again later.",
+            "status": False
+        }, status=500)
+
+    except Exception as e:
+        logger.exception("Unexpected error in start_campaign_view.")
+        return JsonResponse({
+            "error": "An unexpected error occurred.",
+            "status": False
+        }, status=500)
 
 # @login_required
 # def campaign_list(request):
@@ -863,7 +913,10 @@ def campaign_list(request):
 
     return render(request, 'campaign/campaign_list.html')
 
+
 def campaign_data(request):
+    import pytz
+
     draw = request.GET.get('draw')
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 5))
@@ -882,10 +935,23 @@ def campaign_data(request):
         view_url = reverse('contact:campaign_detail', args=[campaign.id])
         edit_url = reverse('contact:edit_campaign', args=[campaign.id])
         delete_url = reverse('contact:delete_campaign', args=[campaign.id])
-        if campaign.scheduled_at:
-            scheduled_display = campaign.scheduled_at.strftime('%b %d, %Y %H:%M')
+
+        if campaign.scheduled_at_utc:
+            # Ensure UTC datetime is aware
+            scheduled_utc = campaign.scheduled_at_utc
+            if timezone.is_naive(scheduled_utc):
+                scheduled_utc = pytz.UTC.localize(scheduled_utc)
+
+            # Convert to user timezone if available
+            try:
+                user_tz = pytz.timezone(campaign.timezone) if campaign.timezone else pytz.UTC
+                local_dt = scheduled_utc.astimezone(user_tz)
+                scheduled_display = f"{local_dt.strftime('%b %d, %Y %H:%M')} ({campaign.timezone})<br><small>UTC: {scheduled_utc.strftime('%b %d, %Y %H:%M')}</small>"
+            except Exception as e:
+                scheduled_display = f"UTC: {scheduled_utc.strftime('%b %d, %Y %H:%M')}"
         else:
             scheduled_display = 'Not Scheduled'
+
         actions = f'''
             <a href="{view_url}" class="btn btn-sm btn-outline-success" title="View">
                 <i class="fa fa-play"></i>
@@ -901,17 +967,18 @@ def campaign_data(request):
         data.append({
             'name': campaign.name.title(),
             'created_at': campaign.created_at.strftime('%b %d, %Y %H:%M'),
-            'scheduled_at':scheduled_display,
-            'created_ago':f"{timesince(campaign.created_at)} ago",  # optional if you pass timeago string
+            'scheduled_at': scheduled_display,
+            'created_ago': f"{timesince(campaign.created_at)} ago",
             'actions': actions,
         })
 
     return JsonResponse({
         'draw': draw,
         'recordsTotal': total,
-        'recordsFiltered': total if search_value else total,
+        'recordsFiltered': total,
         'data': data,
     })
+
 
 def start_campaign(user, campaign_id):
     """

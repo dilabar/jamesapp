@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 from agency.models import User
 
 # Create your models here.
@@ -46,6 +46,9 @@ class PhoneNumber(models.Model):
 
     class Meta:
         unique_together = ('user', 'phone_number')  # Ensure phone number is unique per user.
+        indexes = [
+            models.Index(fields=['contact', 'is_primary']),
+        ]
 
     def __str__(self):
         return self.phone_number
@@ -101,7 +104,10 @@ class Campaign(models.Model):
     content = models.TextField(blank=True, null=True)
     lists = models.ManyToManyField(List, related_name='campaigns', blank=True)
     individual_contacts = models.ManyToManyField(Contact, related_name='campaigns', blank=True)
-    scheduled_at = models.DateTimeField(blank=True, null=True)
+    scheduled_at = models.DateTimeField(blank=True, null=True, help_text="User's local time")
+    scheduled_at_utc = models.DateTimeField(blank=True, null=True, help_text="Stored in UTC")
+    timezone = models.CharField(max_length=64, blank=True, null=True, help_text="Timezone name, e.g., 'Asia/Kolkata'")
+
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     triggers = models.JSONField(default=dict, blank=True)  # Store automation triggers.
@@ -123,6 +129,35 @@ class Campaign(models.Model):
     def is_one_time(self):
         """Returns True if the campaign is one-time."""
         return self.campaign_type == self.ONE_TIME
+    # def save(self, *args, **kwargs):
+    #     import pytz
+    #     from django.utils import timezone
+
+    #     if self.scheduled_at and self.timezone:
+    #         try:
+    #             user_tz = pytz.timezone(self.timezone)
+
+    #             if timezone.is_naive(self.scheduled_at):
+    #                 # If naive, localize to user's timezone
+    #                 local_dt = user_tz.localize(self.scheduled_at)
+    #             else:
+    #                 # If already aware (usually in UTC), convert to user's local time
+    #                 local_dt = self.scheduled_at.astimezone(user_tz)
+
+    #             # Convert to UTC
+    #             self.scheduled_at_utc = local_dt.astimezone(pytz.UTC)
+
+    #             if self.scheduled_at_utc >= timezone.now():
+    #                 self.status = 'scheduled'
+    #         except Exception as e:
+    #             print(f"[ERROR] Timezone conversion failed: {e}")
+    #             self.scheduled_at_utc = None
+    #     else:
+    #         self.scheduled_at_utc = None
+
+    #     super().save(*args, **kwargs)
+
+
 
 
 class CustomField(models.Model):
