@@ -1,0 +1,129 @@
+
+
+    
+    {% extends 'new/base.html' %}
+    {% load static %}
+    
+    {% block header %}
+    
+    {% endblock header %}
+    
+    {% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+    {% endblock css %}
+        
+    
+    
+    {% block body %}
+    
+    <div class="page-body">
+        {% if messages %}
+        <div class="alert alert-warning" role="alert" id="messages">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="container-fluid">
+            <div class="page-title">
+                <div class="row">
+                    <div class="col-6">
+                        <h4>All Lists</h4>
+                    </div>
+                    <div class="col-6">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">                                       
+                                <svg class="stroke-icon">
+                                    <use href="{% static 'manish/svg/icon-sprite.svg' %}#stroke-home"></use>
+                                </svg></a></li>
+                            <li class="breadcrumb-item">List</li>
+                            
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Container-fluid starts-->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Scroll - vertical dynamic Starts-->
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-header pb-0 card-no-border">
+                            <a href="{% url 'contact:create_list' %}" class="btn btn-primary" data-bs-toggle="tooltip" title="Add Contact">Create List</a>
+                            
+    
+                            
+                        </div>
+    
+                        <div class="card-body">
+                            <!-- Table Section for All Lists -->
+                            <div class="table-responsive user-datatable custom-scrollbar">
+                                <table class="display" id="list-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Count</th>
+                                            <th>Created At</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                 
+                                </table>
+                            </div>
+                        
+                         
+                        </div>
+                        
+    
+                    </div>
+                </div>
+                <!-- Scroll - vertical dynamic Ends-->
+            </div>
+        </div>
+    </div>
+    
+    
+               
+    
+    {% endblock body %}
+        
+    
+    
+    {% block js %}
+    <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    <script>
+        $(document).ready(function () {
+            $('#list-table').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'contact:list_data' %}",
+                type: "GET"
+            },
+            columns: [
+                { data: "index", orderable: false },
+                { data: "name" },
+                { data: "count" },
+                { data: "created_at" },
+                {
+                    data: "action",
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        return data;
+                    }
+                }
+            ]
+        });
+
+        });
+        </script>
+    {% endblock js %}
+        
+    
+
+
+

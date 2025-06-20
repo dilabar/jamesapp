@@ -46,60 +46,21 @@
                 
                 <div class="card-body">
                     <div class="table-responsive user-datatable custom-scrollbar">
-                        <table class="display" id="basic-10">
+                        <table class="display" id="events-table">
                             <thead>
-                                <tr>
-                                    <th>Summary</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Description</th>
-                                    <th>Attendees</th>
-                                    <th>Calendar Event ID</th>
-                                    <th>Calendar Link</th>
-                                    <th>Status</th>
-                                </tr>
+                              <tr>
+                                <th>Summary</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Description</th>
+                                <th>Attendees</th>
+                                <th>Calendar Event ID</th>
+                                <th>Link</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
-                            <tbody>
-                                {% for event in events %}
-                                <tr>
-                                    <td>{{ event.summary }}</td>
-                                    <td>{{ event.start_time|date:"Y-m-d H:i" }}</td>
-                                    <td>{{ event.end_time|date:"Y-m-d H:i" }}</td>
-                                    <td>{{ event.description|default:"No description" }}</td>
-                                    <td>{{ event.attendees}}</td>
-                                    <td>{{ event.calendar_event_id }}</td>
-                                    <td><a href="{{ event.calendar_link }}" target="_blank">View Event</a></td>
-
-                                    <td>
-                                        {% if event.status == 'cancelled' %}
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        {% elif event.end_time < now %}
-                                            <span class="badge bg-success">Completed</span>
-                                        {% else %}
-                                            <span class="badge bg-info">Upcoming</span>
-                                        {% endif %}
-                                    </td>
-
-                                    
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="8" class="text-center">No events found.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th>Summary</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Description</th>
-                                    <th>Attendees</th>
-                                    <th>Calendar Event ID</th>
-                                    <th>Calendar Link</th>
-                                    <th>Status</th>
-                                </tr>
-                            </tfoot>
+                        
                         </table>
                     </div>
                 </div>
@@ -118,5 +79,26 @@
 {% block js %}
 <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+<script>
+  $(document).ready(function() {
+      $('#events-table').DataTable({
+          "processing": true,
+          "serverSide": true,
+          "ordering": false, // Enable sorting
+          "ajax": "{% url 'scheduling:event_list_data' %}",
+          "columns": [
+              { "data": "summary", },
+              { "data": "start_time" },
+              { "data": "end_time" },
+              { "data": "description" },
+              { "data": "attendees" },
+              { "data": "calendar_event_id" },
+              { "data": "calendar_link" },
+              { "data": "status", "orderable": true, "searchable": false },
+              { "data": "actions", "orderable": false, "searchable": false }
+          ]
+      });
+  });
+  </script>
 {% endblock js %}
     

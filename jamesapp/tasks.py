@@ -1,101 +1,299 @@
 from datetime import time
+from venv import logger
 from agent.models import PhoneCall, ServiceDetail
 from celery import shared_task, current_task
 from django.utils import timezone
+from jamesapp.redis_queue import dequeue_campaign_task
 from jamesapp.utils import deduplicate_contacts, parse_csv
 from twilio.rest import Client
 from contact.models import BulkAction, Campaign, Contact, CustomField, Email, List, PhoneNumber, RevokedTask
 from celery import current_app
+from django.db import transaction
+from celery import group
+import time
+from django.db.models import Prefetch, Count, Q
+from celery.exceptions import MaxRetriesExceededError
+from twilio.base.exceptions import TwilioRestException
 
+MAX_CONCURRENT_CALLS = 10  # Adjust based on your Twilio capacity
+CALL_RATE_LIMIT = 1  # 1000ms between call initiations
+BATCH_SIZE = 500  # Optimal for most databases
+
+@shared_task
+def poll_and_process_queued_campaigns():
+    for _ in range(10):  # Process max 10 tasks per run
+        task_data = dequeue_campaign_task()
+        if not task_data:
+            break
+
+        try:
+            
+            process_campaign_calls.delay(
+                task_data['campaign_id'],
+                task_data['user_id'],
+                task_data['agent_id']
+            )
+            logger.info(f"Queued campaign {task_data['campaign_id']} for processing.")
+        except Exception as e:
+            logger.error(f"Failed to dispatch campaign task: {str(e)}")
 
 @shared_task(bind=True)
 def process_campaign_calls(self, campaign_id, user_id, agent_id):
-    """
-    Processes campaign calls asynchronously with pause and resume support.
-    """
-    campaign = Campaign.objects.get(id=campaign_id)
-    twilio = ServiceDetail.objects.filter(user_id=user_id, service_name='twilio').first()
+    logger.info(f'[Main Task] Celery started: {self.request.id}')
 
-    phone_calls = []
+    try:
+        campaign = Campaign.objects.get(id=campaign_id)
+    except Campaign.DoesNotExist:
+        logger.error(f"Campaign {campaign_id} not found.")
+        return f"Campaign {campaign_id} not found."
+
+    campaign.status = 'started'
+    campaign.triggers['task_id'] = self.request.id
+    campaign.save()
+
     recipients = campaign.get_recipients()
-    if campaign.status in ["draft", "scheduled"]:
-        for contact in recipients:
-            phone_number = contact.phone_numbers.filter(is_primary=True).first()
-            if not phone_number:
+    for contact in recipients.iterator(chunk_size=500):
+        try:
+            primary_phone = contact.phone_numbers.first()
+            if not primary_phone:
                 continue
 
-            # Format the phone number
-            country_code = phone_number.country_code or ''
-            phone_number_str = f"{country_code}{phone_number.phone_number}".strip()
+            phone_number = f"{primary_phone.country_code or ''}{primary_phone.phone_number}".strip()
 
-            # Create PhoneCall object
-            phone_call = PhoneCall(
-                phone_number=phone_number_str,
+            phone_call = PhoneCall.objects.create(
+                phone_number=phone_number,
                 call_status='pending',
                 user_id=user_id,
                 agent_id=campaign.agent.id,
                 campaign=campaign,
                 contact=contact
             )
-            phone_calls.append(phone_call)
 
-            # Bulk create phone call records
-        PhoneCall.objects.bulk_create(phone_calls)
-
-    if not twilio:
-        campaign.status = 'failed'
-        campaign.triggers['error']='Twilio service details not found.'
-        campaign.save()
-        return "Twilio service details not found."
-
-    client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
-
-    # Store Task ID to Pause/Resume
-    campaign.status = 'started'
-
-    campaign.triggers['task_id'] = self.request.id  # Store Celery task ID in the campaign
-    campaign.save()
-    # CALL_RATE_LIMIT = 1 
-
-    # Loop through PhoneCalls to initiate
-    for phone_call in PhoneCall.objects.filter(campaign=campaign, call_status='pending'):
-        # Check if task is revoked (Paused)
-        if RevokedTask.objects.filter(task_id=self.request.id).exists():
-            # If the task is revoked, stop the execution.
-            campaign.status = 'paushed'
-            campaign.save()
-            return "Campaign task paused."
-
-        try:
-            call = client.calls.create(
-                url=f'https://secretvoiceagent.net/call/start_twilio_stream/{user_id}/{agent_id}/',
-                to=phone_call.phone_number,
-                from_=twilio.decrypted_twilio_phone,
-                record=True,
-                method='POST',
-                status_callback=f'https://secretvoiceagent.net/call/call_status_callback/{phone_call.id}/',
-                status_callback_method='POST',
-                status_callback_event=["initiated", "ringing", "answered", "completed"]
-            )
-
-            phone_call.call_status = 'initiated'
-            phone_call.twilio_call_id = call.sid
-            phone_call.save()
-            # Introduce a delay to avoid Twilio rate limits
-            # time.sleep(1 / CALL_RATE_LIMIT)
+            # Call the sub-task asynchronously
+            initiate_call.delay(phone_call.id, user_id, agent_id, campaign_id)
 
         except Exception as e:
-            phone_call.call_status = 'failed'
-            
-            phone_call.save()
-            # Log or handle exception here (e.g., log the error or message)
-            print(f"Error initiating call for {phone_call.phone_number}: {str(e)}")
+            logger.error(f"Failed to queue contact {contact.id}: {str(e)}")
+            continue
 
-    # After processing all calls, mark the campaign as 'sent'
+    campaign.triggers['queued_at'] = timezone.now().isoformat()
     campaign.status = 'sent'
-    campaign.triggers['sent_at'] = timezone.now().isoformat()
+
     campaign.save()
-    return "Campaign calls processed successfully."
+    logger.info(f"[Main Task] Campaign {campaign.id} calls have been queued.")
+    return f"[Main Task] Campaign {campaign.name} ({campaign.id}) calls have been queued."
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)  # Retry up to 3 times, 60s delay
+def initiate_call(self, phone_call_id, user_id, agent_id, campaign_id):
+    logger.info(f"[Sub-task] Initiating call for PhoneCall ID: {phone_call_id}")
+
+    phone_call = None  # Ensure it's defined even if exception occurs before assignment
+
+    try:
+        CALL_BASE_URL = 'https://secretvoiceagent.net'
+        phone_call = PhoneCall.objects.select_related('campaign').get(id=phone_call_id)
+        campaign = phone_call.campaign
+
+        twilio = ServiceDetail.objects.filter(user_id=user_id, service_name='twilio').first()
+        if not twilio:
+            logger.error("Twilio credentials not found.")
+            phone_call.call_status = 'failed'
+            phone_call.save()
+            return "Twilio credentials not found."
+
+        client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+
+        call = client.calls.create(
+            url=f'{CALL_BASE_URL}/call/start_twilio_stream/{user_id}/{agent_id}/{campaign_id}/',
+            to=phone_call.phone_number,
+            from_=campaign.twilio_phone.phone_number,
+            record=True,
+            method='POST',
+            status_callback=f'{CALL_BASE_URL}/call/call_status_callback/{phone_call.id}/',
+            status_callback_method='POST',
+            status_callback_event=["initiated", "ringing", "answered", "completed"]
+        )
+
+        phone_call.call_status = 'initiated'
+        phone_call.twilio_call_id = call.sid
+        phone_call.save()
+        return f"Call initiated successfully. Call SID: {call.sid}"
+
+    except TwilioRestException as e:
+        if e.status == 429 or "Too Many Requests" in str(e):  # Handle Twilio rate limiting
+            logger.warning(f"Rate limit hit for PhoneCall {phone_call_id}, retrying...")
+            try:
+                raise self.retry(exc=e)
+            except MaxRetriesExceededError:
+                logger.error(f"Max retries exceeded for PhoneCall {phone_call_id}")
+                if phone_call:
+                    phone_call.call_status = 'failed'
+                    phone_call.save()
+                return "Max retries exceeded due to rate limit."
+
+        logger.error(f"[Sub-task] Twilio error for {phone_call_id}: {str(e)}")
+        if phone_call:
+            phone_call.call_status = 'failed'
+            phone_call.save()
+        return f"Twilio error: {str(e)}"
+
+    except Exception as e:
+        logger.error(f"[Sub-task] Call failed for {phone_call_id}: {str(e)}")
+        if phone_call:
+            phone_call.call_status = 'failed'
+            phone_call.save()
+        return f"[Sub-task] Call failed for {phone_call_id}: {str(e)}"
+
+# @shared_task(bind=True)
+# def process_campaign_calls(self, campaign_id, user_id, agent_id):
+#     logger.info(f'Celery task started: {self.request.id}')
+    
+#     try:
+#         campaign = Campaign.objects.get(id=campaign_id)
+#     except Campaign.DoesNotExist:
+#         logger.error(f"Campaign {campaign_id} not found.")
+#         return "Campaign not found."
+
+#     twilio = ServiceDetail.objects.filter(user_id=user_id, service_name='twilio').first()
+#     if not twilio:
+#         campaign.status = 'failed'
+#         campaign.triggers['error'] = 'Twilio service details not found.'
+#         campaign.save()
+#         return "Twilio service details not found."
+
+#     client = Client(twilio.decrypted_account_sid, twilio.decrypted_api_key)
+
+
+#     if campaign.status in ["draft", "scheduled"]:
+#      # Optimized recipient processing with prefetch
+
+#         # # Optimized queryset with prefetching
+#         recipients = campaign.get_recipients()
+
+#         # Batch processing of phone calls
+#         phone_calls_batch = []
+#         for contact in recipients.iterator(chunk_size=1000):  # Memory-efficient iteration
+#             try:
+#                 primary_phone = contact.phone_numbers.first()
+#                 if not primary_phone:
+#                     continue
+
+#                 phone_calls_batch.append(PhoneCall(
+#                     phone_number=f"{primary_phone.country_code or ''}{primary_phone.phone_number}".strip(),
+#                     call_status='pending',
+#                     user_id=user_id,
+#                     agent_id=campaign.agent.id,
+#                     campaign=campaign,
+#                     contact=contact
+#                 ))
+
+#                 # Batch insertion
+#                 if len(phone_calls_batch) >= BATCH_SIZE:
+#                     with transaction.atomic():
+#                         PhoneCall.objects.bulk_create(
+#                             phone_calls_batch,
+#                             batch_size=BATCH_SIZE,
+#                             ignore_conflicts=True
+#                         )
+#                     phone_calls_batch = []
+
+#             except Exception as e:
+#                 logger.error(f"Error processing contact {contact.id}: {str(e)}")
+#                 continue
+
+#         # Final batch insertion
+#         if phone_calls_batch:
+#             with transaction.atomic():
+#                 PhoneCall.objects.bulk_create(
+#                     phone_calls_batch,
+#                     batch_size=BATCH_SIZE,
+#                     ignore_conflicts=True
+#                 )
+
+#         # Update campaign status
+#         campaign.status = 'started'
+#         campaign.triggers['task_id'] = self.request.id
+#         campaign.save(update_fields=['status', 'triggers'])
+
+#     total_calls = 0
+#     success = 0
+#     failures = 0
+
+#     CALL_BASE_URL = 'https://secretvoiceagent.net'
+
+#     while PhoneCall.objects.filter(campaign=campaign, call_status='pending').exists():
+#         # pending_count = PhoneCall.objects.filter(campaign=campaign, call_status='pending').count()
+#         logger.info(f"counter total_calls {total_calls} success: {success}, failure {failures}")
+
+#         if RevokedTask.objects.filter(task_id=self.request.id).exists():
+#             campaign.status = 'paused'
+#             campaign.save()
+#             return True #"Campaign task paused."
+
+#         # Get active calls count
+#         active_calls = PhoneCall.objects.filter(
+#             campaign=campaign,
+#             call_status__in=['initiated', 'in-progress']
+#         ).count()
+#         logger.info(f"active_calls {active_calls} MAX_CONCURRENT_CALLS: {MAX_CONCURRENT_CALLS}")
+        
+#         # Calculate available slots
+#         available_slots = MAX_CONCURRENT_CALLS - active_calls
+#         if available_slots <= 0:
+#             time.sleep(1)
+#             continue
+
+
+#         # Get pending calls with locking
+#         pending_calls = PhoneCall.objects.select_for_update(
+#             skip_locked=True
+#         ).filter(
+#             campaign=campaign,
+#             call_status='pending'
+#         )[:available_slots]
+#         # Process the batch
+#         success, failures = 0, 0
+#         for phone_call in pending_calls:
+
+#             try:
+#                 logger.info(f"phone_call initate")
+
+#                 call = client.calls.create(
+#                     url=f'{CALL_BASE_URL}/call/start_twilio_stream/{user_id}/{agent_id}/{campaign_id}/',
+#                     to=phone_call.phone_number,
+#                     from_=campaign.twilio_phone.phone_number,
+#                     record=True,
+#                     method='POST',
+#                     status_callback=f'{CALL_BASE_URL}/call/call_status_callback/{phone_call.id}/',
+#                     status_callback_method='POST',
+#                     status_callback_event=["initiated", "ringing", "answered", "completed"]
+#                 )
+
+#                 phone_call.call_status = 'initiated'
+#                 phone_call.twilio_call_id = call.sid
+#                 phone_call.save()
+#                 success += 1
+#                 time.sleep(CALL_RATE_LIMIT)
+
+#             except Exception as e:
+#                 logger.error(f"Call failed: {str(e)}")
+#                 phone_call.call_status = 'failed'
+#                 phone_call.save()
+#                 failures += 1
+
+#         logger.info(f"Processed: {success} success, {failures} failures")
+
+#     # Final status update after loop completes
+#     # failed_calls = PhoneCall.objects.filter(
+#     #     campaign=campaign,
+#     #     call_status='failed'
+#     # ).count()
+#     campaign.status = 'sent'
+#     campaign.triggers['sent_at'] = timezone.now().isoformat()
+#     campaign.save()
+
+#     logger.info(f"Campaign {campaign.id} finalized with status: {campaign.status}")
+#     return True #"Campaign calls processed successfully."
 
 
 def pause_task(task_id):
@@ -208,3 +406,11 @@ def process_bulk_action(action_id):
         action.completed_at = timezone.now()
         action.save()
         raise e
+    
+
+@shared_task
+def run_campaign(campaign_id):
+    # Campaign logic here
+    # For example, update the status of the campaign, process data, etc.
+    print(f"Running campaign {campaign_id}")
+    return f"Campaign {campaign_id} is running"

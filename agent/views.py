@@ -1,4 +1,6 @@
-from django.http import HttpResponse
+import json
+from time import localtime
+from django.http import HttpResponse, JsonResponse
 import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
@@ -8,6 +10,8 @@ from django.contrib.auth import login as auth_login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from contact.models import List
+from logger.models import ActivityLog
 import openai
 from agent.forms import ServiceDetailForm,AgentForm
 from agent.models import Agent, ServiceDetail
@@ -61,7 +65,44 @@ def dashboards(request):
     
     return render(request, 'dashboard/dashboard.html')
 
+@login_required
+def dashboard_stats_api(request):
+    try:
+        total_agents_active = Agent.objects.filter(user=request.user).count()
+        total_campaigns = Campaign.objects.filter(user=request.user).count()
+        total_lists = List.objects.filter(user=request.user).count()
+        total_contacts = Contact.objects.filter(user=request.user).count()
+        total_phonecalls = PhoneCall.objects.filter(user=request.user).count()
+        # Recent Activity Logs
+        logs = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')[:10]  # latest 10 logs
+        
+        logs_data = []
+        for log in logs:
+            logs_data.append({
+                'user': log.user.get_full_name() or log.user.username,
+                'timestamp': log.timestamp,
+                'action': log.action,
+                'additional_info': log.additional_info,
+                'img_url': '/static/manish/images/user/26.png'  # You can customize per user later
+            })
+        data = {
+            'total_agents_active': total_agents_active,
+            'total_campaigns': total_campaigns,
+            'total_lists': total_lists,
+            'total_contacts': total_contacts,
+            'total_phonecalls': total_phonecalls,
+            'activity_logs': logs_data
+        }
 
+        return JsonResponse(data, status=200)
+
+    except Exception as e:
+        # Log the error here if needed
+        print(e)
+        return JsonResponse(
+            {'error': 'Something went wrong while fetching dashboard stats.'},
+            status=500
+        )
 
 
 
@@ -270,4 +311,120 @@ def summarize_transcript(request, agent_id, cid):
         return render(request, 'agent/error.html', {'error': f"Error during summarization: {str(e)}"})
 
 
+@login_required
+def add_twilio_phone(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            phone = data.get('phone_number')
+            service_id = data.get('service_id')
 
+            # Validate phone number
+            if not phone or len(phone) < 10:
+                return JsonResponse({'success': False, 'error': 'Invalid phone number.'})
+
+            # Validate service ID
+            if not service_id:
+                return JsonResponse({'success': False, 'error': 'Service ID is required.'})
+
+            # Fetch service associated with the user
+            service = ServiceDetail.objects.get(id=service_id, user=request.user)
+
+            # Create the Twilio phone number entry
+            twilio_phone = TwilioPhoneNumber.objects.create(service=service, phone_number=phone)
+
+            return JsonResponse({'success': True, 'phone_number': twilio_phone.phone_number})
+        except ServiceDetail.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Service ID not found for the user.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON data.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+
+@login_required
+def list_twilio_phones(request):
+    try:
+        service_id = request.GET.get("service_id")
+        draw = int(request.GET.get("draw", 1))
+        start = int(request.GET.get("start", 0))
+        length = int(request.GET.get("length", 10))
+        search_value = request.GET.get("search[value]", "")
+
+        if not service_id:
+            return JsonResponse({"error": "Missing service_id"}, status=400)
+
+        queryset = TwilioPhoneNumber.objects.filter(service_id=service_id)
+
+        if search_value:
+            queryset = queryset.filter(phone_number__icontains=search_value)
+
+        total_records = TwilioPhoneNumber.objects.filter(service_id=service_id).count()
+        filtered_records = queryset.count()
+
+        page_data = queryset[start:start + length]
+
+        data = [
+            [start + i + 1, phone.phone_number, phone.id]
+            for i, phone in enumerate(page_data)
+        ]
+
+        return JsonResponse({
+            "draw": draw,
+            "recordsTotal": total_records,
+            "recordsFiltered": filtered_records,
+            "data": [
+                [row[0], row[1], f'''
+                    <button class="btn btn-sm btn-warning edit-phone" data-id="{row[2]}" data-phone="{row[1]}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-phone" data-id="{row[2]}">Delete</button>
+                '''] for row in data
+            ],
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": f"An error occurred: {str(e)}"}, status=500)
+
+@login_required
+def update_twilio_phone(request, pk):
+    try:
+        phone = TwilioPhoneNumber.objects.select_related('service').get(pk=pk)
+
+        # Check ownership
+        if phone.service.user != request.user:
+            return JsonResponse({"success": False, "error": "Permission denied."}, status=403)
+
+        data = json.loads(request.body)
+        new_phone_number = data.get("phone_number")
+
+        # Validate the new phone number
+        if not new_phone_number or len(new_phone_number) < 10:
+            return JsonResponse({"success": False, "error": "Invalid phone number."})
+
+        phone.phone_number = new_phone_number
+        phone.save()
+
+        return JsonResponse({"success": True})
+    except TwilioPhoneNumber.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Phone number not found."})
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON data."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+@login_required
+def delete_twilio_phone(request, pk):
+    try:
+        phone = TwilioPhoneNumber.objects.select_related('service').get(pk=pk)
+
+        # Check ownership
+        if phone.service.user != request.user:
+            return JsonResponse({"success": False, "error": "Permission denied."}, status=403)
+
+        phone.delete()
+        return JsonResponse({"success": True})
+    except TwilioPhoneNumber.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Phone number not found."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)

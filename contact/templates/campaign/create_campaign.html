@@ -3,7 +3,7 @@
 
 {% block css %}
 <link href="{% static 'css/custom.css' %}" rel="stylesheet">
-
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 {% endblock css %}
 
 {% block body %}
@@ -42,7 +42,7 @@
                         <h5 class="card-title">Enter Campaign Details</h5>
                         <p class="text-muted">Create your campaign by providing all the necessary details.</p>
                     </div>
-                    <form class="form theme-form needs-validation  custom-input {% if form.errors %}was-invalidated{% endif %}" method="POST">
+                    <form class="form theme-form needs-validation  custom-input {% if form.errors %}was-invalidated{% endif %}" id="scheduleForm" method="POST">
                         {% csrf_token %}
                         {% if form.non_field_errors %}
                         <div class="alert alert-light-danger">
@@ -72,9 +72,19 @@
                                     </div>
                                 {% endfor %}
                                 </div>
+                           
                             </div>
-                    
+                           
                             <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="agent">From Phone number</label>
+                                    {{ form.twilio_phone }}
+                                    {% for error in form.twilio_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="name">Campaign Name</label>
                                     {{ form.name }}
@@ -84,6 +94,7 @@
                                         </div>
                                     {% endfor %}
                                 </div>
+
                                 <div class="col-md-6">
                                     <label class="form-label" for="scheduled_at">Scheduled Time</label>
                                     {{ form.scheduled_at }}
@@ -91,8 +102,17 @@
                                     <div class="invalid-feedback d-block">
                                         {{ error }}
                                     </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                      <input type="hidden" id="utcTime" name="utc_time">
                                 </div>
+                                 <div class="mb-3">
+                                    {{ form.timezone.label_tag }}  
+                                    {{ form.timezone }}
+                                    {% if form.timezone.errors %}
+                                        <div class="text-danger">{{ form.timezone.errors }}</div>
+                                    {% endif %}
+                                    </div>
+
                             </div>
                     
                             <!-- <div class="row mb-4">
@@ -110,7 +130,7 @@
                             </div> -->
                             <div class="row mb-4">
                                 <div class="col-md-12">
-                                    <label class="form-label">Target Lists</label>
+                                    <label class="form-label">Target Lists  <span class="text-danger" style="font-size: 0.9em;">(Required)</span></label>
                                     <button type="button" class="btn btn-outline-primary" onclick="openSelectionWindow('lists')">
                                         Select Lists
                                     </button>
@@ -121,7 +141,7 @@
                             
                             <div class="row mb-4">
                                 <div class="col-md-12">
-                                    <label class="form-label">Individual Contacts</label>
+                                    <label class="form-label">Individual Contacts  <span class="text-muted" style="font-size: 0.9em;">(Optional)</span></label>
                                     <button type="button" class="btn btn-outline-primary" onclick="openSelectionWindow('contacts')">
                                         Select Contacts
                                     </button>
@@ -147,6 +167,30 @@
 {% endblock body %}
 
 {% block js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script>
+        $('#scheduleForm').on('submit', function(e) {
+            var localTime = $('#id_scheduled_at').val();
+            var timezone = $('#id_timezone').val();
+            
+            
+            if (localTime && timezone) {
+                var utcTime = moment.tz(localTime, timezone).utc().format('YYYY-MM-DDTHH:mm:ss');
+                $('#utcTime').val(utcTime);
+            }
+        });
+    </script>
+
+<!-- <script>
+    flatpickr("#id_scheduled_at", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today"
+    });
+</script> -->
+
 <script>
    function openSelectionWindow(type) {
     let url = "";
@@ -162,16 +206,51 @@
         if (event.origin !== window.location.origin) return; // Secure: Ignore unknown sources
 
         let selectedIds = event.data.selectedIds.join(",");  // Convert array to comma-separated string
-        let selectedNames = event.data.selectedNames.join(", "); // Display names
+        // let selectedNames = event.data.selectedNames.join(", "); // Display names
+        let selectedNames = event.data.selectedNames; // Array of selected names
 
         if (type === "lists") {
             document.getElementById("selectedLists").value = selectedIds;
-            document.getElementById("selectedListsDisplay").innerHTML = selectedNames;
+            // document.getElementById("selectedListsDisplay").innerHTML = selectedNames;
+            // Create badge display for selected lists
+            let badgeHtml = '';
+            selectedNames.forEach((name, index) => {
+                badgeHtml += `
+                    <span class="badge rounded-pill badge-light text-dark me-2 text-capitalize" id="badge-list-${index}">
+                        ${name}
+                        
+                    </span>`;
+            });
+            document.getElementById("selectedListsDisplay").innerHTML = badgeHtml;
         } else if (type === "contacts") {
             document.getElementById("selectedContacts").value = selectedIds;
-            document.getElementById("selectedContactsDisplay").innerHTML = selectedNames;
+            // document.getElementById("selectedContactsDisplay").innerHTML = selectedNames;
+                 // Create badge display for selected contacts
+                 let badgeHtml = '';
+            selectedNames.forEach((name, index) => {
+                badgeHtml += `
+                    <span class="badge rounded-pill badge-light text-dark me-2 text-capitalize" id="badge-contact-${index}">
+                        ${name}
+                       
+                    </span>`;
+            });
+            document.getElementById("selectedContactsDisplay").innerHTML = badgeHtml;
         }
     }, { once: true });  // Ensures the event listener runs only once
 }
+
+
 </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tzSelect = document.querySelector("select[name='timezone']");
+    if (tzSelect && !tzSelect.value) {
+      const detectedTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if ([...tzSelect.options].some(opt => opt.value === detectedTz)) {
+        tzSelect.value = detectedTz;
+      }
+    }
+  });
+</script>
+
 {% endblock js %}

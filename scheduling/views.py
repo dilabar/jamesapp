@@ -3,7 +3,7 @@ from google_auth_oauthlib.flow import Flow
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseRedirect
 from requests import request
 from django.utils.timezone import now
-
+from django.db.models import Q
 from .models import CalendarConnection
 
 from agent.models import GoogleCalendarEvent
@@ -86,3 +86,56 @@ def event_list(request):
     events = GoogleCalendarEvent.objects.all().order_by('-start_time')
     current_time = now()
     return render(request, 'scheduling/events_list.html', {'events': events, 'now': current_time})
+
+def event_list_data(request):
+    draw = int(request.GET.get('draw', 1))
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    search_value = request.GET.get('search[value]', '')
+
+    queryset = GoogleCalendarEvent.objects.all()
+
+    if search_value:
+        queryset = queryset.filter(
+            Q(summary__icontains=search_value) |
+            Q(attendees__icontains=search_value) |
+            Q(status__icontains=search_value)
+        )
+
+    total = queryset.count()
+    events = queryset.order_by('-created_at')[start:start + length]
+
+    data = []
+    for event in events:
+        event_status_badge = ""
+        if event.status == 'cancelled':
+            event_status_badge = '<span class="badge bg-danger">Cancelled</span>'
+        elif event.status == 'failed':
+            event_status_badge = '<span class="badge bg-danger">Failed</span>'
+        elif event.status == 'completed' and event.end_time < now():
+            event_status_badge = '<span class="badge bg-success">Completed</span>'
+        elif event.status == 'pending':
+            event_status_badge = '<span class="badge bg-warning">Pending</span>'
+        else:
+            event_status_badge = '<span class="badge bg-info">Upcoming</span>'
+
+        data.append({
+            'summary': event.summary,
+            'start_time': event.start_time.strftime('%Y-%m-%d %H:%M'),
+            'end_time': event.end_time.strftime('%Y-%m-%d %H:%M'),
+            'description': event.description if event.description else 'No description',
+            'attendees': ', '.join(event.attendees) if isinstance(event.attendees, list) else event.attendees,
+            'calendar_event_id': event.calendar_event_id,
+            'calendar_link': event.calendar_link,
+            'status': event_status_badge,
+            'actions': f'''
+                <a href="{event.calendar_link}" target="_blank" class="btn btn-info btn-sm">View Event</a>
+            '''
+        })
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data
+    })
