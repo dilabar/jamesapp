@@ -111,7 +111,8 @@ class Campaign(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     created_at = models.DateTimeField(auto_now_add=True)
     triggers = models.JSONField(default=dict, blank=True)  # Store automation triggers.
-    agent = models.ForeignKey('agent.Agent', on_delete=models.CASCADE,related_name='campaigns', null=True, blank=True)
+    # agent = models.ForeignKey('agent.Agent', on_delete=models.CASCADE,related_name='campaigns', null=True, blank=True)
+    agents = models.ManyToManyField('agent.Agent', related_name='campaigns')
     twilio_phone = models.ForeignKey('agent.TwilioPhoneNumber', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):

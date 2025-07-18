@@ -139,6 +139,12 @@ class AgentFormV1(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)  # ✅ request.user ko form me pass karne ke liye
         super().__init__(*args, **kwargs)
+        
+        self.fields["display_name"].required = True
+        self.fields["greeting"].required = True
+
+        # Optional example:
+        self.fields["description"].required = False
 
     def save(self, commit=True):
         instance = super().save(commit=False)

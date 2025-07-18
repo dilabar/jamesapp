@@ -52,6 +52,12 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
     campaign.save()
 
     recipients = campaign.get_recipients()
+    agents = list(campaign.agents.all().order_by('id'))
+    if not agents:
+        logger.error(f"No agents assigned to campaign {campaign.id}")
+        return "No agents assigned."
+    num_agents = len(agents)
+    agent_index = 0
     for contact in recipients.iterator(chunk_size=500):
         try:
             primary_phone = contact.phone_numbers.first()
@@ -59,18 +65,20 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
                 continue
 
             phone_number = f"{primary_phone.country_code or ''}{primary_phone.phone_number}".strip()
+            agent = agents[agent_index % num_agents]  # Round-robin logic
 
             phone_call = PhoneCall.objects.create(
                 phone_number=phone_number,
                 call_status='pending',
                 user_id=user_id,
-                agent_id=campaign.agent.id,
+                agent_id=agent.id,
                 campaign=campaign,
                 contact=contact
             )
 
             # Call the sub-task asynchronously
-            initiate_call.delay(phone_call.id, user_id, agent_id, campaign_id)
+            initiate_call.delay(phone_call.id, user_id, agent.id, campaign_id)
+            agent_index += 1
 
         except Exception as e:
             logger.error(f"Failed to queue contact {contact.id}: {str(e)}")

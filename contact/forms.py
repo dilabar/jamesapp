@@ -114,12 +114,13 @@ class CampaignForm(forms.ModelForm):
         label="Campaign Type"
     )
 
-    agent = forms.ModelChoiceField(
+    agents = forms.ModelMultipleChoiceField(
         queryset=Agent.objects.none(),
-        widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
-        required=False,
-        label="Assign Agent"
+        widget=forms.SelectMultiple(attrs={'class': 'form-select btn-pill select2'}),
+        required=True,
+        label="Assign Voice Agents"
     )
+
     twilio_phone = forms.ModelChoiceField(
         queryset=TwilioPhoneNumber.objects.none(),
         widget=forms.Select(attrs={'class': 'form-select btn-pill'}),
@@ -134,7 +135,7 @@ class CampaignForm(forms.ModelForm):
     )
     class Meta:
         model = Campaign
-        fields = ['name', 'scheduled_at','timezone', 'campaign_type', 'agent','twilio_phone', 'lists', 'individual_contacts']
+        fields = ['name', 'scheduled_at','timezone', 'campaign_type', 'agents','twilio_phone', 'lists', 'individual_contacts']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control btn-pill', 'placeholder': 'Campaign Name'}),
             'scheduled_at': forms.DateTimeInput(attrs={'class': 'form-control btn-pill', 'type': 'datetime-local'}),
@@ -145,10 +146,10 @@ class CampaignForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if user:
-            self.fields['agent'].queryset = Agent.objects.filter(user=user)
+            self.fields['agents'].queryset = Agent.objects.filter(user=user)
             self.fields['twilio_phone'].queryset = TwilioPhoneNumber.objects.filter(service__user=user)
 
-        self.fields['agent'].label_from_instance = lambda obj: obj.display_name.title()
+        self.fields['agents'].label_from_instance = lambda obj: obj.display_name.title()
         self.fields['twilio_phone'].label_from_instance = lambda obj: obj.phone_number  
         # Disable all campaign types except 'ontime'
         # campaign_type_choices = self.fields['campaign_type'].choices
