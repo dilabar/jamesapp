@@ -72,6 +72,7 @@ def process_campaign_calls(self, campaign_id, user_id, agent_id):
                 call_status='pending',
                 user_id=user_id,
                 agent_id=agent.id,
+                agnt_id=agent.id,
                 campaign=campaign,
                 contact=contact
             )
