@@ -157,8 +157,12 @@ def call_history_data(request):
                 'timestamp': timestamp,
                 'time_ago': time_ago,
                 'bill': f"${bill:.2f}" if bill else '$0.00',
-                'campaign_name': getattr(call, 'campaign_name', 'Demo').capitalize() if hasattr(call, 'campaign_name') else 'Demo',
-                'customer_name': f"<a href='#'>{getattr(call, 'customer_name', 'NA').capitalize()}</a>" if hasattr(call, 'customer_name') else '<a href="#">NA</a>',
+                'campaign_name': getattr(call.campaign, 'name', 'Demo').capitalize() if hasattr(call.campaign, 'name') else 'Demo',
+                'customer_name': (
+                                f"<a href='#'>{(call.contact.first_name or '').title()} {(call.contact.last_name or '').title()}</a>"
+                                if hasattr(call, 'contact') and call.contact else '<a href="#">NA</a>'
+                            ),
+
                 'call_status_badge': get_status_badge(call.call_status or ''),
                 'actions': detail_button
             })
@@ -179,7 +183,7 @@ def call_detail(request, id):
 
     play_ai = ServiceDetail.objects.filter(user=request.user, service_name='play_ai').first()
     # print(obj.campaign.agent.agent_id)
-    ag=decrypt(obj.campaign.agent.agent_id)
+    ag=obj.agnt.id
         # Check if the transcript is already available for this call
     transcript = None
     conversation, created = Conversation.objects.get_or_create(

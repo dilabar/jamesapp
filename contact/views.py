@@ -853,14 +853,12 @@ def start_campaign_view(request, campaign_id):
                 "status": False
             }, status=400)
 
-        if not campaign.agent:
-            return JsonResponse({
-                "error": "Campaign has no agent assigned.",
-                "status": False
-            }, status=400)
+        agents = list(campaign.agents.all())
+        if not agents:
+            return JsonResponse({"error": "No agents assigned.", "status": False}, status=400)
 
         # Enqueue in Redis queue
-        enqueue_campaign_task(campaign.id, request.user.id, campaign.agent.id)
+        enqueue_campaign_task(campaign.id, request.user.id, agents[0].id)
 
         return JsonResponse({
             "message": "Campaign queued. Will be processed shortly.",
