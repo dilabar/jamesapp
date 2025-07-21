@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'contact',
     'rateMaster',
     'logger',
+    'taggit',
     
 ]
 CORS_ALLOW_ALL_ORIGINS = True

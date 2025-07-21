@@ -21,6 +21,8 @@ urlpatterns = [
     path('lists/<int:list_id>/', list_detail, name='list_detail'),
     path('list/<int:list_id>/data/', list_detail_data, name='list_detail_data'),
     path('list/edit/<int:list_id>/', edit_list, name='edit_list'),
+    path('api/list/<int:pk>/clone/', api_clone_list, name='api_clone_list'),
+
 
     path('lists/delete/<int:list_id>/', delete_list, name='delete_list'),
     # path('campaigns/create/', create_campaign, name='create_campaign'),
@@ -43,6 +45,7 @@ urlpatterns = [
     path('custom-fields/', custom_fields, name='custom_fields'),
     path('campaign/<int:campaign_id>/edit/', edit_campaign, name='edit_campaign'),
     path('delete_custom_field/<int:field_id>/', delete_custom_field, name='delete_custom_field'),
+    
 
      # Trigger the bulk action (POST)
     path('api/bulk-action/', BulkActionTriggerView.as_view(), name='bulk_action_trigger'),
@@ -52,4 +55,8 @@ urlpatterns = [
     path('api/notes/<int:contact_id>/', NoteAPI.as_view(), name='notes_api'),
     path('api/notes/<int:contact_id>/<int:note_id>/', NoteAPI.as_view(), name='note_detail_api'),
     path("api/start-campaign/<int:campaign_id>/", start_campaign_view, name="start_campaign_api"),
+
+    path('api/list/<int:list_id>/available-contacts/', get_available_contacts, name='get_available_contacts'),
+    path('api/list/<int:list_id>/add-contacts/', api_add_contacts_to_list, name='api_add_contacts_to_list'),
+
 ]
