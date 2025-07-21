@@ -112,15 +112,36 @@
                     data: "action",
                     orderable: false,
                     searchable: false,
-                    render: function (data, type, row) {
-                        return data;
-                    }
+                  
                 }
             ]
         });
 
         });
         </script>
+        <script>
+            function cloneList(id) {
+                if (confirm("Do you want to clone this list?")) {
+                fetch(`/contact/api/list/${id}/clone/`, {
+                    method: 'POST',
+                    headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                    alert(data.message);
+                    $('#list-table').DataTable().ajax.reload();
+                    } else {
+                    alert("Error: " + data.message);
+                    }
+                });
+                }
+            }
+            </script>
+
     {% endblock js %}
         
     

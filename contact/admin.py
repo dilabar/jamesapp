@@ -16,7 +16,10 @@ class CampaignAdmin(admin.ModelAdmin):
         'lists', 'individual_contacts', 'scheduled_at',
         'scheduled_at_utc', 'timezone', 'status', 'created_at'
     )
-admin.site.register(Contact)
+@admin.register(Contact)
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ['full_name', 'contact_type']
+    search_fields = ['first_name', 'last_name', 'tags__name']
 admin.site.register(List)
 admin.site.register(ListContact)
 admin.site.register(CustomField)

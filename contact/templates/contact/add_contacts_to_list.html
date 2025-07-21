@@ -1,0 +1,59 @@
+{% extends 'new/base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'manish/css/vendors/datatables.css' %}">
+{% endblock %}
+
+{% block body %}
+<div class="page-body">
+  <div class="container-fluid">
+    <div class="card">
+      <div class="card-header"><h4>Add Contacts to List: {{ list.name }}</h4></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="table-responsive">
+            <table id="contact-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="select-all" /></th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for contact in contacts %}
+                <tr>
+                  <td><input type="checkbox" name="contacts" value="{{ contact.id }}"></td>
+                  <td>{{ contact.full_name }}</td>
+                  <td>{{ contact.email }}</td>
+                  <td>{{ contact.phone }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="text-end mt-3">
+            <button class="btn btn-success" type="submit">Add Selected Contacts</button>
+            <a href="{% url 'contact:edit_list' list.id %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
+<script>
+  $(document).ready(function () {
+    $('#contact-table').DataTable();
+    $('#select-all').on('click', function () {
+      $('input[name="contacts"]').prop('checked', this.checked);
+    });
+  });
+</script>
+{% endblock %}

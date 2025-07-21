@@ -9,6 +9,8 @@
     
     {% block css %}
     <link rel="stylesheet" type="text/css" href="{% static 'manish/css/vendors/datatables.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     {% endblock css %}
         
     
@@ -152,7 +154,7 @@
                                                   </div>
                                                 </div> {% endcomment %}
                                                 <div class="row">
-                                                  <div class="col">
+                                                  <div class="col-md-6">
                                                     <div class="mb-3">
                                                       <label class="form-label" for="contact_type">Contact Type</label>
                                                       <select class="form-select input-air-primary digits" id="contact_type">
@@ -160,6 +162,13 @@
                                                         <option>Customer</option>
                                                         <option>Lead</option>
                                                       </select>
+                                                    </div>
+                                                  </div>
+                                                     <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                      <label class="form-label" for="contact_type">Tags</label>
+                                                      <select id="tags" multiple="multiple" style="width: 100%" class="form-control"></select>
+
                                                     </div>
                                                   </div>
                                                 </div>
@@ -388,6 +397,8 @@
     {% block js %}
     <script src="{% static 'manish/js/datatable/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'manish/js/datatable/datatables/datatable.custom.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
       $(document).ready(function() {
           $('#contact-table').DataTable({
@@ -448,6 +459,13 @@
         });
     }
 });
+$('#tags').select2({
+  tags: true,
+  
+  tokenSeparators: [',', ' '],
+  placeholder: "Enter tags",
+  width: '100%'
+});
 
   </script>
   
@@ -462,6 +480,8 @@
               option.textContent = zone;
               timeZoneSelect.appendChild(option);
           })
+      
+
   
           $("#submitBtn").click(function (e) {
             e.preventDefault(); // Prevent the form from submitting traditionally
@@ -509,7 +529,8 @@
             const contactType = $("#contact_type").val();
             const timeZone = $("#time_zone").val();
             const lists = $("#lists").val();
-            console.log('#lists', lists)
+            const tags = $("#tags").val();  // this must be an array
+            console.log('tags array:', tags, Array.isArray(tags));
             // Construct data object
             const data = {
                 firstName,
@@ -518,7 +539,8 @@
                 phoneData,
                 contactType,
                 timeZone,
-                lists
+                lists,
+                tags
             };
             console.log("data", data)
             // AJAX request

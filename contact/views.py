@@ -40,6 +40,8 @@ from django.views.decorators.csrf import csrf_exempt
 import re  # For phone number validation
 
 from django.utils.timesince import timesince
+from taggit.models import Tag
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -148,11 +150,13 @@ def add_contact(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-
+        
             # Extract and validate first & last name
             first_name = data.get('firstName', '').strip()
             last_name = data.get('lastName', '').strip()
-            
+            tags = data.get('tags', [])
+            if not isinstance(tags, list):
+                return JsonResponse({'status': 'error', 'message': 'Tags must be a list.'}, status=400)
             if not first_name or len(first_name) > 50:
                 return JsonResponse({'status': 'error', 'message': 'First name is required and must be under 50 characters.'}, status=400)
             if len(last_name) > 50:
@@ -217,7 +221,9 @@ def add_contact(request):
                 time_zone=time_zone,
                 created_at=timezone.now()
             )
-
+            # Assign tags using taggit
+            if tags:
+                contact.tags.add(*tags)
             # Save emails
             for email, is_primary in valid_emails.items():
                 Email.objects.create(
@@ -537,13 +543,29 @@ def list_data(request):
         detail_url = reverse('contact:list_detail', args=[lst.id])
         edit_url = reverse('contact:edit_list', args=[lst.id])
         delete_url = reverse('contact:delete_list', args=[lst.id])
+  
+
 
         actions = f'''
-            <a href="{detail_url}" class="btn btn-primary btn-sm">View Details</a>
-            <a href="{edit_url}" class="btn btn-secondary btn-sm">Edit</a>
-            <a href="{delete_url}" class="btn btn-danger btn-sm" 
-               onclick="return confirm('Are you sure you want to delete this list?');">Delete</a>
+            <div class="dropdown text-center">
+                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{edit_url}">Edit</a>
+                    </li>
+                    <li>
+                        <a href="#" class="dropdown-item" onclick="cloneList({ lst.id })">Clone</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="{delete_url}"
+                        onclick="return confirm('Are you sure you want to delete this list?');">Delete</a>
+                    </li>
+                </ul>
+            </div>
         '''
+
 
         data.append({
             "index": index,
@@ -623,6 +645,20 @@ def list_detail_data(request, list_id):
         'data': data
     })
 
+@login_required
+def api_clone_list(request, pk):
+    if request.method == 'POST':
+        original = get_object_or_404(List, pk=pk, user=request.user)
+
+        cloned_list = List.objects.create(
+            user=request.user,
+            name=f"{original.name} (Copy)"
+        )
+        cloned_list.contacts.set(original.contacts.all())
+
+        return JsonResponse({'status': 'success', 'message': 'List cloned successfully'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 @login_required
@@ -1339,34 +1375,37 @@ def edit_campaign(request, campaign_id):
 @login_required
 def edit_list(request, list_id):
     list_obj = get_object_or_404(List, id=list_id)
-
-    if request.method == 'POST':
-        form = ListForm(request.POST, instance=list_obj)
-        if form.is_valid():
-            form.save()  # Save the updated list
-            return redirect('contact:list_detail', list_id=list_id)  # Redirect to the list detail page
-    else:
-        form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
-
-    context = {'form': form, 'list': list_obj}
-    return render(request, 'new/edit_list.html', context)
-
-
-# List Edit View
-@login_required
-def edit_list(request, list_id):
-    list_obj = get_object_or_404(List, id=list_id)
-
+    all_tags = Tag.objects.filter(contact__user=request.user).distinct()
     if request.method == 'POST':
         form = ListForm(request.POST, instance=list_obj)
         if form.is_valid():
             form.save()  # Save the updated list
             return redirect('contact:list_overview')  # Redirect to the list detail page
+        else:
+            print(form.errors)  # ✅ helpful for debugging
+                    # return redirect('contact:list_detail', list_id=list_id)  # Redirect to the list detail page
     else:
         form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
 
-    context = {'form': form, 'list': list_obj}
+    context = {'form': form, 'list': list_obj, 'all_tags': all_tags}
     return render(request, 'new/edit_list.html', context)
+
+
+# List Edit View
+# @login_required
+# def edit_list(request, list_id):
+#     list_obj = get_object_or_404(List, id=list_id)
+
+#     if request.method == 'POST':
+#         form = ListForm(request.POST, instance=list_obj)
+#         if form.is_valid():
+#             form.save()  # Save the updated list
+#             return redirect('contact:list_overview')  # Redirect to the list detail page
+#     else:
+#         form = ListForm(instance=list_obj)  # Pre-fill the form with the existing list data
+
+#     context = {'form': form, 'list': list_obj}
+#     return render(request, 'new/edit_list.html', context)
 @login_required
 def select_lists(request):
     search_query = request.GET.get('search', '')  # Get search input
@@ -1401,3 +1440,66 @@ def select_contacts(request):
         return render(request, 'contact/select_contacts.html', {'page_obj': page_obj})
 
     return render(request, 'contact/select_contacts.html', {'page_obj': page_obj, 'search_query': query})
+
+
+@csrf_exempt
+@login_required
+def get_available_contacts(request, list_id):
+    draw = int(request.POST.get('draw', 1))
+    start = int(request.POST.get('start', 0))
+    length = int(request.POST.get('length', 10))
+    search_value = request.POST.get('search[value]', '')
+    tag = request.POST.get('tag', '')
+
+    list_obj = get_object_or_404(List, id=list_id, user=request.user)
+    excluded_ids = list_obj.contacts.values_list('id', flat=True)
+
+    qs = Contact.objects.filter(user=request.user).exclude(id__in=excluded_ids)
+
+    if tag:
+        qs = qs.filter(tags__name__iexact=tag)
+
+    if search_value:
+        qs = qs.filter(
+            Q(first_name__icontains=search_value) |
+            Q(last_name__icontains=search_value) |
+            Q(email__icontains=search_value)
+        )
+
+    total = qs.count()
+    contacts = qs[start:start + length]
+
+    data = [{
+        'id': c.id,
+        'name': c.full_name,
+        'email': getattr(c, 'email', ''),
+        'phone': getattr(c, 'phone', '')
+    } for c in contacts]
+
+    return JsonResponse({
+        'draw': draw,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'data': data
+    })
+
+@csrf_exempt
+@login_required
+def api_add_contacts_to_list(request, list_id):
+    if request.method == 'POST':
+        list_obj = get_object_or_404(List, id=list_id, user=request.user)
+        data = json.loads(request.body)
+        contact_ids = data.get('contacts', [])
+
+        if not contact_ids:
+            return JsonResponse({'status': 'error', 'message': 'No contacts selected'}, status=400)
+
+        contacts = Contact.objects.filter(id__in=contact_ids, user=request.user)
+        list_obj.contacts.add(*contacts)
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'{contacts.count()} contact(s) added to the list.'
+        })
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from agency.models import User
-
+from taggit.managers import TaggableManager
 # Create your models here.
 
 
@@ -18,8 +18,15 @@ class Contact(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    tags = TaggableManager(blank=True)  # ✅ Add tag field
     def __str__(self):
         return f"{self.first_name} {self.last_name or ''}"
+    
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name or ''}".strip()
+
+
     
 
 
