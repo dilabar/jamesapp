@@ -34,7 +34,7 @@
     <div class="container-fluid">
       <div class="row">
        <!-- Left Side - Form Controls -->
-       <div class="col-md-6">
+       <div class="col-md-8">
         <div class="card">
             <div class="card-header text-white">
                 <h5>Create Agent</h5>
@@ -46,27 +46,42 @@
                         <label for="display_name" class="form-label">Display Name:</label>
                         <!-- <input type="text" name="display_name" id="display_name" class="form-control" required> -->
                         {{form.display_name}}
+                         {% if form.display_name.errors %}
+                            <div class="text-danger">{{ form.display_name.errors }}</div>
+                        {% endif %}
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description:</label>
                         {{form.description}}
+                            {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
 
                     </div>
                     <div class="mb-3">
                         <label for="greeting" class="form-label">Greeting:</label>
                         {{form.greeting}}
+                           {% if form.greeting.errors %}
+                            <div class="text-danger">{{ form.greeting.errors }}</div>
+                        {% endif %}
 
                     </div>
         
                     <div class="mb-3">
                         <label for="prompt" class="form-label">Prompt:</label>
                         {{form.prompt}}
+                            {% if form.prompt.errors %}
+                            <div class="text-danger">{{ form.prompt.errors }}</div>
+                        {% endif %}
 
                     </div>
         
                     <div class="mb-3">
                         <label for="voice" class="form-label">Voice URL:</label>
                         {{form.voice}}
+                           {% if form.voice.errors %}
+                            <div class="text-danger">{{ form.voice.errors }}</div>
+                        {% endif %}
 
                         <!-- <input type="url" name="voice" id="voice" class="form-control" value="s3://voice-cloning-zero-shot/37RKAKle9paS_85btF3lr/your-voice/manifest.json"> -->
                     </div>
@@ -74,6 +89,9 @@
                     <div class="mb-3">
                         <label for="voice_speed" class="form-label">Voice Speed:</label>
                         {{form.voice_speed}}
+                            {% if form.voice_speed.errors %}
+                            <div class="text-danger">{{ form.voice_speed.errors }}</div>
+                        {% endif %}
 
                     </div>
         
@@ -85,6 +103,9 @@
                     <div class="mb-3">
                         <label for="critical_knowledge" class="form-label">Critical Knowledge:</label>
                         {{form.critical_knowledge}}
+                          {% if form.critical_knowledge.errors %}
+                            <div class="text-danger">{{ form.critical_knowledge.errors }}</div>
+                        {% endif %}
 
                         <!-- <textarea name="critical_knowledge" id="critical_knowledge" class="form-control" rows="3"></textarea> -->
                     </div>
@@ -92,12 +113,18 @@
                     <div class="mb-3">
                         <label for="visibility" class="form-label">Visibility:</label>
                         {{form.visibility}}
+                          {% if form.visibility.errors %}
+                            <div class="text-danger">{{ form.visibility.errors }}</div>
+                        {% endif %}
 
                        
                     </div>
         
                     <div class="mb-3 form-check">
                         {{form.answer_only_from_critical_knowledge}}
+                           {% if form.answer_only_from_critical_knowledge.errors %}
+                            <div class="text-danger">{{ form.answer_only_from_critical_knowledge.errors }}</div>
+                        {% endif %}
 
                         <!-- <input type="checkbox" name="answer_only_from_critical_knowledge" id="answer_only_from_critical_knowledge" class="form-check-input"> -->
                         <label for="answer_only_from_critical_knowledge" class="form-check-label">Answer Only from Critical Knowledge</label>
@@ -106,6 +133,9 @@
                     <div class="mb-3">
                         <label for="avatar_photo_url" class="form-label">Avatar Photo URL:</label>
                         {{form.avatar_photo_url}}
+                           {% if form.avatar_photo_url.errors %}
+                            <div class="text-danger">{{ form.avatar_photo_url.errors }}</div>
+                        {% endif %}
 
                         <!-- <input type="url" name="avatar_photo_url" id="avatar_photo_url" class="form-control"> -->
                     </div>
@@ -113,6 +143,9 @@
                     <div class="mb-3">
                         <label for="llm_model" class="form-label">LLM Model:</label>
                         {{form.llm_model}}
+                            {% if form.llm_model.errors %}
+                            <div class="text-danger">{{ form.llm_model.errors }}</div>
+                        {% endif %}
 
                         <!-- <input type="text" name="llm_model" id="llm_model" class="form-control"> -->
                     </div>
@@ -124,7 +157,7 @@
     </div>
 
     <!-- Right Side - Actions and Settings -->
-    <div class="col-md-5">
+    <div class="col-md-4">
         <!-- <div class="card">
             <div class="card-header text-white">
                 <h5>Actions</h5>
@@ -157,5 +190,10 @@
 </div> 
 {% endblock body %}
 {% block js %}
+<script>
+    document.querySelector("form").addEventListener("submit", function(e) {
+  this.querySelector("button[type='submit']").disabled = true;
+});
 
+</script>
 {% endblock js %}

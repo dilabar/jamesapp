@@ -28,6 +28,7 @@ urlpatterns = [
     path('onboard/', onboard, name='onboard'),
     path('api/playai/webhook/', playai_webhook, name='playai-webhook'),
     path('create-agent/', AgentCreateView.as_view(), name='create-agent'),
+    path('agent/<int:pk>/edit/', AgentEditView.as_view(), name='agent_edit'),
     path('add-twilio-phone/', add_twilio_phone, name='add_twilio_phone'),
     path('api/twilio-phones/list/',list_twilio_phones, name='list_twilio_phones'),
     path("api/twilio-phones/update/<int:pk>/", update_twilio_phone, name="update_twilio_phone"),

@@ -28,6 +28,7 @@ from django.views import View
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import json
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def calculate_bill(call):
     """
@@ -450,5 +451,64 @@ class AgentCreateView(View):
     
         # 🚨 Debug: Print form errors
         print("Form errors:", form.errors)  # Print errors in the terminal
-        return JsonResponse({"error": "Invalid form data", "errors": form.errors}, status=400)
+        return render(request, 'agent/agent_create.html', {'form': form})
+    import requests
+
+def update_playai_agent(agent):
+    """PATCH agent data to Play.ai"""
+    id=agent.decrypted_agent_id
+    print(id)
+    url = f"https://api.play.ai/api/v1/agents/{id}"  # ensure decrypted
+
+    payload = {
+        # "voice": agent.voice,
+        "voiceSpeed": agent.voice_speed,
+        "ttsModel": agent.llm_model,
+        "displayName": agent.display_name,
+        "description": agent.description,
+        "greeting": agent.greeting,
+        "prompt": agent.prompt,
+        "criticalKnowledge": agent.critical_knowledge,
+        "answerOnlyFromCriticalKnowledge": agent.answer_only_from_critical_knowledge,
+        "visibility": agent.visibility,
+        "language": "english",
+        # "actions": [],  # update as needed
+    }
+
+    headers = {
+        "content-type": "application/json",
+        "Authorization": "Bearer ak-524c684b1aa44488b66087078dd9efc0",  # 👉 move to settings
+        "X-USER-ID": "kXeov3rz8WZD6FEAKs2i2UrUbtb2"
+    }
+
+    response = requests.patch(url, json=payload, headers=headers)
+    return response
+
+class AgentEditView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        agent = get_object_or_404(Agent, pk=pk, user=request.user)
+        form = AgentFormV1(instance=agent)
+        return render(request, 'agent/agent_edit.html', {'form': form, 'agent': agent})
+
+    def post(self, request, pk):
+        agent = get_object_or_404(Agent, pk=pk, user=request.user)
+        form = AgentFormV1(request.POST, instance=agent, user=request.user)
+        if form.is_valid():
+            updated_agent = form.save(commit=True)
+
+            # Call PATCH to Play.ai
+            playai_response = update_playai_agent(updated_agent)
+
+            if playai_response.status_code == 200:
+                return redirect('agent:agent_list')
+            else:
+                error = playai_response.json()
+                return render(request, 'agent/agent_edit.html', {
+                    'form': form,
+                    'agent': agent,
+                    'api_error': f"Play.ai update failed: {error}"
+                })
+        else:
+            return render(request, 'agent/agent_edit.html', {'form': form, 'agent': agent})
+
 

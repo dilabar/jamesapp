@@ -41,7 +41,7 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-header pb-0 card-no-border">
-                        <a class="btn btn-primary" style="margin-bottom:20px;"  href="{% url 'agent:create_agent' %}">Add Agent</a> 
+                        <!-- <a class="btn btn-primary" style="margin-bottom:20px;"  href="{% url 'agent:create_agent' %}">Add Agent</a>  -->
                         <a class="btn btn-primary" style="margin-bottom:20px;"  href="{% url 'agent:create-agent' %}">New Agent</a> 
 
                         <h4>AI Agent List   </h4>
@@ -70,7 +70,7 @@
                                     <td>{{ agent.description|default:"No description" }}</td>
                                     <td>{{ agent.created_at|date:"Y-m-d H:i" }}</td>
                                     <td>
-                                        <a href="{% url 'agent:update_agent' agent.id %}" class="btn btn-primary mt-2">Edit</a>
+                                        <a href="{% url 'agent:agent_edit' agent.id %}" class="btn btn-primary mt-2">Edit</a>
                                         <form action="{% url 'agent:delete_agent' agent.id %}" method="post" style="display:inline;">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-danger mt-2" onclick="return confirm('Are you sure you want to delete this agent?');">Delete</button>

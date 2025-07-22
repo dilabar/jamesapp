@@ -145,6 +145,8 @@ class AgentFormV1(forms.ModelForm):
 
         # Optional example:
         self.fields["description"].required = False
+        self.fields["critical_knowledge_files"].widget = forms.HiddenInput()
+        self.fields["phone_numbers"].widget = forms.HiddenInput()
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -200,6 +202,7 @@ class AgentFormV1(forms.ModelForm):
             "answer_only_from_critical_knowledge": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "avatar_photo_url": forms.URLInput(attrs={"class": "form-control"}),
             # "llm_model": forms.TextInput(attrs={"class": "form-control"},value="play"),
+            
         }
 
 
