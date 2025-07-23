@@ -181,7 +181,7 @@ class AgentFormV1(forms.ModelForm):
             "voice", "voice_speed", "display_name", "description", "greeting",
             "prompt", "critical_knowledge", "visibility",
             "answer_only_from_critical_knowledge", "avatar_photo_url",
-            "critical_knowledge_files", "phone_numbers", "llm_model"
+            "critical_knowledge_files", "phone_numbers", "llm_model","real_agent_no"
         ]
       
         widgets = {
@@ -201,6 +201,7 @@ class AgentFormV1(forms.ModelForm):
             "visibility": forms.Select(attrs={"class": "form-control"}, choices=[("public", "Public"), ("private", "Private")]),
             "answer_only_from_critical_knowledge": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "avatar_photo_url": forms.URLInput(attrs={"class": "form-control"}),
+            "real_agent_no": forms.TextInput(attrs={"class": "form-control"}),
             # "llm_model": forms.TextInput(attrs={"class": "form-control"},value="play"),
             
         }
